@@ -80,7 +80,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			if (e.getType() == EventType.WAVELET_PARTICIPANTS_CHANGED) {    
 			}
 
-			if (e.getType() == EventType.BLIP_SUBMITTED){
+			if (e.getType() == EventType.BLIP_SUBMITTED) {
 				Blip root = wavelet.getRootBlip();
 				List<String> childrenIds = root.getChildBlipIds(); 
 				//List<Blip> children = new ArrayList<Blip>(); 
@@ -88,14 +88,14 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 					children.add(bundle.getBlip(wavelet.getWaveId(), wavelet.getWaveletId(), id)); 
 				}*/
 				processBlip(e.getBlip(), wavelet);
-				if(childrenIds.size()==MAX_BLIPS+NUM_OF_VOTES){
+				if(childrenIds.size()==MAX_BLIPS+NUM_OF_VOTES) {
 					Wavelet newWave = wavelet.createWavelet(wavelet.getParticipants(), "ID");
 					String title = getNewTitle(wavelet);
 					newWave.setTitle(title);
 				}
 
 			}
-			/*if (e.getType() == EventType.BLIP_DELETED){
+			/*if (e.getType() == EventType.BLIP_DELETED) {
 			}*/
 		}
 	}
@@ -106,7 +106,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		String author = wavelet.getCreator();
 		String authorRequest = blip.getCreator();
 		
-		if(!activeWavers.contains(authorRequest)){
+		if(!activeWavers.contains(authorRequest)) {
 			ACTIVE_WAVERS++;
 			activeWavers.add(authorRequest);
 		}
@@ -118,20 +118,20 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			String title = getNewTitle(wavelet);
 			newWave.setTitle(title);
 		}
-		if(text.startsWith(CMD_OPEN_IDENT + VOTE_NEW_WAVE + CMD_CLOSE_IDENT)){
+		if(text.startsWith(CMD_OPEN_IDENT + VOTE_NEW_WAVE + CMD_CLOSE_IDENT)) {
 			String voteCreator = blip.getCreator();
 			blip.getDocument().append("\n" + NW_VOTE_QUOTE);
 			votes.put(voteCreator, 1);
 			int i = 0;
 			Set<String> users = votes.keySet();
-			/*for(String user:users){
+			/*for(String user:users) {
 				if(votes.get(user)==1)
 					i++;
 			}*/
 			NUM_OF_VOTES = votes.size();
 			String rootText = wavelet.getRootBlip().getDocument().getText();
 			int index = rootText.indexOf("Wave Max: ");
-			if (index < 0){
+			if (index < 0) {
 				String appendText = "\n\n" + "Wave Max: " + (NUM_OF_VOTES + MAX_BLIPS) + "\nNumber of votes for new wave: "+NUM_OF_VOTES;
 				//wavelet.getRootBlip().getDocument().delete();
 				wavelet.getRootBlip().getDocument().append(appendText);
@@ -143,7 +143,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			if (NUM_OF_VOTES > ((1/3) * ACTIVE_WAVERS) && (ACTIVE_WAVERS >= 4))
 				makeNewWave(wavelet);
 		}
-		/*if(text.startsWith("!@russian-roulette@!")){
+		/*if(text.startsWith("!@russian-roulette@!")) {
 			int drop = generator.nextInt(wavelet.getParticipants().size());
 			//Blip newBlip = wavelet.appendBlip();
 			TextView textView = blip.getDocument();
@@ -151,7 +151,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			wavelet.removeParticipant(wavelet.getParticipants().get(drop));
 		}*/
 		
-		if (text.startsWith(CMD_OPEN_IDENT + WEATHER)){
+		if (text.startsWith(CMD_OPEN_IDENT + WEATHER)) {
 			Matcher mtchr = weatherPattern.matcher(text);
 			mtchr.lookingAt();
 			try {
@@ -171,14 +171,14 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				}
 				blip.getDocument().replace(current);
 				blip.getDocument().appendElement(new Image(image, 52,52,""));
-			} catch (IllegalStateException e){
+			} catch (IllegalStateException e) {
 				//blip.getDocument().replace("Degrees");
-			} catch (IndexOutOfBoundsException e){
+			} catch (IndexOutOfBoundsException e) {
 				//not this many matches
 			}
 		}
 
-		if (text.startsWith("!@vote-to-ban:")){
+		if (text.startsWith("!@vote-to-ban:")) {
 			if (cantBan.containsKey(authorRequest)) {
 				if (cantBan.get(authorRequest) + 10(60)(1000) < System.currentTimeMillis()) {
 					return;
@@ -201,11 +201,11 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 					banMap.put(mtchr.group(1), new HashSet());
 					banMap.get(mtchr.group(1)).add(authorRequest);
 				}
-			}catch (IllegalStateException e){
+			}catch (IllegalStateException e) {
 				wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " loses their ban vote privileges.");
 				
 				cantBan.put(authorRequest, System.currentTimeMillis());
-			}catch (IndexOutOfBoundsException e){
+			}catch (IndexOutOfBoundsException e) {
 				//not this many matches
 			}
 			
@@ -225,13 +225,13 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		// TODO Auto-generated method stub
 		String Title = wavelet.getTitle();
 		/*int indexMax = wavelet.getRootBlip().getDocument().getText().indexOf("Wave Max: ");
-		if(indexMax>-1){
+		if(indexMax>-1) {
 			Title = wavelet.getRootBlip().getDocument().getText().substring(0,indexMax);
 		}*/
 		int index = Title.indexOf(CONT_IDENT);
-		if(index == -1){
+		if (index == -1) {
 			Title = Title + CONT_IDENT + "2";
-		}else{
+		} else {
 			int count = Integer.parseInt(Title.substring(index + CONT_IDENT.length()).trim());
 			Title = Title.substring(0,index) + CONT_IDENT + (count + 1);
 		}
