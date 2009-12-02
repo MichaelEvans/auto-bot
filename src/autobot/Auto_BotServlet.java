@@ -27,10 +27,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.regex.*;
 import java.util.Random;
+
+import sun.util.calendar.BaseCalendar.Date;
 
 import com.google.wave.api.*;
 
@@ -45,6 +48,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	Image optimusTransform = new Image("http://imgur.com/m66zH.gif", 160, 120, "");
 	Random generator = new Random();
 	String weatherURL = "http://weather.yahooapis.com/forecastrss?p=";
+	Map<String, Set<String>> bMap<K, V>ap = new HashMap<String, Set<String>>();
+	Map<String, long> cantBan = new HashMap<String, long>();
 		
 	public void processEvents(RobotMessageBundle bundle) {
 		Wavelet wavelet = bundle.getWavelet();
@@ -158,18 +163,39 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			}
 		}
 		if(text.startsWith("!@vote-to-ban:")){
+			if (cantBan.containsKey(blip.getCreator())) {
+				if (cantBan.get(blip.getCreator()) + 10(60)(1000) < System.currentTimeMillis()) {
+					return;
+				} else {
+					cantBan.remove(blip.getCreator());
+				}
+			}
+			
 			Pattern banP = Pattern.compile("!@vote-to-ban:(.+)@!");
 			Matcher mtchr = banP.matcher(text);
+			
 			mtchr.lookingAt();
+			
 			try{
-				//ban
 				wavelet.getRootBlip().getDocument().append("\n" + blip.getCreator() + " motions to ban " + mtchr.group(1) + ".");
+				
+				if (banMap.contains(mtchr.group(1))) {
+					banMap.get(mtchr.group(1)).add(blip.getCreator());
+				} else {
+					banMap.put(mtchr.group(1), new HashSet());
+					banMap.get(mtchr.group(1)).add(blip.getCreator());
+				}
 			}catch (IllegalStateException e){
 				wavelet.getRootBlip().getDocument().append("\n" + blip.getCreator() + " loses their ban vote privileges.");
+				
+				cantBan.put(blip.getCreator(), System.currentTimeMillis());
 			}catch (IndexOutOfBoundsException e){
 				//not this many matches
 			}
-			//wavelet.removeParticipant(mtchr.group(1));
+			
+			if (banMap.get(mtchr.group(1)).size() >= ((2/3) * ACTIVE_WAVERS)) {
+				wavelet.removeParticipant(mtchr.group(1));
+			}
 		}
 	}
 
