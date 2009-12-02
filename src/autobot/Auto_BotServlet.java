@@ -1,5 +1,5 @@
 /* 
-  Copyright (c) 2009 Michael Evans
+  Copyright (c) 2009 Michael Evans, David Forsythe
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -39,26 +39,39 @@ import com.google.wave.api.*;
 
 public class Auto_BotServlet extends AbstractRobotServlet {
 	static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName()); 
-	public String COMMAND = "!@force-new-wave@!";
-	public int MAX_BLIPS = 150;
 	public HashMap<String, Integer> votes = new HashMap<String, Integer>();
-	int NUM_OF_VOTES = votes.size();
 	public ArrayList<String> activeWavers = new ArrayList<String>();
-	int ACTIVE_WAVERS = 0;
-	Image optimusTransform = new Image("http://imgur.com/m66zH.gif", 160, 120, "");
 	Random generator = new Random();
-	String weatherURL = "http://weather.yahooapis.com/forecastrss?p=";
+	
+	private int MAX_BLIPS = 150;
+	private int NUM_OF_VOTES = 0;
+	private int ACTIVE_WAVERS = 0;
+	
+	/* Command Strings. */
+	final String CMD_OPEN_IDENT = "!@";
+	final String CMD_CLOSE_IDENT = "@!";
+	final String FORCE_NEW_WAVE = "force-new-wave";
+	final String VOTE_NEW_WAVE = "roll-out"
+	final String WEATHER = "weather"
+
 	Map<String, Set<String>> bMap<K, V>ap = new HashMap<String, Set<String>>();
 	Map<String, long> cantBan = new HashMap<String, long>();
 		
+	final Pattern weatherPattern = Pattern.compile("CMD_OPEN_IDENT" + WEATHER + ":(\\d{5})" + CMD_CLOSE_IDENT);
+	final String NW_VOTE_QUOTE = "Before your president decides, please ask him this: What if we leave, and you're wrong?"
+	final String WELCOME_SELF = "Autobots roll out.";
+
 	public void processEvents(RobotMessageBundle bundle) {
 		Wavelet wavelet = bundle.getWavelet();
+
 		if (bundle.wasSelfAdded()) {
+			Image optimusTransform = new Image("http://imgur.com/m66zH.gif", 160, 120, "");
 			Blip blip = wavelet.appendBlip();
 			TextView textView = blip.getDocument();
-			textView.append("Autobots roll out.");
+			textView.append(WELCOME_SELF);
 			blip.getDocument().appendElement(optimusTransform);
 		}
+
 		int NUM_OF_PARTICIPANTS = wavelet.getParticipants().size();
 
 		for (Event e: bundle.getEvents()) {
@@ -95,15 +108,15 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			activeWavers.add(authorRequest);
 		}
 		log.info("Wave Creator: "+ author + "Blip from: " + authorRequest+"\n");
-		if (text.startsWith(COMMAND) && author.equals(authorRequest)) {
+		if (text.startsWith(CMD_OPEN_IDENT + FORCE_NEW_WAVE + CMD_CLOSE_IDENT) && author.equals(authorRequest)) {
 			log.info("Forced a new wave.");
 			Wavelet newWave = wavelet.createWavelet(wavelet.getParticipants(), "ID");
 			String title = getNewTitle(wavelet);
 			newWave.setTitle(title);
 		}
-		if(text.startsWith("!@roll-out@!")){
+		if(text.startsWith(CMD_OPEN_IDENT + VOTE_NEW_WAVE + CMD_CLOSE_IDENT)){
 			String voteCreator = blip.getCreator();
-			blip.getDocument().append("\nFreedom is your right. If you make that request we will honor it.");
+			blip.getDocument().append("\n" + NW_VOTE_QUOTE);
 			votes.put(voteCreator, 1);
 			int i = 0;
 			Set<String> users = votes.keySet();
@@ -133,13 +146,11 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			textView.append("\nThanks for transforming " + wavelet.getParticipants().get(drop) + ".");
 			wavelet.removeParticipant(wavelet.getParticipants().get(drop));
 		}*/
-		//
-		if(text.startsWith("!@weather")){
-			Pattern banP = Pattern.compile("!@weather:(\\d{5})@!");
-			Matcher mtchr = banP.matcher(text);
+		
+		if(text.startsWith(CMD_OPEN_IDENT + WEATHER)){
+			Matcher mtchr = weatherPattern.matcher(text);
 			mtchr.lookingAt();
 			try{
-				//ban
 				String current = "";
 				String image = "";
 				try {
@@ -221,6 +232,11 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			Title = Title.substring(0,index) + " //Part " + count;
 		}
 		return Title;
+	}
+
+	private void consolidateBlips(Wavelet wavelet, Blip latestBlip) {
+		/* do nada. */
+		return;
 	}
 
 }
