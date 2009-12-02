@@ -103,10 +103,12 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		String text = blip.getDocument().getText();
 		String author = wavelet.getCreator();
 		String authorRequest = blip.getCreator();
+		
 		if(!activeWavers.contains(authorRequest)){
 			ACTIVE_WAVERS++;
 			activeWavers.add(authorRequest);
 		}
+		
 		log.info("Wave Creator: "+ author + "Blip from: " + authorRequest+"\n");
 		if (text.startsWith(CMD_OPEN_IDENT + FORCE_NEW_WAVE + CMD_CLOSE_IDENT) && author.equals(authorRequest)) {
 			log.info("Forced a new wave.");
@@ -174,11 +176,11 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			}
 		}
 		if(text.startsWith("!@vote-to-ban:")){
-			if (cantBan.containsKey(blip.getCreator())) {
-				if (cantBan.get(blip.getCreator()) + 10(60)(1000) < System.currentTimeMillis()) {
+			if (cantBan.containsKey(authorRequest)) {
+				if (cantBan.get(authorRequest) + 10(60)(1000) < System.currentTimeMillis()) {
 					return;
 				} else {
-					cantBan.remove(blip.getCreator());
+					cantBan.remove(authorRequest);
 				}
 			}
 			
@@ -188,18 +190,18 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			mtchr.lookingAt();
 			
 			try{
-				wavelet.getRootBlip().getDocument().append("\n" + blip.getCreator() + " motions to ban " + mtchr.group(1) + ".");
+				wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " motions to ban " + mtchr.group(1) + ".");
 				
 				if (banMap.contains(mtchr.group(1))) {
-					banMap.get(mtchr.group(1)).add(blip.getCreator());
+					banMap.get(mtchr.group(1)).add(authorRequest);
 				} else {
 					banMap.put(mtchr.group(1), new HashSet());
-					banMap.get(mtchr.group(1)).add(blip.getCreator());
+					banMap.get(mtchr.group(1)).add(authorRequest);
 				}
 			}catch (IllegalStateException e){
-				wavelet.getRootBlip().getDocument().append("\n" + blip.getCreator() + " loses their ban vote privileges.");
+				wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " loses their ban vote privileges.");
 				
-				cantBan.put(blip.getCreator(), System.currentTimeMillis());
+				cantBan.put(authorRequest, System.currentTimeMillis());
 			}catch (IndexOutOfBoundsException e){
 				//not this many matches
 			}
