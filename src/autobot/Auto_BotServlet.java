@@ -53,6 +53,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	final String FORCE_NEW_WAVE = "force-new-wave";
 	final String VOTE_NEW_WAVE = "roll-out"
 	final String WEATHER = "weather"
+	
+	final String CONT_IDENT = "// Part "
 
 	Map<String, Set<String>> bMap<K, V>ap = new HashMap<String, Set<String>>();
 	Map<String, long> cantBan = new HashMap<String, long>();
@@ -129,16 +131,16 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			NUM_OF_VOTES = votes.size();
 			String rootText = wavelet.getRootBlip().getDocument().getText();
 			int index = rootText.indexOf("Wave Max: ");
-			if(index<0){
+			if (index < 0){
 				String appendText = "\n\n" + "Wave Max: " + (NUM_OF_VOTES + MAX_BLIPS) + "\nNumber of votes for new wave: "+NUM_OF_VOTES;
 				//wavelet.getRootBlip().getDocument().delete();
 				wavelet.getRootBlip().getDocument().append(appendText);
-			}else{
+			} else {
 				String newText = rootText.substring(0,index);
 				wavelet.getRootBlip().getDocument().delete();
-				wavelet.getRootBlip().getDocument().append(newText + "Wave Max: " + (NUM_OF_VOTES + MAX_BLIPS) + "\nNumber of votes for new wave: "+NUM_OF_VOTES);
+				wavelet.getRootBlip().getDocument().append(newText + "Wave Max: " + (NUM_OF_VOTES + MAX_BLIPS) + "\nNumber of votes for new wave: " + NUM_OF_VOTES);
 			}
-			if(NUM_OF_VOTES>((1/3)*ACTIVE_WAVERS)&&(ACTIVE_WAVERS>=4))
+			if (NUM_OF_VOTES > ((1/3) * ACTIVE_WAVERS) && (ACTIVE_WAVERS >= 4))
 				makeNewWave(wavelet);
 		}
 		/*if(text.startsWith("!@russian-roulette@!")){
@@ -149,10 +151,10 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			wavelet.removeParticipant(wavelet.getParticipants().get(drop));
 		}*/
 		
-		if(text.startsWith(CMD_OPEN_IDENT + WEATHER)){
+		if (text.startsWith(CMD_OPEN_IDENT + WEATHER)){
 			Matcher mtchr = weatherPattern.matcher(text);
 			mtchr.lookingAt();
-			try{
+			try {
 				String current = "";
 				String image = "";
 				try {
@@ -169,13 +171,14 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				}
 				blip.getDocument().replace(current);
 				blip.getDocument().appendElement(new Image(image, 52,52,""));
-			}catch (IllegalStateException e){
+			} catch (IllegalStateException e){
 				//blip.getDocument().replace("Degrees");
-			}catch (IndexOutOfBoundsException e){
+			} catch (IndexOutOfBoundsException e){
 				//not this many matches
 			}
 		}
-		if(text.startsWith("!@vote-to-ban:")){
+
+		if (text.startsWith("!@vote-to-ban:")){
 			if (cantBan.containsKey(authorRequest)) {
 				if (cantBan.get(authorRequest) + 10(60)(1000) < System.currentTimeMillis()) {
 					return;
@@ -225,13 +228,12 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		if(indexMax>-1){
 			Title = wavelet.getRootBlip().getDocument().getText().substring(0,indexMax);
 		}*/
-		int index = Title.indexOf("//Part");
+		int index = Title.indexOf(CONT_IDENT);
 		if(index == -1){
-			Title = Title + " //Part 2";
+			Title = Title + CONT_IDENT + "2";
 		}else{
-			int count = Integer.parseInt(Title.substring(index+6).trim());
-			count++;
-			Title = Title.substring(0,index) + " //Part " + count;
+			int count = Integer.parseInt(Title.substring(index + CONT_IDENT.length()).trim());
+			Title = Title.substring(0,index) + CONT_IDENT + (count + 1);
 		}
 		return Title;
 	}
