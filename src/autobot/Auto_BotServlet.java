@@ -25,6 +25,7 @@
 package autobot;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,9 +55,10 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	final String VOTE_NEW_WAVE = "roll-out"
 	final String WEATHER = "weather"
 	
-	final String CONT_IDENT = "// Part "
+	final String CONT_IDENT = "// Part ";
+	string LAST_BLIP_CREATOR = "";
 
-	Map<String, Set<String>> bMap<K, V>ap = new HashMap<String, Set<String>>();
+	Map<String, Set<String>> banMap = new HashMap<String, Set<String>>();
 	Map<String, long> cantBan = new HashMap<String, long>();
 		
 	final Pattern weatherPattern = Pattern.compile("CMD_OPEN_IDENT" + WEATHER + ":(\\d{5})" + CMD_CLOSE_IDENT);
@@ -76,8 +78,18 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 
 		int NUM_OF_PARTICIPANTS = wavelet.getParticipants().size();
 
-		for (Event e: bundle.getEvents()) {
-			if (e.getType() == EventType.WAVELET_PARTICIPANTS_CHANGED) {    
+		for (Event e : bundle.getEvents()) {
+			if (e.getType() == EventType.WAVELET_PARTICIPANTS_CHANGED) {
+				for (String usr : e.getRemovedParticipants()) {
+					activeWavers.remove(usr);
+					/* banMap.remove(usr);
+					for (Set s : banMap.values()) {
+						s.remove(usr);
+					} */
+				}
+				/* for (String usr : e.getAddedParticipants().size()) {
+					;
+				} */
 			}
 
 			if (e.getType() == EventType.BLIP_SUBMITTED) {
@@ -88,12 +100,11 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 					children.add(bundle.getBlip(wavelet.getWaveId(), wavelet.getWaveletId(), id)); 
 				}*/
 				processBlip(e.getBlip(), wavelet);
-				if(childrenIds.size()==MAX_BLIPS+NUM_OF_VOTES) {
+				if (childrenIds.size() == MAX_BLIPS + NUM_OF_VOTES) {
 					Wavelet newWave = wavelet.createWavelet(wavelet.getParticipants(), "ID");
 					String title = getNewTitle(wavelet);
 					newWave.setTitle(title);
 				}
-
 			}
 			/*if (e.getType() == EventType.BLIP_DELETED) {
 			}*/
@@ -101,7 +112,6 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	}
 
 	private void processBlip(Blip blip, Wavelet wavelet) {
-		// TODO Auto-generated method stub
 		String text = blip.getDocument().getText();
 		String author = wavelet.getCreator();
 		String authorRequest = blip.getCreator();
@@ -112,13 +122,18 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		}
 		
 		log.info("Wave Creator: "+ author + "Blip from: " + authorRequest+"\n");
+		
+		
 		if (text.startsWith(CMD_OPEN_IDENT + FORCE_NEW_WAVE + CMD_CLOSE_IDENT) && author.equals(authorRequest)) {
+			/* Force a new Wave */
+			
 			log.info("Forced a new wave.");
 			Wavelet newWave = wavelet.createWavelet(wavelet.getParticipants(), "ID");
 			String title = getNewTitle(wavelet);
 			newWave.setTitle(title);
-		}
-		if(text.startsWith(CMD_OPEN_IDENT + VOTE_NEW_WAVE + CMD_CLOSE_IDENT)) {
+		} else if(text.startsWith(CMD_OPEN_IDENT + VOTE_NEW_WAVE + CMD_CLOSE_IDENT)) {
+			/* Vote for new Wave */
+			
 			String voteCreator = blip.getCreator();
 			blip.getDocument().append("\n" + NW_VOTE_QUOTE);
 			votes.put(voteCreator, 1);
@@ -142,16 +157,18 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			}
 			if (NUM_OF_VOTES > ((1/3) * ACTIVE_WAVERS) && (ACTIVE_WAVERS >= 4))
 				makeNewWave(wavelet);
+			
 		}
-		/*if(text.startsWith("!@russian-roulette@!")) {
+		/* else if(text.startsWith("!@russian-roulette@!")) {
 			int drop = generator.nextInt(wavelet.getParticipants().size());
 			//Blip newBlip = wavelet.appendBlip();
 			TextView textView = blip.getDocument();
 			textView.append("\nThanks for transforming " + wavelet.getParticipants().get(drop) + ".");
 			wavelet.removeParticipant(wavelet.getParticipants().get(drop));
 		}*/
-		
-		if (text.startsWith(CMD_OPEN_IDENT + WEATHER)) {
+		else if (text.startsWith(CMD_OPEN_IDENT + WEATHER)) {
+			/* Request weather */
+			
 			Matcher mtchr = weatherPattern.matcher(text);
 			mtchr.lookingAt();
 			try {
@@ -176,9 +193,9 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			} catch (IndexOutOfBoundsException e) {
 				//not this many matches
 			}
-		}
-
-		if (text.startsWith("!@vote-to-ban:")) {
+		} else if (text.startsWith("!@vote-to-ban:")) {
+			/* Vote to ban user */
+			
 			if (cantBan.containsKey(authorRequest)) {
 				if (cantBan.get(authorRequest) + 10(60)(1000) < System.currentTimeMillis()) {
 					return;
@@ -212,6 +229,19 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			if (banMap.get(mtchr.group(1)).size() >= ((2/3) * ACTIVE_WAVERS)) {
 				wavelet.removeParticipant(mtchr.group(1));
 			}
+		}
+		
+		if (blip.getCreator().equals(LAST_BLIP_CREATOR)) {
+			/* Consolidate blips */
+			int prevBlipIndex = wavelet.getRootBlip().getChildren().indexOf(blip) - 1;
+			Blip prevBlip = wavelet.getRootBlip().getChild(prevBlipIndex);
+			TextView prevBlipText = prevBlip.getDocument();
+			
+			prevBlipText.append("\n");
+			prevBlipText.append(Calendar.HOUR + ":" + Calendar.MINUTE + ":" + Calendar.SECOND);
+			prevBlipText.append(blip.getDocument().toString());
+			
+			wavelet.getRootBlip().deleteInlineBlip(blip);
 		}
 	}
 
