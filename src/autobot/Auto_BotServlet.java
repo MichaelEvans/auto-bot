@@ -213,6 +213,10 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			try{
 				wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " motions to ban " + mtchr.group(1) + ".");
 				
+				if (!wavelet.getParticipants().contains(mtchr.group(1))) {
+					throw new IllegalStateException();
+				}
+				
 				if (banMap.containsKey(mtchr.group(1))) {
 					banMap.get(mtchr.group(1)).add(authorRequest);
 				} else {
@@ -228,6 +232,9 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			}
 			
 			if (banMap.get(mtchr.group(1)).size() >= ((2/3) * ACTIVE_WAVERS)) {
+				String message = "Motion to ban " + mtchr.group(1) + " passed with " banMap.get(mtchr.group(1)).size() + " votes. Removing this user.";
+				log.info(message);
+				wavelet.getRootBlip().getDocument().append("\n" + message);
 				wavelet.removeParticipant(mtchr.group(1));
 			}
 		}
