@@ -233,15 +233,15 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		
 		if (blip.getCreator().equals(LAST_BLIP_CREATOR)) {
 			/* Consolidate blips */
-			int prevBlipIndex = wavelet.getRootBlip().getChildren().indexOf(blip) - 1;
-			Blip prevBlip = wavelet.getRootBlip().getChild(prevBlipIndex);
+			int prevBlipIndex = blip.getParent().getChildren().indexOf(blip) - 1;
+			Blip prevBlip = blip.getParent().getChild(prevBlipIndex);
 			TextView prevBlipText = prevBlip.getDocument();
 			
 			prevBlipText.append("\n");
 			prevBlipText.append(Calendar.HOUR + ":" + Calendar.MINUTE + ":" + Calendar.SECOND);
 			prevBlipText.append(blip.getDocument().toString());
 			
-			wavelet.getRootBlip().deleteInlineBlip(blip);
+			blip.getParent().deleteInlineBlip(blip);
 		} else {
 			LAST_BLIP_CREATOR = blip.getCreator();
 		}
