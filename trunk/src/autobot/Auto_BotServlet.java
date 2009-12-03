@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,17 +53,17 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	final String CMD_OPEN_IDENT = "!@";
 	final String CMD_CLOSE_IDENT = "@!";
 	final String FORCE_NEW_WAVE = "force-new-wave";
-	final String VOTE_NEW_WAVE = "roll-out"
-	final String WEATHER = "weather"
+	final String VOTE_NEW_WAVE = "roll-out";
+	final String WEATHER = "weather";
 	
 	final String CONT_IDENT = "// Part ";
-	string LAST_BLIP_CREATOR = "";
+	String LAST_BLIP_CREATOR = "";
 
 	Map<String, Set<String>> banMap = new HashMap<String, Set<String>>();
-	Map<String, long> cantBan = new HashMap<String, long>();
+	Map<String, Long> cantBan = new HashMap<String, Long>();
 		
 	final Pattern weatherPattern = Pattern.compile("CMD_OPEN_IDENT" + WEATHER + ":(\\d{5})" + CMD_CLOSE_IDENT);
-	final String NW_VOTE_QUOTE = "Before your president decides, please ask him this: What if we leave, and you're wrong?"
+	final String NW_VOTE_QUOTE = "Before your president decides, please ask him this: What if we leave, and you're wrong?";
 	final String WELCOME_SELF = "Autobots roll out.";
 
 	public void processEvents(RobotMessageBundle bundle) {
@@ -197,7 +198,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			/* Vote to ban user */
 			
 			if (cantBan.containsKey(authorRequest)) {
-				if (cantBan.get(authorRequest) + 10(60)(1000) < System.currentTimeMillis()) {
+				if (cantBan.get(authorRequest) + 10*60*1000 < System.currentTimeMillis()) {
 					return;
 				} else {
 					cantBan.remove(authorRequest);
@@ -212,7 +213,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			try{
 				wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " motions to ban " + mtchr.group(1) + ".");
 				
-				if (banMap.contains(mtchr.group(1))) {
+				if (banMap.containsKey(mtchr.group(1))) {
 					banMap.get(mtchr.group(1)).add(authorRequest);
 				} else {
 					banMap.put(mtchr.group(1), new HashSet());
@@ -237,13 +238,13 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			Blip prevBlip = blip.getParent().getChild(prevBlipIndex);
 			TextView prevBlipText = prevBlip.getDocument();
 			
-			log.info("Consilidating blips " + prevBlip.getBlipID() + " and " + blip.getBlipID());
+			log.info("Consilidating blips " + prevBlip.getBlipId() + " and " + blip.getBlipId());
 			
 			prevBlipText.append("\n");
 			prevBlipText.append(Calendar.HOUR + ":" + Calendar.MINUTE + ":" + Calendar.SECOND);
 			prevBlipText.append(blip.getDocument().toString());
 			
-			blip.getDocument().append("Consilidating blips " + prevBlip.getBlipID() + " and " + blip.getBlipID());
+			blip.getDocument().append("Consilidating blips " + prevBlip.getBlipId() + " and " + blip.getBlipId());
 			//blip.getParent().deleteInlineBlip(blip);
 		} else {
 			LAST_BLIP_CREATOR = blip.getCreator();
