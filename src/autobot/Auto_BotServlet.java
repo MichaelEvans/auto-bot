@@ -242,6 +242,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			prevBlipText.append(blip.getDocument().toString());
 			
 			wavelet.getRootBlip().deleteInlineBlip(blip);
+		} else {
+			LAST_BLIP_CREATOR = blip.getCreator();
 		}
 	}
 
