@@ -237,11 +237,14 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			Blip prevBlip = blip.getParent().getChild(prevBlipIndex);
 			TextView prevBlipText = prevBlip.getDocument();
 			
+			log.info("Consilidating blips " + prevBlip.getBlipID() + " and " + blip.getBlipID());
+			
 			prevBlipText.append("\n");
 			prevBlipText.append(Calendar.HOUR + ":" + Calendar.MINUTE + ":" + Calendar.SECOND);
 			prevBlipText.append(blip.getDocument().toString());
 			
-			blip.getParent().deleteInlineBlip(blip);
+			blip.getDocument().append("Consilidating blips " + prevBlip.getBlipID() + " and " + blip.getBlipID());
+			//blip.getParent().deleteInlineBlip(blip);
 		} else {
 			LAST_BLIP_CREATOR = blip.getCreator();
 		}
