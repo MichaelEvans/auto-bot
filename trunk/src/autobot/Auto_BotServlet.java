@@ -56,6 +56,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	final String FORCE_NEW_WAVE = "force-new-wave";
 	final String VOTE_NEW_WAVE = "roll-out";
 	final String WEATHER = "weather";
+	final String VOTE_TO_BAN = "vote-to-ban:";
+	final String VOTE_TO_UNBAN = "vote-to-unban";
 	
 	final String CONT_IDENT = "// Part ";
 	String WAVE_BASE_TITLE;
@@ -63,6 +65,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 
 	Map<String, Set<String>> banMap = new HashMap<String, Set<String>>();
 	Map<String, Long> cantBan = new HashMap<String, Long>();
+	Set<String> areBanned = new HashSet<String>();
 		
 	final Pattern weatherPattern = Pattern.compile("CMD_OPEN_IDENT" + WEATHER + ":(\\d{5})" + CMD_CLOSE_IDENT);
 	final String NW_VOTE_QUOTE = "Before your president decides, please ask him this: What if we leave, and you're wrong?";
@@ -92,9 +95,11 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 						s.remove(usr);
 					} */
 				}
-				/* for (String usr : e.getAddedParticipants().size()) {
-					;
-				} */
+				for (String usr : e.getAddedParticipants().size()) {
+					if (areBanned.contains(usr)) {
+						wavelet.removeParticipant(usr);
+					}
+				}
 			}
 
 			if (e.getType() == EventType.BLIP_SUBMITTED) {
@@ -198,7 +203,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			} catch (IndexOutOfBoundsException e) {
 				//not this many matches
 			}
-		} else if (text.startsWith("!@vote-to-ban:")) {
+		} else if (text.startsWith(CMD_OPEN_IDENT + VOTE_TO_BAN)) {
 			/* Vote to ban user */
 			
 			if (cantBan.containsKey(authorRequest)) {
@@ -212,26 +217,30 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			Pattern banP = Pattern.compile("!@vote-to-ban:(.+)@!");
 			Matcher mtchr = banP.matcher(text);
 			TextView rootBlipDoc = wavelet.getRootBlip().getDocument();
+			String usr;
 			
 			mtchr.lookingAt();
 			
 			try{
+				usr = mtchr.group(1);
+				
 				if (!rootBlipDoc.getText().contains("Motions to Ban")) {
 					;
 				}
+				
 				if (wavelet) {
-					wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " motions to ban " + mtchr.group(1) + ".");
+					wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " motions to ban " + usr + ".");
 				}
 				
-				if (!wavelet.getParticipants().contains(mtchr.group(1))) {
+				if (!wavelet.getParticipants().contains(usr)) {
 					throw new IllegalStateException();
 				}
 				
-				if (banMap.containsKey(mtchr.group(1))) {
-					banMap.get(mtchr.group(1)).add(authorRequest);
+				if (banMap.containsKey(usr)) {
+					banMap.get(usr).add(authorRequest);
 				} else {
-					banMap.put(mtchr.group(1), new HashSet());
-					banMap.get(mtchr.group(1)).add(authorRequest);
+					banMap.put(usr, new HashSet());
+					banMap.get(usr).add(authorRequest);
 				}
 			}catch (IllegalStateException e) {
 				wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " loses their ban vote privileges.");
@@ -241,31 +250,71 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				//not this many matches
 			}
 			
-			if (banMap.get(mtchr.group(1)).size() >= ((2/3) * ACTIVE_WAVERS)) {
-				String message = "Motion to ban " + mtchr.group(1) + " passed with " banMap.get(mtchr.group(1)).size() + " votes. Removing this user.";
+			if (banMap.get(usr).size() >= ((2/3) * ACTIVE_WAVERS)) {
+				String message = "Motion to ban " + mtchr.group(1) + " passed with " banMap.get(usr).size() + " votes. Removing this user.";
 				log.info(message);
 				wavelet.getRootBlip().getDocument().append("\n" + message);
-				wavelet.removeParticipant(mtchr.group(1));
+				wavelet.removeParticipant(usr);
+			}
+		} else if (text.startsWith(CMD_OPEN_IDENT + VOTE_TO_UNBAN)) {
+			/* Vote to unban user */
+			
+			/* The following if block can be removed once removeParticipant() works */
+			if (cantBan.containsKey(authorRequest)) {
+				if (cantBan.get(authorRequest) + 10*60*1000 < System.currentTimeMillis()) {
+					return;
+				} else {
+					cantBan.remove(authorRequest);
+				}
+			}
+			
+			Pattern unbanP = Pattern.compile("!@vote-to-unban:(.+)@!");
+			Matcher mtchr = banP.matcher(text);
+			TextView rootBlipDoc = wavelet.getRootBlip().getDocument();
+			String usr;
+			
+			mtchr.lookingAt();
+	
+			try{
+				usr = mtchr.group(1);
+				
+				if (!rootBlipDoc.getText().contains("Motions to Unban")) {
+					;
+				}
+				
+				if (wavelet) {
+					wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " motions to unban " + usr + ".");
+				}
+				
+				if (!wavelet.getParticipants().contains(usr)) {
+					throw new IllegalStateException();
+				}
+				
+				if (banMap.containsKey(usr)) {
+					banMap.get(usr).add(authorRequest);
+				} else {
+					banMap.put(usr, new HashSet());
+					banMap.get(usr).add(authorRequest);
+				}
+			}catch (IllegalStateException e) {
+				wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " loses their unban vote privileges.");
+				
+				cantBan.put(authorRequest, System.currentTimeMillis());
+			}catch (IndexOutOfBoundsException e) {
+				//not this many matches
+			}
+			
+			if (banMap.get(usr).size() >= ((2/3) * ACTIVE_WAVERS)) {
+				String message = "Motion to unban " + usr + " passed with " banMap.get(usr).size() + " votes. Unbanning this user.";
+				log.info(message);
+				wavelet.getRootBlip().getDocument().append("\n" + message);
+				wavelet.addParticipant(usr);
+				banMap.remove(usr);
+				areBanned.remove(usr);
 			}
 		}
 		
-		if (blip.getCreator().equals(LAST_BLIP_CREATOR)) {
-			/* Consolidate blips */
-			int prevBlipIndex = blip.getParent().getChildren().indexOf(blip) - 1;
-			Blip prevBlip = blip.getParent().getChild(prevBlipIndex);
-			TextView prevBlipText = prevBlip.getDocument();
-			
-			log.info("Consilidating blips " + prevBlip.getBlipId() + " and " + blip.getBlipId());
-			
-			prevBlipText.append("\n");
-			prevBlipText.append(Calendar.HOUR + ":" + Calendar.MINUTE + ":" + Calendar.SECOND);
-			prevBlipText.append(blip.getDocument().toString());
-			
-			blip.getDocument().append("Consilidating blips " + prevBlip.getBlipId() + " and " + blip.getBlipId());
-			//blip.getParent().deleteInlineBlip(blip);
-		} else {
-			LAST_BLIP_CREATOR = blip.getCreator();
-		}
+		consolidateBlips(blip);
 	}
 
 	private void makeNewWave(Wavelet wavelet) {
@@ -291,8 +340,25 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		return title;
 	}
 
-	private void consolidateBlips(Wavelet wavelet, Blip latestBlip) {
-		/* do nada. */
+	private void consolidateBlips(Blip blip) {
+		if (blip.getCreator().equals(LAST_BLIP_CREATOR)) {
+			/* Consolidate blips */
+			int prevBlipIndex = blip.getParent().getChildren().indexOf(blip) - 1;
+			Blip prevBlip = blip.getParent().getChild(prevBlipIndex);
+			TextView prevBlipText = prevBlip.getDocument();
+			
+			log.info("Consilidating blips " + prevBlip.getBlipId() + " and " + blip.getBlipId());
+			
+			prevBlipText.append("\n");
+			prevBlipText.append(Calendar.HOUR + ":" + Calendar.MINUTE + ":" + Calendar.SECOND);
+			prevBlipText.append(blip.getDocument().toString());
+			
+			blip.getDocument().append("Consilidating blips " + prevBlip.getBlipId() + " and " + blip.getBlipId());
+			//blip.getParent().deleteInlineBlip(blip);
+		} else {
+			LAST_BLIP_CREATOR = blip.getCreator();
+		}
+		
 		return;
 	}
 
