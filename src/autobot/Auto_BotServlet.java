@@ -318,6 +318,11 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	}
 
 	private void makeNewWave(Wavelet wavelet) {
+		Blip rollOut = new Blip();
+		
+		rollOut.getDocument().append(WELCOME_QUOTE);
+		wavelet.appendBlip(rollOut);
+		
 		String title = getNewTitle(wavelet);
 		Wavelet newWave = wavelet.createWavelet(wavelet.getParticipants(), "ID");
 		newWave.setTitle(title);
