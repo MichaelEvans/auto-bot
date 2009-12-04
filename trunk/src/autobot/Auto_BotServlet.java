@@ -67,7 +67,9 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	Map<String, Long> cantBan = new HashMap<String, Long>();
 	Set<String> areBanned = new HashSet<String>();
 		
-	final Pattern weatherPattern = Pattern.compile("CMD_OPEN_IDENT" + WEATHER + ":(\\d{5})" + CMD_CLOSE_IDENT);
+	final Pattern weatherPattern = Pattern.compile(CMD_OPEN_IDENT + WEATHER + ":(\\d{5})" + CMD_CLOSE_IDENT);
+	final Pattern voteToBanPattern = Pattern.compile(CMD_OPEN_IDENT + VOTE_TO_BAN + "(.+)" + CMD_CLOSE_IDENT);
+	final Pattern voteToUnbanPattern = Pattern.compile(CMD_OPEN_IDENT + VOTE_TO_UNBAN + "(.+)" + CMD_CLOSE_IDENT);
 	final String NW_VOTE_QUOTE = "Before your president decides, please ask him this: What if we leave, and you're wrong?";
 	final String WELCOME_SELF = "Autobots roll out.";
 
@@ -214,8 +216,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				}
 			}
 			
-			Pattern banP = Pattern.compile("!@vote-to-ban:(.+)@!");
-			Matcher mtchr = banP.matcher(text);
+			Matcher mtchr = voteToBanPattern.matcher(text);
 			TextView rootBlipDoc = wavelet.getRootBlip().getDocument();
 			String usr;
 			
@@ -268,8 +269,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				}
 			}
 			
-			Pattern unbanP = Pattern.compile("!@vote-to-unban:(.+)@!");
-			Matcher mtchr = banP.matcher(text);
+			Matcher mtchr = voteToUnbanPattern.matcher(text);
 			TextView rootBlipDoc = wavelet.getRootBlip().getDocument();
 			String usr;
 			
