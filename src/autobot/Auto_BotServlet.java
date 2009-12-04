@@ -48,6 +48,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	private int MAX_BLIPS = 150;
 	private int NUM_OF_VOTES = 0;
 	private int ACTIVE_WAVERS = 0;
+	private int	WAVE_NUMBER = 1;
 	
 	/* Command Strings. */
 	final String CMD_OPEN_IDENT = "!@";
@@ -57,7 +58,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	final String WEATHER = "weather";
 	
 	final String CONT_IDENT = "// Part ";
-	String LAST_BLIP_CREATOR = "";
+	String WAVE_BASE_TITLE;
+	String LAST_BLIP_CREATOR;
 
 	Map<String, Set<String>> banMap = new HashMap<String, Set<String>>();
 	Map<String, Long> cantBan = new HashMap<String, Long>();
@@ -70,6 +72,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		Wavelet wavelet = bundle.getWavelet();
 
 		if (bundle.wasSelfAdded()) {
+			WAVE_BASE_TITLE = wavelet.getTitle();
+			
 			Image optimusTransform = new Image("http://imgur.com/m66zH.gif", 160, 120, "");
 			Blip blip = wavelet.appendBlip();
 			TextView textView = blip.getDocument();
@@ -94,14 +98,14 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			}
 
 			if (e.getType() == EventType.BLIP_SUBMITTED) {
-				Blip root = wavelet.getRootBlip();
-				List<String> childrenIds = root.getChildBlipIds(); 
+				//Blip root = wavelet.getRootBlip();
+				//List<String> childrenIds = root.getChildBlipIds(); 
 				//List<Blip> children = new ArrayList<Blip>(); 
 				/*for (String id: childrenIds) { 
 					children.add(bundle.getBlip(wavelet.getWaveId(), wavelet.getWaveletId(), id)); 
 				}*/
 				processBlip(e.getBlip(), wavelet);
-				if (childrenIds.size() == MAX_BLIPS + NUM_OF_VOTES) {
+				if (wavelet.getRootBlip().getChildBlipIds().size() == MAX_BLIPS + NUM_OF_VOTES) {
 					Wavelet newWave = wavelet.createWavelet(wavelet.getParticipants(), "ID");
 					String title = getNewTitle(wavelet);
 					newWave.setTitle(title);
@@ -207,11 +211,17 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			
 			Pattern banP = Pattern.compile("!@vote-to-ban:(.+)@!");
 			Matcher mtchr = banP.matcher(text);
+			TextView rootBlipDoc = wavelet.getRootBlip().getDocument();
 			
 			mtchr.lookingAt();
 			
 			try{
-				wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " motions to ban " + mtchr.group(1) + ".");
+				if (!rootBlipDoc.getText().contains("Motions to Ban")) {
+					;
+				}
+				if (wavelet) {
+					wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " motions to ban " + mtchr.group(1) + ".");
+				}
 				
 				if (!wavelet.getParticipants().contains(mtchr.group(1))) {
 					throw new IllegalStateException();
@@ -266,19 +276,19 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 
 	private String getNewTitle(Wavelet wavelet) {
 		// TODO Auto-generated method stub
-		String Title = wavelet.getTitle();
+		String title;// = wavelet.getTitle();
 		/*int indexMax = wavelet.getRootBlip().getDocument().getText().indexOf("Wave Max: ");
 		if(indexMax>-1) {
 			Title = wavelet.getRootBlip().getDocument().getText().substring(0,indexMax);
 		}*/
-		int index = Title.indexOf(CONT_IDENT);
+		int index = WAVE_BASE_TITLE.indexOf(CONT_IDENT);
 		if (index == -1) {
-			Title = Title + CONT_IDENT + "2";
+			title = WAVE_BASE_TITLE + CONT_IDENT + "2";
 		} else {
-			int count = Integer.parseInt(Title.substring(index + CONT_IDENT.length()).trim());
-			Title = Title.substring(0,index) + CONT_IDENT + (count + 1);
+			int count = Integer.parseInt(WAVE_BASE_TITLE.substring(index + CONT_IDENT.length()).trim());
+			title = WAVE_BASE_TITLE.substring(0,index) + CONT_IDENT + (count + 1);
 		}
-		return Title;
+		return title;
 	}
 
 	private void consolidateBlips(Wavelet wavelet, Blip latestBlip) {
