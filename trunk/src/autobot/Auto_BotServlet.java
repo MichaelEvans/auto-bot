@@ -141,14 +141,9 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		if (text.startsWith(CMD_OPEN_IDENT + FORCE_NEW_WAVE + CMD_CLOSE_IDENT) && author.equals(authorRequest)) {
 			/* Force a new Wave */
 			
-			Blip new_blip = wavelet.appendBlip();
-			TextView tv = blip.getDocument();
-			tv.append(NEW_WAVE_INDICATOR);
-
+			makeNewWave(wavelet);
 			log.info("Forced a new wave.");
-			Wavelet newWave = wavelet.createWavelet(wavelet.getParticipants(), "ID");
-			String title = getNewTitle(wavelet);
-			newWave.setTitle(title);
+
 		} else if(text.startsWith(CMD_OPEN_IDENT + VOTE_NEW_WAVE + CMD_CLOSE_IDENT)) {
 			/* Vote for new Wave */
 			
@@ -326,7 +321,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	private void makeNewWave(Wavelet wavelet) {
 		Blip rollOut = new Blip();
 		
-		rollOut.getDocument().append(WELCOME_QUOTE);
+		rollOut.getDocument().append(NEW_WAVE_INDICATOR);
 		wavelet.appendBlip(rollOut);
 		
 		String title = getNewTitle(wavelet);
