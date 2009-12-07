@@ -63,6 +63,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	String WAVE_BASE_TITLE;
 	String LAST_BLIP_CREATOR;
 
+	final String NEW_WAVE_INDICATOR = "We're rolling out!";
+
 	Map<String, Set<String>> banMap = new HashMap<String, Set<String>>();
 	Map<String, Long> cantBan = new HashMap<String, Long>();
 	Set<String> areBanned = new HashSet<String>();
@@ -139,6 +141,10 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		if (text.startsWith(CMD_OPEN_IDENT + FORCE_NEW_WAVE + CMD_CLOSE_IDENT) && author.equals(authorRequest)) {
 			/* Force a new Wave */
 			
+			Blip new_blip = wavelet.appendBlip();
+			TextView tv = blip.getDocument();
+			tv.append(NEW_WAVE_INDICATOR);
+
 			log.info("Forced a new wave.");
 			Wavelet newWave = wavelet.createWavelet(wavelet.getParticipants(), "ID");
 			String title = getNewTitle(wavelet);
