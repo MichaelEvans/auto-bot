@@ -276,6 +276,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				cantBan.put(authorRequest, System.currentTimeMillis());
 			}catch (IndexOutOfBoundsException e) {
 				//not this many matches
+				String message = "Usage: !@vote-to-ban:user@googlewave.com@!";
+				wavelet.getRootBlip().getDocument().append("\n" + message);
 			}	
 		} else if (text.startsWith(CMD_OPEN_IDENT + VOTE_TO_UNBAN)) {
 			/* Vote to unban user */
@@ -331,6 +333,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				cantBan.put(authorRequest, System.currentTimeMillis());
 			}catch (IndexOutOfBoundsException e) {
 				//not this many matches
+				String message = "Usage: !@vote-to-unban:user@googlewave.com@!";
+				wavelet.getRootBlip().getDocument().append("\n" + message);
 			}
 		} else if (text.startsWith(CMD_OPEN_IDENT + AUTO_INVITE + CMD_CLOSE_IDENT) {
 			for (String usr : autoInviteWavers) {
