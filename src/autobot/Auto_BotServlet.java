@@ -269,6 +269,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 					log.info(message);
 					wavelet.getRootBlip().getDocument().append("\n" + message);
 					wavelet.removeParticipant(usr);
+					--ACTIVE_WAVERS;
 				}
 			}catch (IllegalStateException e) {
 				wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " loses their ban vote privileges.");
