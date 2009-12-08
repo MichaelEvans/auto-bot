@@ -263,20 +263,20 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 					banMap.put(usr, new HashSet());
 					banMap.get(usr).add(authorRequest);
 				}
+				
+				if (banMap.get(usr).size() >= ((2/3) * ACTIVE_WAVERS)) {
+					String message = "Motion to ban " + usr + " passed with " banMap.get(usr).size() + " votes. Removing this user.";
+					log.info(message);
+					wavelet.getRootBlip().getDocument().append("\n" + message);
+					wavelet.removeParticipant(usr);
+				}
 			}catch (IllegalStateException e) {
 				wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " loses their ban vote privileges.");
 				
 				cantBan.put(authorRequest, System.currentTimeMillis());
 			}catch (IndexOutOfBoundsException e) {
 				//not this many matches
-			}
-			
-			if (banMap.get(usr).size() >= ((2/3) * ACTIVE_WAVERS)) {
-				String message = "Motion to ban " + mtchr.group(1) + " passed with " banMap.get(usr).size() + " votes. Removing this user.";
-				log.info(message);
-				wavelet.getRootBlip().getDocument().append("\n" + message);
-				wavelet.removeParticipant(usr);
-			}
+			}	
 		} else if (text.startsWith(CMD_OPEN_IDENT + VOTE_TO_UNBAN)) {
 			/* Vote to unban user */
 			
@@ -316,21 +316,21 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 					banMap.put(usr, new HashSet());
 					banMap.get(usr).add(authorRequest);
 				}
+				
+				if (banMap.get(usr).size() >= ((2/3) * ACTIVE_WAVERS)) {
+					String message = "Motion to unban " + usr + " passed with " banMap.get(usr).size() + " votes. Unbanning this user.";
+					log.info(message);
+					wavelet.getRootBlip().getDocument().append("\n" + message);
+					wavelet.addParticipant(usr);
+					banMap.remove(usr);
+					areBanned.remove(usr);
+				}
 			}catch (IllegalStateException e) {
 				wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " loses their unban vote privileges.");
 				
 				cantBan.put(authorRequest, System.currentTimeMillis());
 			}catch (IndexOutOfBoundsException e) {
 				//not this many matches
-			}
-			
-			if (banMap.get(usr).size() >= ((2/3) * ACTIVE_WAVERS)) {
-				String message = "Motion to unban " + usr + " passed with " banMap.get(usr).size() + " votes. Unbanning this user.";
-				log.info(message);
-				wavelet.getRootBlip().getDocument().append("\n" + message);
-				wavelet.addParticipant(usr);
-				banMap.remove(usr);
-				areBanned.remove(usr);
 			}
 		} else if (text.startsWith(CMD_OPEN_IDENT + AUTO_INVITE + CMD_CLOSE_IDENT) {
 			for (String usr : autoInviteWavers) {
