@@ -43,6 +43,16 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName()); 
 	public HashMap<String, Integer> votes = new HashMap<String, Integer>();
 	public ArrayList<String> activeWavers = new ArrayList<String>();
+	public Set<String> autoInviteWavers = new HashSet<String> {{
+		this.add("n.lefler@googlewave.com");
+		this.add("bmwracer0@googlewave.com");
+		this.add("dforsythe@googlewave.com");
+		this.add("themagnum@googlewave.com");
+		this.add("twyphoon@googlewave.com");
+		this.add("claudio.sayan@googlewave.com");
+		this.add("rgalginaitis@googlewave.com");
+		this.add("rob.kiefer@googlewave.com");
+	}};
 	Random generator = new Random();
 	
 	private int MAX_BLIPS = 150;
@@ -57,7 +67,10 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	final String VOTE_NEW_WAVE = "roll-out";
 	final String WEATHER = "weather";
 	final String VOTE_TO_BAN = "vote-to-ban:";
-	final String VOTE_TO_UNBAN = "vote-to-unban";
+	final String VOTE_TO_UNBAN = "vote-to-unban:";
+	final String AUTO_INVITE = "auto-invite";
+	final String AUTO_INVITE_ADD = "auto-invite-add:";
+	final String AUTO_INVITE_REMOVE = "auto-invite-remove:";
 	
 	final String CONT_IDENT = "// Part ";
 	String WAVE_BASE_TITLE;
@@ -72,12 +85,17 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	final Pattern weatherPattern = Pattern.compile(CMD_OPEN_IDENT + WEATHER + ":(\\d{5})" + CMD_CLOSE_IDENT);
 	final Pattern voteToBanPattern = Pattern.compile(CMD_OPEN_IDENT + VOTE_TO_BAN + "(.+)" + CMD_CLOSE_IDENT);
 	final Pattern voteToUnbanPattern = Pattern.compile(CMD_OPEN_IDENT + VOTE_TO_UNBAN + "(.+)" + CMD_CLOSE_IDENT);
+	final Pattern autoInviteAdd = Pattern.compile(CMD_OPEN_IDENT + AUTO_INVITE_ADD + "(.+)" + CMD_CLOSE_IDENT);
+	final Pattern autoInviteRemove = Pattern.compile(CMD_OPEN_IDENT + AUTO_INVITE_REMOVE + "(.+)" + CMD_CLOSE_IDENT);
+	
+	
 	final String NW_VOTE_QUOTE = "Before your president decides, please ask him this: What if we leave, and you're wrong?";
 	final String WELCOME_SELF = "Autobots roll out.";
 
 	public void processEvents(RobotMessageBundle bundle) {
 		Wavelet wavelet = bundle.getWavelet();
 
+		/* Say hello */
 		if (bundle.wasSelfAdded()) {
 			WAVE_BASE_TITLE = wavelet.getTitle();
 			
@@ -88,6 +106,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			blip.getDocument().appendElement(optimusTransform);
 		}
 
+		/* Should Auto-Bot be included in this? */
 		int NUM_OF_PARTICIPANTS = wavelet.getParticipants().size();
 
 		for (Event e : bundle.getEvents()) {
@@ -99,7 +118,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 						s.remove(usr);
 					} */
 				}
-				for (String usr : e.getAddedParticipants().size()) {
+				for (String usr : e.getAddedParticipants()) {
 					if (areBanned.contains(usr)) {
 						wavelet.removeParticipant(usr);
 					}
@@ -312,6 +331,10 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				wavelet.addParticipant(usr);
 				banMap.remove(usr);
 				areBanned.remove(usr);
+			}
+		} else if (text.startsWith(CMD_OPEN_IDENT + AUTO_INVITE + CMD_CLOSE_IDENT) {
+			for (String usr : autoInviteWavers) {
+				wavelet.addParticipant(usr);
 			}
 		}
 		
