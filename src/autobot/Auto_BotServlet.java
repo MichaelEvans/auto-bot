@@ -43,15 +43,15 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName()); 
 	public HashMap<String, Integer> votes = new HashMap<String, Integer>();
 	public ArrayList<String> activeWavers = new ArrayList<String>();
-	public Set<String> autoInviteWavers = new HashSet<String> {{
-		this.add("n.lefler@googlewave.com");
-		this.add("bmwracer0@googlewave.com");
-		this.add("dforsythe@googlewave.com");
-		this.add("themagnum@googlewave.com");
-		this.add("twyphoon@googlewave.com");
-		this.add("claudio.sayan@googlewave.com");
-		this.add("rgalginaitis@googlewave.com");
-		this.add("rob.kiefer@googlewave.com");
+	public Set<String> autoInviteWavers = new HashSet<String> () {{
+		add("n.lefler@googlewave.com");
+		add("bmwracer0@googlewave.com");
+		add("dforsythe@googlewave.com");
+		add("themagnum@googlewave.com");
+		add("twyphoon@googlewave.com");
+		add("claudio.sayan@googlewave.com");
+		add("rgalginaitis@googlewave.com");
+		add("rob.kiefer@googlewave.com");
 	}};
 	Random generator = new Random();
 	
@@ -265,7 +265,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				}
 				
 				if (banMap.get(usr).size() >= ((2/3) * ACTIVE_WAVERS)) {
-					String message = "Motion to ban " + usr + " passed with " banMap.get(usr).size() + " votes. Removing this user.";
+					String message = "Motion to ban " + usr + " passed with " + banMap.get(usr).size() + " votes. Removing this user.";
 					log.info(message);
 					wavelet.getRootBlip().getDocument().append("\n" + message);
 					wavelet.removeParticipant(usr);
@@ -321,7 +321,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				}
 				
 				if (banMap.get(usr).size() >= ((2/3) * ACTIVE_WAVERS)) {
-					String message = "Motion to unban " + usr + " passed with " banMap.get(usr).size() + " votes. Unbanning this user.";
+					String message = "Motion to unban " + usr + " passed with " + banMap.get(usr).size() + " votes. Unbanning this user.";
 					log.info(message);
 					wavelet.getRootBlip().getDocument().append("\n" + message);
 					wavelet.addParticipant(usr);
@@ -337,7 +337,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				String message = "Usage: !@vote-to-unban:user@googlewave.com@!";
 				wavelet.getRootBlip().getDocument().append("\n" + message);
 			}
-		} else if (text.startsWith(CMD_OPEN_IDENT + AUTO_INVITE + CMD_CLOSE_IDENT) {
+		} else if (text.startsWith(CMD_OPEN_IDENT + AUTO_INVITE + CMD_CLOSE_IDENT)) {
 			for (String usr : autoInviteWavers) {
 				wavelet.addParticipant(usr);
 			}
