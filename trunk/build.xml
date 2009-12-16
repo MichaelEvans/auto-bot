@@ -1,0 +1,14 @@
+<!-- Auto-Bot Ant build file -->
+
+<project name="Auto-Bot" default="build" basedir=".">
+	<description>
+		Build file for Auto-Bot
+	</description>
+	<property name="src_dir" location="src/autobot/" />
+	<property name="build_dir" location="war/WEB-INF/classes/autobot/" />
+	<property name="classpath" value="war/WEB-INF/lib/appengine-api-1.0-skd-1.2.6.jar;war/WEB-INF/lib/wave-robot-api.jar" />
+	
+	<target name="build">
+		<javac classpath="${classpath}" srcdir="${src_dir}" destdir="${build_dir}" />
+	</target>
+</project>
