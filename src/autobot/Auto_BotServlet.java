@@ -249,7 +249,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 					;
 				}
 				
-				if (wavelet) {
+				if (wavelet != null) {
 					wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " motions to ban " + usr + ".");
 				}
 				
@@ -305,7 +305,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 					;
 				}
 				
-				if (wavelet) {
+				if (wavelet != null) {
 					wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " motions to unban " + usr + ".");
 				}
 				
@@ -346,11 +346,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		consolidateBlips(blip);
 	}
 
-	private void makeNewWave(Wavelet wavelet) {
-		Blip rollOut = new Blip();
-		
-		rollOut.getDocument().append(NEW_WAVE_INDICATOR);
-		wavelet.appendBlip(rollOut);
+	private void makeNewWave(Wavelet wavelet) {		
+		wavelet.appendBlip().getDocument().append(NEW_WAVE_INDICATOR);
 		
 		String title = getNewTitle(wavelet);
 		Wavelet newWave = wavelet.createWavelet(wavelet.getParticipants(), "ID");
