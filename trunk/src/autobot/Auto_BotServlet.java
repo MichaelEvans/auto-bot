@@ -105,18 +105,13 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			textView.append(WELCOME_SELF);
 			blip.getDocument().appendElement(optimusTransform);
 		}
-
-		/* Should Auto-Bot be included in this? */
-		int NUM_OF_PARTICIPANTS = wavelet.getParticipants().size();
+        
+		int NUM_OF_PARTICIPANTS = getHumanWavers(wavelet.getParticipants()).size();
 
 		for (Event e : bundle.getEvents()) {
 			if (e.getType() == EventType.WAVELET_PARTICIPANTS_CHANGED) {
 				for (String usr : e.getRemovedParticipants()) {
 					activeWavers.remove(usr);
-					/* banMap.remove(usr);
-					for (Set s : banMap.values()) {
-						s.remove(usr);
-					} */
 				}
 				for (String usr : e.getAddedParticipants()) {
 					if (areBanned.contains(usr)) {
@@ -161,7 +156,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			/* Force a new Wave */
 			
 			makeNewWave(wavelet);
-			log.info("Forced a new wave.");
+			log.info(author + " forced a new wave.");
 
 		} else if(text.startsWith(CMD_OPEN_IDENT + VOTE_NEW_WAVE + CMD_CLOSE_IDENT)) {
 			/* Vote for new Wave */
@@ -170,11 +165,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			blip.getDocument().append("\n" + NW_VOTE_QUOTE);
 			votes.put(voteCreator, 1);
 			int i = 0;
-			Set<String> users = votes.keySet();
-			/*for(String user:users) {
-				if(votes.get(user)==1)
-					i++;
-			}*/
+
 			NUM_OF_VOTES = votes.size();
 			String rootText = wavelet.getRootBlip().getDocument().getText();
 			int index = rootText.indexOf("Wave Max: ");
@@ -187,7 +178,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				wavelet.getRootBlip().getDocument().delete();
 				wavelet.getRootBlip().getDocument().append(newText + "Wave Max: " + (NUM_OF_VOTES + MAX_BLIPS) + "\nNumber of votes for new wave: " + NUM_OF_VOTES);
 			}
-			if (NUM_OF_VOTES > ((1/3) * ACTIVE_WAVERS) && (ACTIVE_WAVERS >= 4))
+			//if (NUM_OF_VOTES > ((1/3) * ACTIVE_WAVERS) && (ACTIVE_WAVERS >= 4))
+			if (NUM_OF_VOTES > ((1/3) * ACTIVE_WAVERS))
 				makeNewWave(wavelet);
 			
 		}
@@ -393,4 +385,20 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		return;
 	}
 
+    /**
+     * Takes a list of all wavers subscribed to this wave, removes bots, and returns a list containing only human wavers
+     */
+    private List<String> getHumanWavers(List<String> wavers) {
+        List<String> remList = new ArrayList<String>();
+
+        for (String s : wavers) {
+            if (s.contains("@appspot.com")) {
+                remList.add(s);
+            }
+        }
+
+        wavers.removeAll(remList);
+
+        return wavers;
+    }
 }
