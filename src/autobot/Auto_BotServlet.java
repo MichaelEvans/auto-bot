@@ -222,7 +222,9 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			
 			if (cantBan.containsKey(authorRequest)) {
 				if (cantBan.get(authorRequest) + 10*60*1000 < System.currentTimeMillis()) {
-					return;
+                    blip.getDocument().append("Message from Auto-Bot: Your ban vote-to-ban privileges have been temporarily revoked.");
+
+                    return;
 				} else {
 					cantBan.remove(authorRequest);
 				}
