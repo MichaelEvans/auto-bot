@@ -43,9 +43,9 @@ import com.google.wave.api.*;
 public class Auto_BotServlet extends AbstractRobotServlet {
 	static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName()); 
 	
-	public HashMap<String, Integer> votes = new HashMap<String, Integer>();
-	public ArrayList<String> activeWavers = new ArrayList<String>();
-	public Set<String> privelegedWavers = new HashSet<String> () {{
+	private HashMap<String, Integer> votes = new HashMap<String, Integer>();
+	private ArrayList<String> activeWavers = new ArrayList<String>();
+	private Set<String> privelegedWavers = new HashSet<String> () {{
 		add("n.lefler@googlewave.com");
 		add("bmwracer0@googlewave.com");
 		add("dforsythe@googlewave.com");
@@ -72,6 +72,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	final String AUTO_INVITE = "auto-invite";
 	final String AUTO_INVITE_ADD = "auto-invite-add:";
 	final String AUTO_INVITE_REMOVE = "auto-invite-remove:";
+	final String WAVE_STATS = "get-wave-stats";
 	
 	final String CONT_IDENT = "// Part ";
 	String WAVE_BASE_TITLE;
@@ -86,13 +87,16 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	final Pattern weatherPattern = Pattern.compile(CMD_OPEN_IDENT + WEATHER + ":(\\d{5})" + CMD_CLOSE_IDENT);
 	final Pattern voteToBanPattern = Pattern.compile(CMD_OPEN_IDENT + VOTE_TO_BAN + "(.+)" + CMD_CLOSE_IDENT);
 	final Pattern voteToUnbanPattern = Pattern.compile(CMD_OPEN_IDENT + VOTE_TO_UNBAN + "(.+)" + CMD_CLOSE_IDENT);
-	final Pattern autoInviteAdd = Pattern.compile(CMD_OPEN_IDENT + AUTO_INVITE_ADD + "(.+)" + CMD_CLOSE_IDENT);
-	final Pattern autoInviteRemove = Pattern.compile(CMD_OPEN_IDENT + AUTO_INVITE_REMOVE + "(.+)" + CMD_CLOSE_IDENT);
+	final Pattern autoInviteAddPattern = Pattern.compile(CMD_OPEN_IDENT + AUTO_INVITE_ADD + "(.+)" + CMD_CLOSE_IDENT);
+	final Pattern autoInviteRemovePattern = Pattern.compile(CMD_OPEN_IDENT + AUTO_INVITE_REMOVE + "(.+)" + CMD_CLOSE_IDENT);
+	final Pattern getWaveStatsPattern = Pattern.compile(CMD_OPEN_IDENT + WAVE_STATS + CMD_CLOSE_IDENT);
 	
 	
 	final String NW_VOTE_QUOTE = "Before your president decides, please ask him this: What if we leave, and you're wrong?";
 	final String WELCOME_SELF = "Autobots roll out.";
 
+	final AbstractBlipProcessor waveStatsProcessor = new WaveStatsBlipProcessor();
+	
 	public void processEvents(RobotMessageBundle bundle) {
 		Wavelet wavelet = bundle.getWavelet();
 
@@ -352,9 +356,11 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			for (String usr : privelegedWavers) {
 				wavelet.addParticipant(usr);
 			}
+		} else if (text.startsWith(CMD_OPEN_IDENT + WAVE_STATS + CMD_CLOSE_IDENT)) {
+			waveStatsProcessor.processBlip(blip, wavelet);
 		}
 		
-		consolidateBlips(blip);
+		//consolidateBlips(blip);
 	}
 
 	private void makeNewWave(Wavelet wavelet) {
@@ -387,8 +393,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	}
 
 	private void consolidateBlips(Blip blip) {
-		return;
-		/*if (blip.getCreator().equals(LAST_BLIP_CREATOR)) {
+		if (blip.getCreator().equals(LAST_BLIP_CREATOR)) {
 			int prevBlipIndex = blip.getParent().getChildren().indexOf(blip) - 1;
 			Blip prevBlip = blip.getParent().getChild(prevBlipIndex);
 			TextView prevBlipText = prevBlip.getDocument();
@@ -404,23 +409,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			LAST_BLIP_CREATOR = blip.getCreator();
 		}
 		
-		return;*/
+		return;
 	}
 
-    /**
-     * Takes a list of all wavers subscribed to this wave, removes bots, and returns a list containing only human wavers
-     */
-    private List<String> getHumanWavers(List<String> wavers) {
-        List<String> remList = new ArrayList<String>();
-
-        for (String s : wavers) {
-            if (s.contains("@appspot.com")) {
-                remList.add(s);
-            }
-        }
-
-        wavers.removeAll(remList);
-
-        return wavers;
-    }
+    
 }
