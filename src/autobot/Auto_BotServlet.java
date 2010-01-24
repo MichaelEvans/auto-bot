@@ -125,6 +125,10 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			if (e.getType() == EventType.BLIP_SUBMITTED) {
 				++BLIP_COUNT;
 				
+				if (BLIP_COUNT % 50 == 0) {
+					log.log(Level.INFO, "Wave '" + wavelet.getTitle() + "' has reached " + BLIP_COUNT + " blips.");
+				}
+				
 				processBlip(e.getBlip(), wavelet);
 				
 				if (BLIP_COUNT == MAX_BLIPS + NUM_OF_VOTES) {
