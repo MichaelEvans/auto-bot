@@ -12,11 +12,7 @@ public class WaveStatsBlipProcessor extends AbstractBlipProcessor {
 	SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
 	
 	@Override
-	protected Wavelet processBlip(Blip blip, Wavelet wavelet) {
-		String text = blip.getDocument().getText();
-		String waveAuthor = wavelet.getCreator();
-		String blipAuthor = blip.getCreator();
-		
+	protected Wavelet processBlip(Blip blip, Wavelet wavelet) {		
 		StringBuffer responseBuffer = new StringBuffer();
 		
 		responseBuffer.append("Wave created: ");
@@ -32,7 +28,7 @@ public class WaveStatsBlipProcessor extends AbstractBlipProcessor {
 		responseBuffer.append("\n\n");
 		
 		responseBuffer.append("Number of Blips: ");
-		responseBuffer.append(wavelet.getRootBlip().getChildren().size());
+		responseBuffer.append(wavelet.getRootBlip().getChildBlipIds().size());
 		responseBuffer.append("\n");
 		
 		blip.getDocument().append(responseBuffer.toString());
