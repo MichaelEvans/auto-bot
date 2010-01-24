@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.*;
 import java.util.Random;
@@ -41,9 +42,10 @@ import com.google.wave.api.*;
 
 public class Auto_BotServlet extends AbstractRobotServlet {
 	static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName()); 
+	
 	public HashMap<String, Integer> votes = new HashMap<String, Integer>();
 	public ArrayList<String> activeWavers = new ArrayList<String>();
-	public Set<String> autoInviteWavers = new HashSet<String> () {{
+	public Set<String> privelegedWavers = new HashSet<String> () {{
 		add("n.lefler@googlewave.com");
 		add("bmwracer0@googlewave.com");
 		add("dforsythe@googlewave.com");
@@ -56,9 +58,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	Random generator = new Random();
 	
 	private int MAX_BLIPS = 150;
+	private int BLIP_COUNT = 1;
 	private int NUM_OF_VOTES = 0;
-	private int ACTIVE_WAVERS = 0;
-	private int	WAVE_NUMBER = 1;
 	
 	/* Command Strings. */
 	final String CMD_OPEN_IDENT = "!@";
@@ -97,6 +98,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 
 		/* Say hello */
 		if (bundle.wasSelfAdded()) {
+			log.log(Level.INFO, "Attempting to greet the wave.");
 			WAVE_BASE_TITLE = wavelet.getTitle();
 			
 			Image optimusTransform = new Image("http://imgur.com/m66zH.gif", 160, 120, "");
@@ -104,9 +106,9 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			TextView textView = blip.getDocument();
 			textView.append(WELCOME_SELF);
 			blip.getDocument().appendElement(optimusTransform);
+			
+			log.log(Level.INFO, "Successfully greeted the wave.");
 		}
-        
-		int NUM_OF_PARTICIPANTS = getHumanWavers(wavelet.getParticipants()).size();
 
 		for (Event e : bundle.getEvents()) {
 			if (e.getType() == EventType.WAVELET_PARTICIPANTS_CHANGED) {
@@ -121,17 +123,14 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			}
 
 			if (e.getType() == EventType.BLIP_SUBMITTED) {
-				//Blip root = wavelet.getRootBlip();
-				//List<String> childrenIds = root.getChildBlipIds(); 
-				//List<Blip> children = new ArrayList<Blip>(); 
-				/*for (String id: childrenIds) { 
-					children.add(bundle.getBlip(wavelet.getWaveId(), wavelet.getWaveletId(), id)); 
-				}*/
+				++BLIP_COUNT;
+				
 				processBlip(e.getBlip(), wavelet);
-				if (wavelet.getRootBlip().getChildBlipIds().size() == MAX_BLIPS + NUM_OF_VOTES) {
-					Wavelet newWave = wavelet.createWavelet(wavelet.getParticipants(), "ID");
-					String title = getNewTitle(wavelet);
-					newWave.setTitle(title);
+				
+				if (BLIP_COUNT == MAX_BLIPS + NUM_OF_VOTES) {
+					log.log(Level.INFO, "Blip count is " + BLIP_COUNT + ", spawning a new wave.");
+					
+					wavelet.createWavelet(wavelet.getParticipants(), "ID").setTitle(getNewTitle(wavelet));
 				}
 			}
 			/*if (e.getType() == EventType.BLIP_DELETED) {
@@ -141,46 +140,45 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 
 	private void processBlip(Blip blip, Wavelet wavelet) {
 		String text = blip.getDocument().getText();
-		String author = wavelet.getCreator();
-		String authorRequest = blip.getCreator();
+		String waveAuthor = wavelet.getCreator();
+		String blipAuthor = blip.getCreator();
 		
-		if(!activeWavers.contains(authorRequest)) {
-			ACTIVE_WAVERS++;
-			activeWavers.add(authorRequest);
+		if(!activeWavers.contains(blipAuthor)) {
+			activeWavers.add(blipAuthor);
 		}
 		
-		log.info("Wave Creator: "+ author + "Blip from: " + authorRequest+"\n");
+		log.info("Wave Creator: "+ waveAuthor + "Blip from: " + blipAuthor+"\n");
 		
 		
-		if (text.startsWith(CMD_OPEN_IDENT + FORCE_NEW_WAVE + CMD_CLOSE_IDENT) && author.equals(authorRequest)) {
+		if (text.startsWith(CMD_OPEN_IDENT + FORCE_NEW_WAVE + CMD_CLOSE_IDENT) && privelegedWavers.contains(blipAuthor)) {
 			/* Force a new Wave */
 			
 			makeNewWave(wavelet);
-			log.info(author + " forced a new wave.");
-
+			
+			log.info(blipAuthor + " forced a new wave.");
 		} else if(text.startsWith(CMD_OPEN_IDENT + VOTE_NEW_WAVE + CMD_CLOSE_IDENT)) {
 			/* Vote for new Wave */
 			
 			String voteCreator = blip.getCreator();
 			blip.getDocument().append("\n" + NW_VOTE_QUOTE);
 			votes.put(voteCreator, 1);
-			int i = 0;
 
 			NUM_OF_VOTES = votes.size();
 			String rootText = wavelet.getRootBlip().getDocument().getText();
+			
 			int index = rootText.indexOf("Wave Max: ");
 			if (index < 0) {
-				String appendText = "\n\n" + "Wave Max: " + (NUM_OF_VOTES + MAX_BLIPS) + "\nNumber of votes for new wave: "+NUM_OF_VOTES;
-				//wavelet.getRootBlip().getDocument().delete();
+				String appendText = "\n\n" + "Wave Max: " + (NUM_OF_VOTES + MAX_BLIPS) + "\nNumber of votes for new wave: " + NUM_OF_VOTES;
 				wavelet.getRootBlip().getDocument().append(appendText);
 			} else {
-				String newText = rootText.substring(0,index);
+				String newText = rootText.substring(0, index);
 				wavelet.getRootBlip().getDocument().delete();
 				wavelet.getRootBlip().getDocument().append(newText + "Wave Max: " + (NUM_OF_VOTES + MAX_BLIPS) + "\nNumber of votes for new wave: " + NUM_OF_VOTES);
 			}
-			//if (NUM_OF_VOTES > ((1/3) * ACTIVE_WAVERS) && (ACTIVE_WAVERS >= 4))
-			if (NUM_OF_VOTES > ((1/3) * ACTIVE_WAVERS))
+			
+			if (NUM_OF_VOTES > ((1/3) * activeWavers.size())) {
 				makeNewWave(wavelet);
+			}
 			
 		}
 		/* else if(text.startsWith("!@russian-roulette@!")) {
@@ -204,29 +202,39 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 					current += "\n" + XMLParser.getForecast(Integer.parseInt(mtchr.group(1)));
 					image = XMLParser.getImage(Integer.parseInt(mtchr.group(1)));
 				} catch (NumberFormatException e) {
-					// TODO Auto-generated catch block
+					blip.getDocument().append("Encountered an error when requesting weather");
+					
+					log.log(Level.WARNING, "Caught NumberFormatException when requesting weather, message was: " + e.getLocalizedMessage());
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					blip.getDocument().append("Encountered an error when requesting weather");
+					
+					log.log(Level.WARNING, "Caught IOException when requesting weather, message was: " + e.getLocalizedMessage());
 					e.printStackTrace();
 				}
+				
 				blip.getDocument().replace(current);
 				blip.getDocument().appendElement(new Image(image, 52,52,""));
 			} catch (IllegalStateException e) {
-				//blip.getDocument().replace("Degrees");
+				log.log(Level.WARNING, "Caught IllegalStateException when requesting weather, message was: " + e.getLocalizedMessage());
+				e.printStackTrace();
 			} catch (IndexOutOfBoundsException e) {
-				//not this many matches
+				blip.getDocument().append("Incorrect command form. Correct form is !@weather:<zip code, 5 digits>@!");
+				
+				log.log(Level.WARNING, "Caught IndexOutOfBoundsException when requesting weather, message was: " + e.getLocalizedMessage());
+				e.printStackTrace();
 			}
 		} else if (text.startsWith(CMD_OPEN_IDENT + VOTE_TO_BAN)) {
 			/* Vote to ban user */
 			
-			if (cantBan.containsKey(authorRequest)) {
-				if (cantBan.get(authorRequest) + 10*60*1000 < System.currentTimeMillis()) {
+			if (cantBan.containsKey(blipAuthor)) {
+				// Allow if user has been baned for longer than 10 minues
+				if (cantBan.get(blipAuthor) < System.currentTimeMillis()) {
                     blip.getDocument().append("Message from Auto-Bot: Your ban vote-to-ban privileges have been temporarily revoked.");
 
                     return;
 				} else {
-					cantBan.remove(authorRequest);
+					cantBan.remove(blipAuthor);
 				}
 			}
 			
@@ -239,12 +247,18 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			try{
 				usr = mtchr.group(1);
 				
+				if (usr.substring(0, usr.indexOf("@googlewave.com")).equalsIgnoreCase(blipAuthor)) {
+					//cantBan.put(blipAuthor, System.currentTimeMillis() + 10*60*1000);
+					
+					return;
+				}
+				
 				if (!rootBlipDoc.getText().contains("Motions to Ban")) {
 					;
 				}
 				
 				if (wavelet != null) {
-					wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " motions to ban " + usr + ".");
+					wavelet.getRootBlip().getDocument().append("\n" + blipAuthor + " motions to ban " + usr + ".");
 				}
 				
 				if (!wavelet.getParticipants().contains(usr)) {
@@ -252,37 +266,36 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				}
 				
 				if (banMap.containsKey(usr)) {
-					banMap.get(usr).add(authorRequest);
+					banMap.get(usr).add(blipAuthor);
 				} else {
 					banMap.put(usr, new HashSet());
-					banMap.get(usr).add(authorRequest);
+					banMap.get(usr).add(blipAuthor);
 				}
 				
-				if (banMap.get(usr).size() >= ((2/3) * ACTIVE_WAVERS)) {
+				if (banMap.get(usr).size() >= ((2/3) * activeWavers.size())) {
 					String message = "Motion to ban " + usr + " passed with " + banMap.get(usr).size() + " votes. Removing this user.";
 					log.info(message);
 					wavelet.getRootBlip().getDocument().append("\n" + message);
 					wavelet.removeParticipant(usr);
-					--ACTIVE_WAVERS;
 				}
 			}catch (IllegalStateException e) {
-				wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " loses their ban vote privileges.");
+				wavelet.getRootBlip().getDocument().append("\n" + blipAuthor + " loses their ban vote privileges.");
 				
-				cantBan.put(authorRequest, System.currentTimeMillis());
+				cantBan.put(blipAuthor, System.currentTimeMillis() + 10*60*1000);
 			}catch (IndexOutOfBoundsException e) {
 				//not this many matches
-				String message = "Usage: !@vote-to-ban:user@googlewave.com@!";
+				String message = "Incorrect command form. Correct form is !@vote-to-ban:<user>@googlewave.com@!";
 				wavelet.getRootBlip().getDocument().append("\n" + message);
 			}	
 		} else if (text.startsWith(CMD_OPEN_IDENT + VOTE_TO_UNBAN)) {
 			/* Vote to unban user */
 			
 			/* The following if block can be removed once removeParticipant() works */
-			if (cantBan.containsKey(authorRequest)) {
-				if (cantBan.get(authorRequest) + 10*60*1000 < System.currentTimeMillis()) {
+			if (cantBan.containsKey(blipAuthor)) {
+				if (cantBan.get(blipAuthor) + 10*60*1000 < System.currentTimeMillis()) {
 					return;
 				} else {
-					cantBan.remove(authorRequest);
+					cantBan.remove(blipAuthor);
 				}
 			}
 			
@@ -300,7 +313,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				}
 				
 				if (wavelet != null) {
-					wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " motions to unban " + usr + ".");
+					wavelet.getRootBlip().getDocument().append("\n" + blipAuthor + " motions to unban " + usr + ".");
 				}
 				
 				if (!wavelet.getParticipants().contains(usr)) {
@@ -308,13 +321,13 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				}
 				
 				if (banMap.containsKey(usr)) {
-					banMap.get(usr).add(authorRequest);
+					banMap.get(usr).add(blipAuthor);
 				} else {
 					banMap.put(usr, new HashSet());
-					banMap.get(usr).add(authorRequest);
+					banMap.get(usr).add(blipAuthor);
 				}
 				
-				if (banMap.get(usr).size() >= ((2/3) * ACTIVE_WAVERS)) {
+				if (banMap.get(usr).size() >= ((2/3) * activeWavers.size())) {
 					String message = "Motion to unban " + usr + " passed with " + banMap.get(usr).size() + " votes. Unbanning this user.";
 					log.info(message);
 					wavelet.getRootBlip().getDocument().append("\n" + message);
@@ -323,16 +336,16 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 					areBanned.remove(usr);
 				}
 			}catch (IllegalStateException e) {
-				wavelet.getRootBlip().getDocument().append("\n" + authorRequest + " loses their unban vote privileges.");
+				wavelet.getRootBlip().getDocument().append("\n" + blipAuthor + " loses their unban vote privileges.");
 				
-				cantBan.put(authorRequest, System.currentTimeMillis());
+				cantBan.put(blipAuthor, System.currentTimeMillis());
 			}catch (IndexOutOfBoundsException e) {
 				//not this many matches
 				String message = "Usage: !@vote-to-unban:user@googlewave.com@!";
 				wavelet.getRootBlip().getDocument().append("\n" + message);
 			}
 		} else if (text.startsWith(CMD_OPEN_IDENT + AUTO_INVITE + CMD_CLOSE_IDENT)) {
-			for (String usr : autoInviteWavers) {
+			for (String usr : privelegedWavers) {
 				wavelet.addParticipant(usr);
 			}
 		}
@@ -340,34 +353,38 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		consolidateBlips(blip);
 	}
 
-	private void makeNewWave(Wavelet wavelet) {		
+	private void makeNewWave(Wavelet wavelet) {
+		log.log(Level.INFO, "Creating new wave");
+		
 		wavelet.appendBlip().getDocument().append(NEW_WAVE_INDICATOR);
 		
 		String title = getNewTitle(wavelet);
 		Wavelet newWave = wavelet.createWavelet(wavelet.getParticipants(), "ID");
 		newWave.setTitle(title);
+		
+		log.log(Level.INFO, "Created new wave: " + title);
 	}
 
 	private String getNewTitle(Wavelet wavelet) {
-		// TODO Auto-generated method stub
-		String title;// = wavelet.getTitle();
-		/*int indexMax = wavelet.getRootBlip().getDocument().getText().indexOf("Wave Max: ");
-		if(indexMax>-1) {
-			Title = wavelet.getRootBlip().getDocument().getText().substring(0,indexMax);
-		}*/
-		int index = WAVE_BASE_TITLE.indexOf(CONT_IDENT);
+		int index;
+		String title;
+		
+		if (WAVE_BASE_TITLE == null)
+			WAVE_BASE_TITLE = "";
+		index = WAVE_BASE_TITLE.indexOf(CONT_IDENT);
 		if (index == -1) {
 			title = WAVE_BASE_TITLE + CONT_IDENT + "2";
 		} else {
 			int count = Integer.parseInt(WAVE_BASE_TITLE.substring(index + CONT_IDENT.length()).trim());
 			title = WAVE_BASE_TITLE.substring(0,index) + CONT_IDENT + (count + 1);
 		}
+		
 		return title;
 	}
 
 	private void consolidateBlips(Blip blip) {
-		if (blip.getCreator().equals(LAST_BLIP_CREATOR)) {
-			/* Consolidate blips */
+		return;
+		/*if (blip.getCreator().equals(LAST_BLIP_CREATOR)) {
 			int prevBlipIndex = blip.getParent().getChildren().indexOf(blip) - 1;
 			Blip prevBlip = blip.getParent().getChild(prevBlipIndex);
 			TextView prevBlipText = prevBlip.getDocument();
@@ -379,12 +396,11 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			prevBlipText.append(blip.getDocument().toString());
 			
 			blip.getDocument().append("Consilidating blips " + prevBlip.getBlipId() + " and " + blip.getBlipId());
-			//blip.getParent().deleteInlineBlip(blip);
 		} else {
 			LAST_BLIP_CREATOR = blip.getCreator();
 		}
 		
-		return;
+		return;*/
 	}
 
     /**
