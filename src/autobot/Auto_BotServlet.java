@@ -111,7 +111,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		}
 
 		for (Event e : bundle.getEvents()) {
-			if (e.getType() == EventType.WAVELET_PARTICIPANTS_CHANGED) {
+			/*if (e.getType() == EventType.WAVELET_PARTICIPANTS_CHANGED) {
 				for (String usr : e.getRemovedParticipants()) {
 					activeWavers.remove(usr);
 				}
@@ -120,7 +120,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 						wavelet.removeParticipant(usr);
 					}
 				}
-			}
+			}*/
 
 			if (e.getType() == EventType.BLIP_SUBMITTED) {
 				++BLIP_COUNT;
