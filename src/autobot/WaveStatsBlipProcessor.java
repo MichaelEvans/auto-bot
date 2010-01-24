@@ -35,6 +35,8 @@ public class WaveStatsBlipProcessor extends AbstractBlipProcessor {
 		responseBuffer.append(wavelet.getRootBlip().getChildren().size());
 		responseBuffer.append("\n");
 		
+		blip.getDocument().append(responseBuffer.toString());
+		
 		return wavelet;
 	}
 
