@@ -26,6 +26,8 @@ public class WaveStatsBlipProcessor implements BlipProcessor {
 	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {		
 		StringBuffer responseBuffer = new StringBuffer();
 		
+		responseBuffer.append("\n\n");
+		
 		responseBuffer.append("Wave created: ");
 		responseBuffer.append(sdf.format(new Date(wavelet.getCreationTime())));
 		responseBuffer.append("\n\n");
