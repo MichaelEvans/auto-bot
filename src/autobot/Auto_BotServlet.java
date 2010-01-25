@@ -98,7 +98,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			}*/
 
 			if (e.getType() == EventType.BLIP_SUBMITTED) {
-				blipSet.add(e.getBlip().getBlipId());
+				blipSet.add(e.getCreatedBlipId());
 				
 				if (blipSet.size() % 50 == 0) {
 					log.log(Level.INFO, "Wave '" + wavelet.getTitle() + "' has reached " + blipSet.size() + " blips.");
