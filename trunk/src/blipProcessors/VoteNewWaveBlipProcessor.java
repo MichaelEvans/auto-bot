@@ -9,14 +9,12 @@ import autobot.WaveUtils;
 import com.google.wave.api.Blip;
 import com.google.wave.api.Wavelet;
 
-public class VoteNewWaveBlipProcessor extends AbstractBlipProcessor {
+public class VoteNewWaveBlipProcessor implements AbstractBlipProcessor {
 	public final static String VOTE_NEW_WAVE = "roll-out";
 	
 	final static String NW_VOTE_QUOTE = "Before your president decides, please ask him this: What if we leave, and you're wrong?";
 	
-	public static Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
-		
-		
+	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
 		String voteCreator, rootText;
 		int numVotes;
 		HashMap<String, Integer> votes;

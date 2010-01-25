@@ -16,14 +16,14 @@ import com.google.wave.api.Wavelet;
  * @author n.lefler
  *
  */
-public class WaveStatsBlipProcessor extends AbstractBlipProcessor {
+public class WaveStatsBlipProcessor implements AbstractBlipProcessor {
 	public final static String WAVE_STATS = "get-wave-stats";
 	
 	final static Pattern getWaveStatsPattern = Pattern.compile(CMD_OPEN_IDENT + WAVE_STATS + CMD_CLOSE_IDENT);
 	
 	final static SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
 
-	public static Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {		
+	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {		
 		StringBuffer responseBuffer = new StringBuffer();
 		
 		responseBuffer.append("Wave created: ");
