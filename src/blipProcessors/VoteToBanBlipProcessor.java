@@ -12,7 +12,7 @@ import com.google.wave.api.Blip;
 import com.google.wave.api.TextView;
 import com.google.wave.api.Wavelet;
 
-public class VoteToBanBlipProcessor extends AbstractBlipProcessor {
+public class VoteToBanBlipProcessor implements AbstractBlipProcessor {
 	final static Logger log = Logger.getLogger(VoteNewWaveBlipProcessor.class.getName());
 
 	public final static String VOTE_TO_BAN = "vote-to-ban:";
@@ -21,12 +21,12 @@ public class VoteToBanBlipProcessor extends AbstractBlipProcessor {
 	private final static Pattern voteToBanPattern = Pattern.compile(CMD_OPEN_IDENT + VOTE_TO_BAN + "(.+)" + CMD_CLOSE_IDENT);
 	private final static Pattern voteToUnbanPattern = Pattern.compile(CMD_OPEN_IDENT + VOTE_TO_UNBAN + "(.+)" + CMD_CLOSE_IDENT);
 
-	private static Map<String, Set<String>> banMap = new HashMap<String, Set<String>>();
-	private static Map<String, Long> cantBan = new HashMap<String, Long>();
-	private static Set<String> areBanned = new HashSet<String>();
+	private Map<String, Set<String>> banMap = new HashMap<String, Set<String>>();
+	private Map<String, Long> cantBan = new HashMap<String, Long>();
+	private Set<String> areBanned = new HashSet<String>();
 
 
-	public static Wavelet processBlip(Blip blip, Wavelet wavelet,
+	public Wavelet processBlip(Blip blip, Wavelet wavelet,
 			Map<String, Object> dataMap) {
 		String blipAuthor = blip.getCreator();
 

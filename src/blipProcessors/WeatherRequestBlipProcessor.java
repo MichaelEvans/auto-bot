@@ -14,13 +14,13 @@ import com.google.wave.api.Blip;
 import com.google.wave.api.Image;
 import com.google.wave.api.Wavelet;
 
-public class WeatherRequestBlipProcessor extends AbstractBlipProcessor {
+public class WeatherRequestBlipProcessor implements AbstractBlipProcessor {
 	public final static String WEATHER = "weather";
 	
 	final static Pattern weatherPattern = Pattern.compile(CMD_OPEN_IDENT + WEATHER + ":(\\d{5})" + CMD_CLOSE_IDENT);
 	final static Logger log = Logger.getLogger(WeatherRequestBlipProcessor.class.getName());
 	
-	public static Wavelet processBlip(Blip blip, Wavelet wavelet,
+	public Wavelet processBlip(Blip blip, Wavelet wavelet,
 			Map<String, Object> dataMap) {
 		Matcher mtchr = weatherPattern.matcher(blip.getDocument().getText());
 		mtchr.lookingAt();

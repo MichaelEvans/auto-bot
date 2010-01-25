@@ -10,10 +10,10 @@ import autobot.WaveUtils;
 import com.google.wave.api.Blip;
 import com.google.wave.api.Wavelet;
 
-public class ForceNewWaveBlipProcessor extends AbstractBlipProcessor {
+public class ForceNewWaveBlipProcessor implements AbstractBlipProcessor {
 	public final static String FORCE_NEW_WAVE = "force-new-wave";
 	
-	public static Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
+	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
 		if (((HashSet<String>)dataMap.get("privelegedWavers")).contains(blip.getCreator())) {
 			Auto_BotServlet.log.info(blip.getCreator() + " is forcing a new wave.");
 			
