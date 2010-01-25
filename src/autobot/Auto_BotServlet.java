@@ -36,7 +36,7 @@ import java.util.regex.*;
 import java.util.Random;
 
 
-import blipProcessors.AbstractBlipProcessor;
+import blipProcessors.BlipProcessor;
 import blipProcessors.AutoInviteBlipProcessor;
 import blipProcessors.ForceNewWaveBlipProcessor;
 import blipProcessors.MasterBlipProcessor;
@@ -51,7 +51,7 @@ import com.google.wave.api.*;
 public class Auto_BotServlet extends AbstractRobotServlet {
 	public static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName()); 
 	
-	private final AbstractBlipProcessor blipProcessor = new MasterBlipProcessor();
+	private final BlipProcessor blipProcessor = new MasterBlipProcessor();
 	
 	private ArrayList<String> activeWavers = new ArrayList<String>();
 	private Set<String> privelegedWavers = new HashSet<String> () {{

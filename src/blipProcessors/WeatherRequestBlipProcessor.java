@@ -14,7 +14,7 @@ import com.google.wave.api.Blip;
 import com.google.wave.api.Image;
 import com.google.wave.api.Wavelet;
 
-public class WeatherRequestBlipProcessor implements AbstractBlipProcessor {
+public class WeatherRequestBlipProcessor implements BlipProcessor {
 	public final static String WEATHER = "weather";
 	
 	final static Pattern weatherPattern = Pattern.compile(CMD_OPEN_IDENT + WEATHER + ":(\\d{5})" + CMD_CLOSE_IDENT);
