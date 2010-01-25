@@ -1,18 +1,25 @@
-package autobot;
+package blipProcessors;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 
 import com.google.wave.api.Blip;
 import com.google.wave.api.Wavelet;
 
+/**
+ * 
+ * @author n.lefler
+ *
+ */
 public class WaveStatsBlipProcessor extends AbstractBlipProcessor {
 	SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
 	
 	@Override
-	protected Wavelet processBlip(Blip blip, Wavelet wavelet) {		
+	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {		
 		StringBuffer responseBuffer = new StringBuffer();
 		
 		responseBuffer.append("Wave created: ");

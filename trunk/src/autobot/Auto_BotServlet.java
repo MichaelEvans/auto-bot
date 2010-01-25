@@ -1,5 +1,5 @@
 /* 
-  Copyright (c) 2009 Michael Evans, David Forsythe
+  Copyright (c) 2009 Michael Evans, David Forsythe, Nathan Lefler
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -36,14 +35,19 @@ import java.util.logging.Logger;
 import java.util.regex.*;
 import java.util.Random;
 
-import sun.util.calendar.BaseCalendar.Date;
+
+import blipProcessors.AbstractBlipProcessor;
+import blipProcessors.ForceNewWaveBlipProcessor;
+import blipProcessors.VoteNewWaveBlipProcessor;
+import blipProcessors.WaveStatsBlipProcessor;
+import blipProcessors.WeatherRequestBlipProcessor;
 
 import com.google.wave.api.*;
 
 public class Auto_BotServlet extends AbstractRobotServlet {
-	static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName()); 
+	public static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName()); 
 	
-	private HashMap<String, Integer> votes = new HashMap<String, Integer>();
+	
 	private ArrayList<String> activeWavers = new ArrayList<String>();
 	private Set<String> privelegedWavers = new HashSet<String> () {{
 		add("n.lefler@googlewave.com");
@@ -57,16 +61,14 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	}};
 	Random generator = new Random();
 	
-	private int MAX_BLIPS = 150;
+	public static final int MAX_BLIPS = 150;
 	private int BLIP_COUNT = 1;
 	private int NUM_OF_VOTES = 0;
 	
 	/* Command Strings. */
-	final String CMD_OPEN_IDENT = "!@";
-	final String CMD_CLOSE_IDENT = "@!";
 	final String FORCE_NEW_WAVE = "force-new-wave";
 	final String VOTE_NEW_WAVE = "roll-out";
-	final String WEATHER = "weather";
+	
 	final String VOTE_TO_BAN = "vote-to-ban:";
 	final String VOTE_TO_UNBAN = "vote-to-unban:";
 	final String AUTO_INVITE = "auto-invite";
@@ -74,17 +76,13 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	final String AUTO_INVITE_REMOVE = "auto-invite-remove:";
 	final String WAVE_STATS = "get-wave-stats";
 	
-	final String CONT_IDENT = "// Part ";
-	String WAVE_BASE_TITLE;
 	String LAST_BLIP_CREATOR;
-
-	final String NEW_WAVE_INDICATOR = "We're rolling out!";
 
 	Map<String, Set<String>> banMap = new HashMap<String, Set<String>>();
 	Map<String, Long> cantBan = new HashMap<String, Long>();
 	Set<String> areBanned = new HashSet<String>();
 		
-	final Pattern weatherPattern = Pattern.compile(CMD_OPEN_IDENT + WEATHER + ":(\\d{5})" + CMD_CLOSE_IDENT);
+	
 	final Pattern voteToBanPattern = Pattern.compile(CMD_OPEN_IDENT + VOTE_TO_BAN + "(.+)" + CMD_CLOSE_IDENT);
 	final Pattern voteToUnbanPattern = Pattern.compile(CMD_OPEN_IDENT + VOTE_TO_UNBAN + "(.+)" + CMD_CLOSE_IDENT);
 	final Pattern autoInviteAddPattern = Pattern.compile(CMD_OPEN_IDENT + AUTO_INVITE_ADD + "(.+)" + CMD_CLOSE_IDENT);
@@ -92,10 +90,13 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	final Pattern getWaveStatsPattern = Pattern.compile(CMD_OPEN_IDENT + WAVE_STATS + CMD_CLOSE_IDENT);
 	
 	
-	final String NW_VOTE_QUOTE = "Before your president decides, please ask him this: What if we leave, and you're wrong?";
+	
 	final String WELCOME_SELF = "Autobots roll out.";
 
 	final AbstractBlipProcessor waveStatsProcessor = new WaveStatsBlipProcessor();
+	final AbstractBlipProcessor forceNewWaveProcessor = new ForceNewWaveBlipProcessor();
+	final AbstractBlipProcessor voteNewWaveProcessor = new VoteNewWaveBlipProcessor();
+	final AbstractBlipProcessor weatherRequestProcessor = new WeatherRequestBlipProcessor();
 	
 	public void processEvents(RobotMessageBundle bundle) {
 		Wavelet wavelet = bundle.getWavelet();
@@ -103,7 +104,6 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		/* Say hello */
 		if (bundle.wasSelfAdded()) {
 			log.log(Level.INFO, "Attempting to greet the wave.");
-			WAVE_BASE_TITLE = wavelet.getTitle();
 			
 			Image optimusTransform = new Image("http://imgur.com/m66zH.gif", 160, 120, "");
 			Blip blip = wavelet.appendBlip();
@@ -138,7 +138,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				if (BLIP_COUNT == MAX_BLIPS + NUM_OF_VOTES) {
 					log.log(Level.INFO, "Blip count is " + BLIP_COUNT + ", spawning a new wave.");
 					
-					wavelet.createWavelet(wavelet.getParticipants(), "ID").setTitle(getNewTitle(wavelet));
+					wavelet.createWavelet(wavelet.getParticipants(), "ID").setTitle(WaveUtils.getNewTitle(wavelet));
 				}
 			}
 			/*if (e.getType() == EventType.BLIP_DELETED) {
@@ -151,43 +151,19 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		String waveAuthor = wavelet.getCreator();
 		String blipAuthor = blip.getCreator();
 		
-		if(!activeWavers.contains(blipAuthor)) {
+		if(!activeWavers.contains(blipAuthor) && !blipAuthor.contains("@appspot.com")) {
 			activeWavers.add(blipAuthor);
 		}
 		
-		log.info("Wave Creator: "+ waveAuthor + "Blip from: " + blipAuthor+"\n");
 		
-		
-		if (text.startsWith(CMD_OPEN_IDENT + FORCE_NEW_WAVE + CMD_CLOSE_IDENT) && privelegedWavers.contains(blipAuthor)) {
+		if (text.startsWith(AbstractBlipProcessor.CMD_OPEN_IDENT + FORCE_NEW_WAVE + AbstractBlipProcessor.CMD_CLOSE_IDENT) && privelegedWavers.contains(blipAuthor)) {
 			/* Force a new Wave */
-			
-			makeNewWave(wavelet);
-			
-			log.info(blipAuthor + " forced a new wave.");
-		} else if(text.startsWith(CMD_OPEN_IDENT + VOTE_NEW_WAVE + CMD_CLOSE_IDENT)) {
+			forceNewWaveProcessor.processBlip(blip, wavelet, null);
+		} else if(text.startsWith(AbstractBlipProcessor.CMD_OPEN_IDENT + VOTE_NEW_WAVE + AbstractBlipProcessor.CMD_CLOSE_IDENT)) {
 			/* Vote for new Wave */
-			
-			String voteCreator = blip.getCreator();
-			blip.getDocument().append("\n" + NW_VOTE_QUOTE);
-			votes.put(voteCreator, 1);
-
-			NUM_OF_VOTES = votes.size();
-			String rootText = wavelet.getRootBlip().getDocument().getText();
-			
-			int index = rootText.indexOf("Wave Max: ");
-			if (index < 0) {
-				String appendText = "\n\n" + "Wave Max: " + (NUM_OF_VOTES + MAX_BLIPS) + "\nNumber of votes for new wave: " + NUM_OF_VOTES;
-				wavelet.getRootBlip().getDocument().append(appendText);
-			} else {
-				String newText = rootText.substring(0, index);
-				wavelet.getRootBlip().getDocument().delete();
-				wavelet.getRootBlip().getDocument().append(newText + "Wave Max: " + (NUM_OF_VOTES + MAX_BLIPS) + "\nNumber of votes for new wave: " + NUM_OF_VOTES);
-			}
-			
-			if (NUM_OF_VOTES > ((1/3) * activeWavers.size())) {
-				makeNewWave(wavelet);
-			}
-			
+			voteNewWaveProcessor.processBlip(blip, wavelet, new HashMap<String, Object>() {{
+				put("numberOfActiveWavers", getNumberOfActiveWavers());
+			}});
 		}
 		/* else if(text.startsWith("!@russian-roulette@!")) {
 			int drop = generator.nextInt(wavelet.getParticipants().size());
@@ -196,43 +172,10 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			textView.append("\nThanks for transforming " + wavelet.getParticipants().get(drop) + ".");
 			wavelet.removeParticipant(wavelet.getParticipants().get(drop));
 		}*/
-		else if (text.startsWith(CMD_OPEN_IDENT + WEATHER)) {
+		else if (text.startsWith(AbstractBlipProcessor.CMD_OPEN_IDENT + WEATHER)) {
 			/* Request weather */
-			
-			Matcher mtchr = weatherPattern.matcher(text);
-			mtchr.lookingAt();
-			try {
-				String current = "";
-				String image = "";
-				try {
-					current = XMLParser.getLocation(Integer.parseInt(mtchr.group(1)));
-					current += "\nNow - " + XMLParser.getTemp(Integer.parseInt(mtchr.group(1)));
-					current += "\n" + XMLParser.getForecast(Integer.parseInt(mtchr.group(1)));
-					image = XMLParser.getImage(Integer.parseInt(mtchr.group(1)));
-				} catch (NumberFormatException e) {
-					blip.getDocument().append("Encountered an error when requesting weather");
-					
-					log.log(Level.WARNING, "Caught NumberFormatException when requesting weather, message was: " + e.getLocalizedMessage());
-					e.printStackTrace();
-				} catch (IOException e) {
-					blip.getDocument().append("Encountered an error when requesting weather");
-					
-					log.log(Level.WARNING, "Caught IOException when requesting weather, message was: " + e.getLocalizedMessage());
-					e.printStackTrace();
-				}
-				
-				blip.getDocument().replace(current);
-				blip.getDocument().appendElement(new Image(image, 52,52,""));
-			} catch (IllegalStateException e) {
-				log.log(Level.WARNING, "Caught IllegalStateException when requesting weather, message was: " + e.getLocalizedMessage());
-				e.printStackTrace();
-			} catch (IndexOutOfBoundsException e) {
-				blip.getDocument().append("Incorrect command form. Correct form is !@weather:<zip code, 5 digits>@!");
-				
-				log.log(Level.WARNING, "Caught IndexOutOfBoundsException when requesting weather, message was: " + e.getLocalizedMessage());
-				e.printStackTrace();
-			}
-		} else if (text.startsWith(CMD_OPEN_IDENT + VOTE_TO_BAN)) {
+			weatherRequestProcessor.processBlip(blip, wavelet, null);
+		} else if (text.startsWith(CAbstractBlipProcessor.MD_OPEN_IDENT + VOTE_TO_BAN)) {
 			/* Vote to ban user */
 			
 			if (cantBan.containsKey(blipAuthor)) {
@@ -295,7 +238,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				String message = "Incorrect command form. Correct form is !@vote-to-ban:<user>@googlewave.com@!";
 				wavelet.getRootBlip().getDocument().append("\n" + message);
 			}	
-		} else if (text.startsWith(CMD_OPEN_IDENT + VOTE_TO_UNBAN)) {
+		} else if (text.startsWith(AbstractBlipProcessor.CMD_OPEN_IDENT + VOTE_TO_UNBAN)) {
 			/* Vote to unban user */
 			
 			/* The following if block can be removed once removeParticipant() works */
@@ -352,44 +295,15 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				String message = "Usage: !@vote-to-unban:user@googlewave.com@!";
 				wavelet.getRootBlip().getDocument().append("\n" + message);
 			}
-		} else if (text.startsWith(CMD_OPEN_IDENT + AUTO_INVITE + CMD_CLOSE_IDENT)) {
+		} else if (text.startsWith(AbstractBlipProcessor.CMD_OPEN_IDENT + AUTO_INVITE + AbstractBlipProcessor.CMD_CLOSE_IDENT)) {
 			for (String usr : privelegedWavers) {
 				wavelet.addParticipant(usr);
 			}
-		} else if (text.startsWith(CMD_OPEN_IDENT + WAVE_STATS + CMD_CLOSE_IDENT)) {
-			waveStatsProcessor.processBlip(blip, wavelet);
+		} else if (text.startsWith(AbstractBlipProcessor.CMD_OPEN_IDENT + WAVE_STATS + AbstractBlipProcessor.CMD_CLOSE_IDENT)) {
+			waveStatsProcessor.processBlip(blip, wavelet, null);
 		}
 		
 		//consolidateBlips(blip);
-	}
-
-	private void makeNewWave(Wavelet wavelet) {
-		log.log(Level.INFO, "Creating new wave");
-		
-		wavelet.appendBlip().getDocument().append(NEW_WAVE_INDICATOR);
-		
-		String title = getNewTitle(wavelet);
-		Wavelet newWave = wavelet.createWavelet(wavelet.getParticipants(), "ID");
-		newWave.setTitle(title);
-		
-		log.log(Level.INFO, "Created new wave: " + title);
-	}
-
-	private String getNewTitle(Wavelet wavelet) {
-		int index;
-		String title;
-		
-		if (WAVE_BASE_TITLE == null)
-			WAVE_BASE_TITLE = "";
-		index = WAVE_BASE_TITLE.indexOf(CONT_IDENT);
-		if (index == -1) {
-			title = WAVE_BASE_TITLE + CONT_IDENT + "2";
-		} else {
-			int count = Integer.parseInt(WAVE_BASE_TITLE.substring(index + CONT_IDENT.length()).trim());
-			title = WAVE_BASE_TITLE.substring(0,index) + CONT_IDENT + (count + 1);
-		}
-		
-		return title;
 	}
 
 	private void consolidateBlips(Blip blip) {
@@ -412,5 +326,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		return;
 	}
 
-    
+	private int getNumberOfActiveWavers() {
+		return activeWavers.size();
+	}
 }
