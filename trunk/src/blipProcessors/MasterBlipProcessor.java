@@ -24,6 +24,7 @@ public class MasterBlipProcessor implements BlipProcessor {
 		processorsMap.put("voteNewWave", new VoteNewWaveBlipProcessor());
 		processorsMap.put("voteToBan", new VoteToBanBlipProcessor());
 		processorsMap.put("voteToUnBan", new VoteToBanBlipProcessor());
+		processorsMap.put("nonCommand", new NonCommandBlipProcessor());
 		
 		startsWithMap = new HashMap<String, String>();
 		startsWithMap.put("forceNewWave", CMD_OPEN_IDENT + ForceNewWaveBlipProcessor.FORCE_NEW_WAVE + CMD_CLOSE_IDENT);
@@ -63,7 +64,7 @@ public class MasterBlipProcessor implements BlipProcessor {
 		} else if (commandText.startsWith(startsWithMap.get("waveStats"))) {
 			return new WaveStatsBlipProcessor();
 		} else {
-			throw new InvalidBlipProcessorException();
+			return processorsMap.get("nonCommand");
 		}
 	}
 }
