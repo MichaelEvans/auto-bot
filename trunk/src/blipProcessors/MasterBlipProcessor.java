@@ -13,13 +13,13 @@ import com.google.wave.api.Wavelet;
  * @author n.lefler
  *
  */
-public class MasterBlipProcessor implements AbstractBlipProcessor {
+public class MasterBlipProcessor implements BlipProcessor {
 	private static final Logger log = Logger.getLogger(MasterBlipProcessor.class.getName());
 	
-	public final Map<String, AbstractBlipProcessor> processorsMap;
+	public final Map<String, BlipProcessor> processorsMap;
 	
 	public MasterBlipProcessor() {
-		processorsMap = new HashMap<String, AbstractBlipProcessor>();
+		processorsMap = new HashMap<String, BlipProcessor>();
 		processorsMap.put(CMD_OPEN_IDENT + ForceNewWaveBlipProcessor.FORCE_NEW_WAVE + CMD_CLOSE_IDENT, new ForceNewWaveBlipProcessor());
 		processorsMap.put(CMD_OPEN_IDENT + VoteNewWaveBlipProcessor.VOTE_NEW_WAVE + CMD_CLOSE_IDENT, new VoteNewWaveBlipProcessor());
 		processorsMap.put(CMD_OPEN_IDENT + WeatherRequestBlipProcessor.WEATHER, new WeatherRequestBlipProcessor());
@@ -31,7 +31,7 @@ public class MasterBlipProcessor implements AbstractBlipProcessor {
 	
 	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
 		String commandText = (String)dataMap.get("commandText");
-		AbstractBlipProcessor processor = processorsMap.get(commandText);
+		BlipProcessor processor = processorsMap.get(commandText);
 		
 		return processor.processBlip(blip, wavelet, dataMap);
 	}
