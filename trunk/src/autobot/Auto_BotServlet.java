@@ -55,9 +55,9 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		add("rgalginaitis@googlewave.com");
 		add("rob.kiefer@googlewave.com");
 	}};
+	private Set<String> blipSet = new HashSet<String>();
 	
 	public static final int MAX_BLIPS = 150;
-	private int BLIP_COUNT = 0;
 	private int NUM_OF_VOTES = 0;
 	
 	String LAST_BLIP_CREATOR;
@@ -77,8 +77,10 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			textView.append(WELCOME_SELF);
 			blip.getDocument().appendElement(optimusTransform);
 			
-			BLIP_COUNT = wavelet.getRootBlip().getChildBlipIds().size();
-			log.log(Level.INFO, "Wave had " + BLIP_COUNT + " blips when I entered.");
+			for (String s : wavelet.getRootBlip().getChildBlipIds()) {
+				blipSet.add(s);
+			}
+			log.log(Level.INFO, "Wave had " + blipSet.size() + " blips when I entered.");
 			
 			log.log(Level.INFO, "Successfully greeted the wave.");
 		}
@@ -96,16 +98,16 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			}*/
 
 			if (e.getType() == EventType.BLIP_SUBMITTED) {
-				++BLIP_COUNT;
+				blipSet.add(e.getBlip().getBlipId());
 				
-				if (BLIP_COUNT % 50 == 0) {
-					log.log(Level.INFO, "Wave '" + wavelet.getTitle() + "' has reached " + BLIP_COUNT + " blips.");
+				if (blipSet.size() % 50 == 0) {
+					log.log(Level.INFO, "Wave '" + wavelet.getTitle() + "' has reached " + blipSet.size() + " blips.");
 				}
 				
 				processBlip(e.getBlip(), wavelet);
 				
-				if (BLIP_COUNT == MAX_BLIPS + NUM_OF_VOTES) {
-					log.log(Level.INFO, "Blip count is " + BLIP_COUNT + ", spawning a new wave.");
+				if (blipSet.size() == MAX_BLIPS + NUM_OF_VOTES) {
+					log.log(Level.INFO, "Blip count is " + blipSet.size() + ", spawning a new wave.");
 					
 					wavelet.createWavelet(wavelet.getParticipants(), "ID").setTitle(WaveUtils.getNewTitle(wavelet));
 				}
