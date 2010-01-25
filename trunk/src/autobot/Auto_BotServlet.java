@@ -114,7 +114,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 					Blip blip = wavelet.appendBlip();
 					
 					blip.getDocument().append("=============================\n");
-					blip.getDocument().append("Rolling out in 5 blilps.\n");
+					blip.getDocument().append("Rolling out in 5 blips.\n");
 					blip.getDocument().append("===========================\n");
 				}
 			}

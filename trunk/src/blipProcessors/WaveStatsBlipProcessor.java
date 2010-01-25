@@ -44,6 +44,10 @@ public class WaveStatsBlipProcessor implements BlipProcessor {
 		responseBuffer.append(dataMap.get("numberOfBlips"));
 		responseBuffer.append("\n");
 		
+		responseBuffer.append("This blip's ID: ");
+		responseBuffer.append(blip.getBlipId());
+		responseBuffer.append("\n");
+		
 		blip.getDocument().append(responseBuffer.toString());
 		
 		return wavelet;
