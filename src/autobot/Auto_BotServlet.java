@@ -23,28 +23,19 @@
   THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package autobot;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.*;
-import java.util.Random;
-
 
 import blipProcessors.BlipProcessor;
-import blipProcessors.AutoInviteBlipProcessor;
-import blipProcessors.ForceNewWaveBlipProcessor;
 import blipProcessors.MasterBlipProcessor;
-import blipProcessors.RussianRouletteBlipProcessor;
-import blipProcessors.VoteNewWaveBlipProcessor;
 import blipProcessors.VoteToBanBlipProcessor;
-import blipProcessors.WaveStatsBlipProcessor;
-import blipProcessors.WeatherRequestBlipProcessor;
+
 
 import com.google.wave.api.*;
 
@@ -66,7 +57,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	}};
 	
 	public static final int MAX_BLIPS = 150;
-	private int BLIP_COUNT = 1;
+	private int BLIP_COUNT = 0;
 	private int NUM_OF_VOTES = 0;
 	
 	String LAST_BLIP_CREATOR;
@@ -85,6 +76,9 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			TextView textView = blip.getDocument();
 			textView.append(WELCOME_SELF);
 			blip.getDocument().appendElement(optimusTransform);
+			
+			BLIP_COUNT = wavelet.getRootBlip().getChildBlipIds().size();
+			log.log(Level.INFO, "Wave had " + BLIP_COUNT + " blips when I entered.");
 			
 			log.log(Level.INFO, "Successfully greeted the wave.");
 		}
