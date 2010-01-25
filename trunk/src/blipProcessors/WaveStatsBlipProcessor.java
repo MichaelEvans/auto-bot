@@ -38,8 +38,8 @@ public class WaveStatsBlipProcessor implements BlipProcessor {
 		responseBuffer.append(getBots(wavelet.getParticipants()).size());
 		responseBuffer.append("\n\n");
 		
-		responseBuffer.append("Number of Blips: ");
-		responseBuffer.append(wavelet.getRootBlip().getChildBlipIds().size());
+		responseBuffer.append("Number of Blips (According to Auto-Bot: ");
+		responseBuffer.append(dataMap.get("numberOfBlips"));
 		responseBuffer.append("\n");
 		
 		blip.getDocument().append(responseBuffer.toString());
