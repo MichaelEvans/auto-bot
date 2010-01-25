@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 
 import com.google.wave.api.Blip;
@@ -16,10 +17,13 @@ import com.google.wave.api.Wavelet;
  *
  */
 public class WaveStatsBlipProcessor extends AbstractBlipProcessor {
-	SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+	public final static String WAVE_STATS = "get-wave-stats";
 	
-	@Override
-	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {		
+	final static Pattern getWaveStatsPattern = Pattern.compile(CMD_OPEN_IDENT + WAVE_STATS + CMD_CLOSE_IDENT);
+	
+	final static SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+
+	public static Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {		
 		StringBuffer responseBuffer = new StringBuffer();
 		
 		responseBuffer.append("Wave created: ");
@@ -46,7 +50,7 @@ public class WaveStatsBlipProcessor extends AbstractBlipProcessor {
 	/**
      * Takes a list of all wavers subscribed to this wave, removes bots, and returns a list containing only human wavers
      */
-    private List<String> getHumanWavers(List<String> wavers) {
+    private static List<String> getHumanWavers(List<String> wavers) {
         List<String> remList = new ArrayList<String>();
 
         for (String s : wavers) {
@@ -60,7 +64,7 @@ public class WaveStatsBlipProcessor extends AbstractBlipProcessor {
         return wavers;
     }
     
-    private List<String> getBots(List<String> wavers) {
+    private static List<String> getBots(List<String> wavers) {
     	List<String> botsList = new ArrayList<String>();
 
         for (String s : wavers) {

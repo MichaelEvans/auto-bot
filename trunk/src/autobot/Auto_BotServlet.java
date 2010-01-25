@@ -37,8 +37,11 @@ import java.util.Random;
 
 
 import blipProcessors.AbstractBlipProcessor;
+import blipProcessors.AutoInviteBlipProcessor;
 import blipProcessors.ForceNewWaveBlipProcessor;
+import blipProcessors.RussianRouletteBlipProcessor;
 import blipProcessors.VoteNewWaveBlipProcessor;
+import blipProcessors.VoteToBanBlipProcessor;
 import blipProcessors.WaveStatsBlipProcessor;
 import blipProcessors.WeatherRequestBlipProcessor;
 
@@ -59,44 +62,14 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		add("rgalginaitis@googlewave.com");
 		add("rob.kiefer@googlewave.com");
 	}};
-	Random generator = new Random();
 	
 	public static final int MAX_BLIPS = 150;
 	private int BLIP_COUNT = 1;
 	private int NUM_OF_VOTES = 0;
 	
-	/* Command Strings. */
-	final String FORCE_NEW_WAVE = "force-new-wave";
-	final String VOTE_NEW_WAVE = "roll-out";
-	
-	final String VOTE_TO_BAN = "vote-to-ban:";
-	final String VOTE_TO_UNBAN = "vote-to-unban:";
-	final String AUTO_INVITE = "auto-invite";
-	final String AUTO_INVITE_ADD = "auto-invite-add:";
-	final String AUTO_INVITE_REMOVE = "auto-invite-remove:";
-	final String WAVE_STATS = "get-wave-stats";
-	
 	String LAST_BLIP_CREATOR;
 
-	Map<String, Set<String>> banMap = new HashMap<String, Set<String>>();
-	Map<String, Long> cantBan = new HashMap<String, Long>();
-	Set<String> areBanned = new HashSet<String>();
-		
-	
-	final Pattern voteToBanPattern = Pattern.compile(CMD_OPEN_IDENT + VOTE_TO_BAN + "(.+)" + CMD_CLOSE_IDENT);
-	final Pattern voteToUnbanPattern = Pattern.compile(CMD_OPEN_IDENT + VOTE_TO_UNBAN + "(.+)" + CMD_CLOSE_IDENT);
-	final Pattern autoInviteAddPattern = Pattern.compile(CMD_OPEN_IDENT + AUTO_INVITE_ADD + "(.+)" + CMD_CLOSE_IDENT);
-	final Pattern autoInviteRemovePattern = Pattern.compile(CMD_OPEN_IDENT + AUTO_INVITE_REMOVE + "(.+)" + CMD_CLOSE_IDENT);
-	final Pattern getWaveStatsPattern = Pattern.compile(CMD_OPEN_IDENT + WAVE_STATS + CMD_CLOSE_IDENT);
-	
-	
-	
 	final String WELCOME_SELF = "Autobots roll out.";
-
-	final AbstractBlipProcessor waveStatsProcessor = new WaveStatsBlipProcessor();
-	final AbstractBlipProcessor forceNewWaveProcessor = new ForceNewWaveBlipProcessor();
-	final AbstractBlipProcessor voteNewWaveProcessor = new VoteNewWaveBlipProcessor();
-	final AbstractBlipProcessor weatherRequestProcessor = new WeatherRequestBlipProcessor();
 	
 	public void processEvents(RobotMessageBundle bundle) {
 		Wavelet wavelet = bundle.getWavelet();
@@ -151,157 +124,22 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		String waveAuthor = wavelet.getCreator();
 		String blipAuthor = blip.getCreator();
 		
+		HashMap<String, Object> dataMap = new HashMap<String, Object>();
+		
 		if(!activeWavers.contains(blipAuthor) && !blipAuthor.contains("@appspot.com")) {
 			activeWavers.add(blipAuthor);
 		}
 		
+		dataMap.put("commandText", blip.getDocument().getText());
+		dataMap.put("privelegedWavers", privelegedWavers);
+		dataMap.put("numberOfActiveWavers", getNumberOfActiveWavers());
+		if (blip.getDocument().getText().contains(VoteToBanBlipProcessor.VOTE_TO_BAN)) {
+			dataMap.put("banType", "ban");
+		} else if (blip.getDocument().getText().contains(VoteToBanBlipProcessor.VOTE_TO_UNBAN)) {
+			dataMap.put("banType", "unban");
+		}
 		
-		if (text.startsWith(AbstractBlipProcessor.CMD_OPEN_IDENT + FORCE_NEW_WAVE + AbstractBlipProcessor.CMD_CLOSE_IDENT) && privelegedWavers.contains(blipAuthor)) {
-			/* Force a new Wave */
-			forceNewWaveProcessor.processBlip(blip, wavelet, null);
-		} else if(text.startsWith(AbstractBlipProcessor.CMD_OPEN_IDENT + VOTE_NEW_WAVE + AbstractBlipProcessor.CMD_CLOSE_IDENT)) {
-			/* Vote for new Wave */
-			voteNewWaveProcessor.processBlip(blip, wavelet, new HashMap<String, Object>() {{
-				put("numberOfActiveWavers", getNumberOfActiveWavers());
-			}});
-		}
-		/* else if(text.startsWith("!@russian-roulette@!")) {
-			int drop = generator.nextInt(wavelet.getParticipants().size());
-			//Blip newBlip = wavelet.appendBlip();
-			TextView textView = blip.getDocument();
-			textView.append("\nThanks for transforming " + wavelet.getParticipants().get(drop) + ".");
-			wavelet.removeParticipant(wavelet.getParticipants().get(drop));
-		}*/
-		else if (text.startsWith(AbstractBlipProcessor.CMD_OPEN_IDENT + WEATHER)) {
-			/* Request weather */
-			weatherRequestProcessor.processBlip(blip, wavelet, null);
-		} else if (text.startsWith(CAbstractBlipProcessor.MD_OPEN_IDENT + VOTE_TO_BAN)) {
-			/* Vote to ban user */
-			
-			if (cantBan.containsKey(blipAuthor)) {
-				// Allow if user has been baned for longer than 10 minues
-				if (cantBan.get(blipAuthor) < System.currentTimeMillis()) {
-                    blip.getDocument().append("Message from Auto-Bot: Your ban vote-to-ban privileges have been temporarily revoked.");
-
-                    return;
-				} else {
-					cantBan.remove(blipAuthor);
-				}
-			}
-			
-			Matcher mtchr = voteToBanPattern.matcher(text);
-			TextView rootBlipDoc = wavelet.getRootBlip().getDocument();
-			String usr;
-			
-			mtchr.lookingAt();
-			
-			try{
-				usr = mtchr.group(1);
-				
-				if (usr.substring(0, usr.indexOf("@googlewave.com")).equalsIgnoreCase(blipAuthor)) {
-					//cantBan.put(blipAuthor, System.currentTimeMillis() + 10*60*1000);
-					
-					return;
-				}
-				
-				if (!rootBlipDoc.getText().contains("Motions to Ban")) {
-					;
-				}
-				
-				if (wavelet != null) {
-					wavelet.getRootBlip().getDocument().append("\n" + blipAuthor + " motions to ban " + usr + ".");
-				}
-				
-				if (!wavelet.getParticipants().contains(usr)) {
-					throw new IllegalStateException();
-				}
-				
-				if (banMap.containsKey(usr)) {
-					banMap.get(usr).add(blipAuthor);
-				} else {
-					banMap.put(usr, new HashSet());
-					banMap.get(usr).add(blipAuthor);
-				}
-				
-				if (banMap.get(usr).size() >= ((2/3) * activeWavers.size())) {
-					String message = "Motion to ban " + usr + " passed with " + banMap.get(usr).size() + " votes. Removing this user.";
-					log.info(message);
-					wavelet.getRootBlip().getDocument().append("\n" + message);
-					wavelet.removeParticipant(usr);
-				}
-			}catch (IllegalStateException e) {
-				wavelet.getRootBlip().getDocument().append("\n" + blipAuthor + " loses their ban vote privileges.");
-				
-				cantBan.put(blipAuthor, System.currentTimeMillis() + 10*60*1000);
-			}catch (IndexOutOfBoundsException e) {
-				//not this many matches
-				String message = "Incorrect command form. Correct form is !@vote-to-ban:<user>@googlewave.com@!";
-				wavelet.getRootBlip().getDocument().append("\n" + message);
-			}	
-		} else if (text.startsWith(AbstractBlipProcessor.CMD_OPEN_IDENT + VOTE_TO_UNBAN)) {
-			/* Vote to unban user */
-			
-			/* The following if block can be removed once removeParticipant() works */
-			if (cantBan.containsKey(blipAuthor)) {
-				if (cantBan.get(blipAuthor) + 10*60*1000 < System.currentTimeMillis()) {
-					return;
-				} else {
-					cantBan.remove(blipAuthor);
-				}
-			}
-			
-			Matcher mtchr = voteToUnbanPattern.matcher(text);
-			TextView rootBlipDoc = wavelet.getRootBlip().getDocument();
-			String usr;
-			
-			mtchr.lookingAt();
-	
-			try{
-				usr = mtchr.group(1);
-				
-				if (!rootBlipDoc.getText().contains("Motions to Unban")) {
-					;
-				}
-				
-				if (wavelet != null) {
-					wavelet.getRootBlip().getDocument().append("\n" + blipAuthor + " motions to unban " + usr + ".");
-				}
-				
-				if (!wavelet.getParticipants().contains(usr)) {
-					throw new IllegalStateException();
-				}
-				
-				if (banMap.containsKey(usr)) {
-					banMap.get(usr).add(blipAuthor);
-				} else {
-					banMap.put(usr, new HashSet());
-					banMap.get(usr).add(blipAuthor);
-				}
-				
-				if (banMap.get(usr).size() >= ((2/3) * activeWavers.size())) {
-					String message = "Motion to unban " + usr + " passed with " + banMap.get(usr).size() + " votes. Unbanning this user.";
-					log.info(message);
-					wavelet.getRootBlip().getDocument().append("\n" + message);
-					wavelet.addParticipant(usr);
-					banMap.remove(usr);
-					areBanned.remove(usr);
-				}
-			}catch (IllegalStateException e) {
-				wavelet.getRootBlip().getDocument().append("\n" + blipAuthor + " loses their unban vote privileges.");
-				
-				cantBan.put(blipAuthor, System.currentTimeMillis());
-			}catch (IndexOutOfBoundsException e) {
-				//not this many matches
-				String message = "Usage: !@vote-to-unban:user@googlewave.com@!";
-				wavelet.getRootBlip().getDocument().append("\n" + message);
-			}
-		} else if (text.startsWith(AbstractBlipProcessor.CMD_OPEN_IDENT + AUTO_INVITE + AbstractBlipProcessor.CMD_CLOSE_IDENT)) {
-			for (String usr : privelegedWavers) {
-				wavelet.addParticipant(usr);
-			}
-		} else if (text.startsWith(AbstractBlipProcessor.CMD_OPEN_IDENT + WAVE_STATS + AbstractBlipProcessor.CMD_CLOSE_IDENT)) {
-			waveStatsProcessor.processBlip(blip, wavelet, null);
-		}
+		AbstractBlipProcessor.processBlip(blip, wavelet, dataMap);
 		
 		//consolidateBlips(blip);
 	}
