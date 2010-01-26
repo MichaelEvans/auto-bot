@@ -104,19 +104,22 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			}*/
 
 			if (e.getType() == EventType.BLIP_SUBMITTED) {				
-				wavesMap.get(id).add(e.getBlip().getBlipId());
+				int numBlips;
 				
-				if (wavesMap.get(id).size() % 50 == 0) {
-					log.log(Level.INFO, "Wave '" + wavelet.getTitle() + "' has reached " + blipSet.size() + " blips.");
+				wavesMap.get(id).add(e.getBlip().getBlipId());
+				numBlips = getNumberOfBips(id);
+				
+				if (numBlips % 50 == 0) {
+					log.log(Level.INFO, "Wave '" + wavelet.getTitle() + "' has reached " + numBlips + " blips.");
 				}
 				
 				processBlip(e.getBlip(), wavelet);
 				
-				if (wavesMap.get(id).size() == MAX_BLIPS + NUM_OF_VOTES) {
-					log.log(Level.INFO, "Blip count is " + wavesMap.get(id).size() + ", spawning a new wave.");
+				if (numBlips == MAX_BLIPS + NUM_OF_VOTES) {
+					log.log(Level.INFO, "Blip count is " + numBlips + ", spawning a new wave.");
 					
 					wavelet.createWavelet(wavelet.getParticipants(), "ID").setTitle(WaveUtils.getNewTitle(wavelet));
-				} else if (wavesMap.get(wavelet.getWaveletId()).size() == MAX_BLIPS + NUM_OF_VOTES - 5) {
+				} else if (numBlips == MAX_BLIPS + NUM_OF_VOTES - 5) {
 					Blip blip = wavelet.appendBlip();
 					
 					blip.getDocument().append("=============================\n");
