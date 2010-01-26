@@ -67,7 +67,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	
 	public void processEvents(RobotMessageBundle bundle) {
 		Wavelet wavelet = bundle.getWavelet();
-
+		String id = wavelet.getWaveId() + wavelet.getWaveletId();
+		
 		if (!wavesMap.containsKey(wavelet.getWaveletId())) {
 			wavesMap.put(wavelet.getWaveletId(), new HashSet<String>());
 		}
@@ -83,7 +84,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			blip.getDocument().appendElement(optimusTransform);
 			
 			for (String s : wavelet.getRootBlip().getChildBlipIds()) {
-				blipSet.add(s);
+				wavesMap.get(id).add(s);
 			}
 			log.log(Level.INFO, "Wave had " + blipSet.size() + " blips when I entered.");
 			
@@ -102,17 +103,17 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				}
 			}*/
 
-			if (e.getType() == EventType.BLIP_SUBMITTED) {
-				wavesMap.get(wavelet.getWaveletId()).add(e.getBlip().getBlipId());
+			if (e.getType() == EventType.BLIP_SUBMITTED) {				
+				wavesMap.get(id).add(e.getBlip().getBlipId());
 				
-				if (blipSet.size() % 50 == 0) {
+				if (wavesMap.get(id).size() % 50 == 0) {
 					log.log(Level.INFO, "Wave '" + wavelet.getTitle() + "' has reached " + blipSet.size() + " blips.");
 				}
 				
 				processBlip(e.getBlip(), wavelet);
 				
-				if (wavesMap.get(wavelet.getWaveletId()).size() == MAX_BLIPS + NUM_OF_VOTES) {
-					log.log(Level.INFO, "Blip count is " + wavesMap.get(wavelet.getWaveletId()).size() + ", spawning a new wave.");
+				if (wavesMap.get(id).size() == MAX_BLIPS + NUM_OF_VOTES) {
+					log.log(Level.INFO, "Blip count is " + wavesMap.get(id).size() + ", spawning a new wave.");
 					
 					wavelet.createWavelet(wavelet.getParticipants(), "ID").setTitle(WaveUtils.getNewTitle(wavelet));
 				} else if (wavesMap.get(wavelet.getWaveletId()).size() == MAX_BLIPS + NUM_OF_VOTES - 5) {
