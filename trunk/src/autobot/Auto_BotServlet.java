@@ -141,6 +141,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		dataMap.put("privelegedWavers", privelegedWavers);
 		dataMap.put("numberOfActiveWavers", getNumberOfActiveWavers());
 		dataMap.put("numberOfBlips", getNumberOfBips(wavelet));
+		dataMap.put("waveletID", wavelet.getWaveletId());
+		dataMap.put("waveID", wavelet.getWaveId());
 		if (blip.getDocument().getText().contains(VoteToBanBlipProcessor.VOTE_TO_BAN)) {
 			dataMap.put("banType", "ban");
 		} else if (blip.getDocument().getText().contains(VoteToBanBlipProcessor.VOTE_TO_UNBAN)) {
