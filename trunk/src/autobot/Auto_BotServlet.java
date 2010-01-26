@@ -69,8 +69,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		Wavelet wavelet = bundle.getWavelet();
 		String id = wavelet.getWaveId() + wavelet.getWaveletId();
 		
-		if (!wavesMap.containsKey(wavelet.getWaveletId())) {
-			wavesMap.put(wavelet.getWaveletId(), new HashSet<String>());
+		if (!wavesMap.containsKey(id)) {
+			wavesMap.put(id, new HashSet<String>());
 		}
 		
 		/* Say hello */
