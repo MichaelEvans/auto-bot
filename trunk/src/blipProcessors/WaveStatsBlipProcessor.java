@@ -32,6 +32,10 @@ public class WaveStatsBlipProcessor implements BlipProcessor {
 		responseBuffer.append(sdf.format(new Date(wavelet.getCreationTime())));
 		responseBuffer.append("\n\n");
 		
+		responseBuffer.append("This wavelet's ID: ");
+		responseBuffer.append(wavelet.getWaveletId());
+		responseBuffer.append("\n");
+		
 		responseBuffer.append("Number of Human Wavers: ");
 		responseBuffer.append(getHumanWavers(wavelet.getParticipants()).size());
 		responseBuffer.append("\n\n");
