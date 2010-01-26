@@ -131,6 +131,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 
 	private void processBlip(Blip blip, Wavelet wavelet) {
 		String blipAuthor = blip.getCreator();
+		String id = wavelet.getWaveId() + wavelet.getWaveletId();
 		
 		HashMap<String, Object> dataMap = new HashMap<String, Object>();
 		
@@ -141,7 +142,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		dataMap.put("commandText", blip.getDocument().getText());
 		dataMap.put("privelegedWavers", privelegedWavers);
 		dataMap.put("numberOfActiveWavers", getNumberOfActiveWavers());
-		dataMap.put("numberOfBlips", getNumberOfBips(wavelet));
+		dataMap.put("numberOfBlips", getNumberOfBips(id));
 		dataMap.put("waveletID", wavelet.getWaveletId());
 		dataMap.put("waveID", wavelet.getWaveId());
 		if (blip.getDocument().getText().contains(VoteToBanBlipProcessor.VOTE_TO_BAN)) {
@@ -159,7 +160,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		return activeWavers.size();
 	}
 	
-	private int getNumberOfBips(Wavelet wavelet) {
-		return wavesMap.get(wavelet.getWaveletId()).size();
+	private int getNumberOfBips(String id) {
+		return wavesMap.get(id).size();
 	}
 }
