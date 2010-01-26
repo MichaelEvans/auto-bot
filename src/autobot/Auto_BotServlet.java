@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,7 +41,9 @@ import blipProcessors.VoteToBanBlipProcessor;
 import com.google.wave.api.*;
 
 public class Auto_BotServlet extends AbstractRobotServlet {
-	public static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName()); 
+	public static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName());
+	
+	private static Map<String, Set<String>> wavesMap = new HashMap<String, Set<String>>();
 	
 	private final BlipProcessor blipProcessor = new MasterBlipProcessor();
 	
@@ -59,14 +62,16 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	
 	public static final int MAX_BLIPS = 150;
 	private int NUM_OF_VOTES = 0;
-	
-	String LAST_BLIP_CREATOR;
 
 	final String WELCOME_SELF = "Autobots roll out.";
 	
 	public void processEvents(RobotMessageBundle bundle) {
 		Wavelet wavelet = bundle.getWavelet();
 
+		if (!wavesMap.containsKey(wavelet.getWaveletId())) {
+			wavesMap.put(wavelet.getWaveletId(), new HashSet<String>());
+		}
+		
 		/* Say hello */
 		if (bundle.wasSelfAdded()) {
 			log.log(Level.INFO, "Attempting to greet the wave.");
@@ -98,7 +103,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			}*/
 
 			if (e.getType() == EventType.BLIP_SUBMITTED) {
-				blipSet.add(e.getBlip().getBlipId());
+				wavesMap.get(wavelet.getWaveletId()).add(e.getBlip().getBlipId());
 				
 				if (blipSet.size() % 50 == 0) {
 					log.log(Level.INFO, "Wave '" + wavelet.getTitle() + "' has reached " + blipSet.size() + " blips.");
@@ -106,11 +111,11 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				
 				processBlip(e.getBlip(), wavelet);
 				
-				if (blipSet.size() == MAX_BLIPS + NUM_OF_VOTES) {
-					log.log(Level.INFO, "Blip count is " + blipSet.size() + ", spawning a new wave.");
+				if (wavesMap.get(wavelet.getWaveletId()).size() == MAX_BLIPS + NUM_OF_VOTES) {
+					log.log(Level.INFO, "Blip count is " + wavesMap.get(wavelet.getWaveletId()).size() + ", spawning a new wave.");
 					
 					wavelet.createWavelet(wavelet.getParticipants(), "ID").setTitle(WaveUtils.getNewTitle(wavelet));
-				} else if (blipSet.size() == MAX_BLIPS + NUM_OF_VOTES - 5) {
+				} else if (wavesMap.get(wavelet.getWaveletId()).size() == MAX_BLIPS + NUM_OF_VOTES - 5) {
 					Blip blip = wavelet.appendBlip();
 					
 					blip.getDocument().append("=============================\n");
@@ -124,8 +129,6 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	}
 
 	private void processBlip(Blip blip, Wavelet wavelet) {
-		String text = blip.getDocument().getText();
-		String waveAuthor = wavelet.getCreator();
 		String blipAuthor = blip.getCreator();
 		
 		HashMap<String, Object> dataMap = new HashMap<String, Object>();
@@ -137,7 +140,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		dataMap.put("commandText", blip.getDocument().getText());
 		dataMap.put("privelegedWavers", privelegedWavers);
 		dataMap.put("numberOfActiveWavers", getNumberOfActiveWavers());
-		dataMap.put("numberOfBlips", getNumberOfBips());
+		dataMap.put("numberOfBlips", getNumberOfBips(wavelet));
 		if (blip.getDocument().getText().contains(VoteToBanBlipProcessor.VOTE_TO_BAN)) {
 			dataMap.put("banType", "ban");
 		} else if (blip.getDocument().getText().contains(VoteToBanBlipProcessor.VOTE_TO_UNBAN)) {
@@ -149,31 +152,11 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		//consolidateBlips(blip);
 	}
 
-	private void consolidateBlips(Blip blip) {
-		if (blip.getCreator().equals(LAST_BLIP_CREATOR)) {
-			int prevBlipIndex = blip.getParent().getChildren().indexOf(blip) - 1;
-			Blip prevBlip = blip.getParent().getChild(prevBlipIndex);
-			TextView prevBlipText = prevBlip.getDocument();
-			
-			log.info("Consilidating blips " + prevBlip.getBlipId() + " and " + blip.getBlipId());
-			
-			prevBlipText.append("\n");
-			prevBlipText.append(Calendar.HOUR + ":" + Calendar.MINUTE + ":" + Calendar.SECOND);
-			prevBlipText.append(blip.getDocument().toString());
-			
-			blip.getDocument().append("Consilidating blips " + prevBlip.getBlipId() + " and " + blip.getBlipId());
-		} else {
-			LAST_BLIP_CREATOR = blip.getCreator();
-		}
-		
-		return;
-	}
-
 	private int getNumberOfActiveWavers() {
 		return activeWavers.size();
 	}
 	
-	private int getNumberOfBips() {
-		return blipSet.size();
+	private int getNumberOfBips(Wavelet wavelet) {
+		return wavesMap.get(wavelet.getWaveletId()).size();
 	}
 }

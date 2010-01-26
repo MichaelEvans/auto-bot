@@ -42,7 +42,7 @@ public class WaveStatsBlipProcessor implements BlipProcessor {
 		
 		responseBuffer.append("Number of Blips (According to Auto-Bot): ");
 		responseBuffer.append(dataMap.get("numberOfBlips"));
-		responseBuffer.append("\n");
+		responseBuffer.append("\n\n");
 		
 		responseBuffer.append("This blip's ID: ");
 		responseBuffer.append(blip.getBlipId());
