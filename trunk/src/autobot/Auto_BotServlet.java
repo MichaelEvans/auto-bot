@@ -58,6 +58,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		add("claudio.sayan@googlewave.com");
 		add("rgalginaitis@googlewave.com");
 		add("rob.kiefer@googlewave.com");
+		add("patrick.dattilio@googlewave.com");
 	}};
 	private Set<String> blipSet = new HashSet<String>();
 	
