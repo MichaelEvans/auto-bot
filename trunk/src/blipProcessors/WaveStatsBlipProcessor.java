@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 
@@ -49,7 +50,7 @@ public class WaveStatsBlipProcessor implements BlipProcessor {
 		responseBuffer.append("\n\n");
 		
 		responseBuffer.append("Number of Blips (According to Auto-Bot): ");
-		responseBuffer.append(dataMap.get("numberOfBlips"));
+		responseBuffer.append(getNumberOfBlipsByWavers((Map<String, Set<String>>)dataMap.get("waversBlipsMap")));
 		responseBuffer.append("\n\n");
 		
 		responseBuffer.append("This blip's ID: ");
@@ -88,5 +89,15 @@ public class WaveStatsBlipProcessor implements BlipProcessor {
         }
 
         return botsList;
+    }
+    
+    private int getNumberOfBlipsByWavers(Map<String, Set<String>> waversBlipsSet) {
+    	int sum = 0;
+    	
+    	for (Set<String> set : waversBlipsSet.values()) {
+    		sum += set.size();
+    	}
+    	
+    	return sum;
     }
 }

@@ -44,6 +44,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	public static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName());
 	
 	private static Map<String, Set<String>> wavesMap = new HashMap<String, Set<String>>();
+	private Map<String, HashSet<String>> waversBlipsMap = new HashMap<String, HashSet<String>>();
 	
 	private final BlipProcessor blipProcessor = new MasterBlipProcessor();
 	
@@ -68,6 +69,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	public void processEvents(RobotMessageBundle bundle) {
 		Wavelet wavelet = bundle.getWavelet();
 		String id = wavelet.getWaveId() + wavelet.getWaveletId();
+		String blipCreator;
 		
 		if (!wavesMap.containsKey(id)) {
 			wavesMap.put(id, new HashSet<String>());
@@ -106,8 +108,16 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			if (e.getType() == EventType.BLIP_SUBMITTED) {				
 				int numBlips;
 				
+				blipCreator = e.getBlip().getCreator();
+				
 				wavesMap.get(id).add(e.getBlip().getBlipId());
-				numBlips = getNumberOfBips(id);
+				if (!waversBlipsMap.containsKey(blipCreator)) {
+					waversBlipsMap.put(blipCreator, new HashSet<String>());
+				} else {
+					waversBlipsMap.get(blipCreator).add(e.getBlip().getBlipId());
+				}
+				
+				numBlips = getNumberOfBlipsByWavers();
 				
 				if (numBlips % 50 == 0) {
 					log.log(Level.INFO, "Wave '" + wavelet.getTitle() + "' has reached " + numBlips + " blips.");
@@ -127,8 +137,9 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 					blip.getDocument().append("===========================\n");
 				}
 			}
-			/*if (e.getType() == EventType.BLIP_DELETED) {
-			}*/
+			if (e.getType() == EventType.BLIP_DELETED) {
+				wavesMap.get(id).remove(e.getBlip().getBlipId());
+			}
 		}
 	}
 
@@ -145,7 +156,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		dataMap.put("commandText", blip.getDocument().getText());
 		dataMap.put("privelegedWavers", privelegedWavers);
 		dataMap.put("numberOfActiveWavers", getNumberOfActiveWavers());
-		dataMap.put("numberOfBlips", getNumberOfBips(id));
+		dataMap.put("waversBlipsMap", waversBlipsMap);
 		dataMap.put("waveletID", wavelet.getWaveletId());
 		dataMap.put("waveID", wavelet.getWaveId());
 		if (blip.getDocument().getText().contains(VoteToBanBlipProcessor.VOTE_TO_BAN)) {
@@ -163,7 +174,17 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		return activeWavers.size();
 	}
 	
-	private int getNumberOfBips(String id) {
+	private int getNumberOfBlipsInWavelet(String id) {
 		return wavesMap.get(id).size();
+	}
+	
+	private int getNumberOfBlipsByWavers() {
+		int sum = 0;
+		
+		for (Set<String> set : waversBlipsMap.values()) {
+			sum += set.size();
+		}
+		
+		return sum;
 	}
 }
