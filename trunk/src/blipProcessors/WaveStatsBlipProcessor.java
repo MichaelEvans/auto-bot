@@ -29,6 +29,10 @@ public class WaveStatsBlipProcessor implements BlipProcessor {
 		
 		responseBuffer.append("\n\n");
 		
+		responseBuffer.append("Auto-Bot's Unique ID: ");
+		responseBuffer.append(dataMap.get("autbotID"));
+		responseBuffer.append("\n\n");
+		
 		responseBuffer.append("Wave created: ");
 		responseBuffer.append(sdf.format(new Date(wavelet.getCreationTime())));
 		responseBuffer.append("\n\n");

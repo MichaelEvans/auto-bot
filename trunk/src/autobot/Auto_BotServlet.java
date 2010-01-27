@@ -25,7 +25,6 @@
 package autobot;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -42,6 +41,7 @@ import com.google.wave.api.*;
 
 public class Auto_BotServlet extends AbstractRobotServlet {
 	public static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName());
+	private final long uniqueID = System.nanoTime();
 	
 	private static Map<String, Set<String>> wavesMap = new HashMap<String, Set<String>>();
 	private Map<String, HashSet<String>> waversBlipsMap = new HashMap<String, HashSet<String>>();
@@ -160,6 +160,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		dataMap.put("waversBlipsMap", waversBlipsMap);
 		dataMap.put("waveletID", wavelet.getWaveletId());
 		dataMap.put("waveID", wavelet.getWaveId());
+		dataMap.put("autobotID",uniqueID);
 		if (blip.getDocument().getText().contains(VoteToBanBlipProcessor.VOTE_TO_BAN)) {
 			dataMap.put("banType", "ban");
 		} else if (blip.getDocument().getText().contains(VoteToBanBlipProcessor.VOTE_TO_UNBAN)) {
