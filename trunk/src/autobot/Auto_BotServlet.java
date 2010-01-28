@@ -118,7 +118,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 					waversBlipsMap.get(blipCreator).add(e.getBlip().getBlipId());
 				}
 				
-				numBlips = getNumberOfBlipsByWavers();
+				numBlips = getNumberOfBlipsInWavelet(id);
 				
 				if (numBlips % 50 == 0) {
 					log.log(Level.INFO, "Wave '" + wavelet.getTitle() + "' has reached " + numBlips + " blips.");
