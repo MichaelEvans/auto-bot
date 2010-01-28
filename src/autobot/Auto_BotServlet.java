@@ -69,8 +69,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	
 	public void processEvents(RobotMessageBundle bundle) {
 		Wavelet wavelet = bundle.getWavelet();
-		String id = wavelet.getWaveId() + wavelet.getWaveletId();
-		String blipCreator;
+		String id = wavelet.getWaveId();
 		
 		if (!wavesMap.containsKey(id)) {
 			wavesMap.put(id, new HashSet<String>());
@@ -109,16 +108,9 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			if (e.getType() == EventType.BLIP_SUBMITTED) {				
 				int numBlips;
 				
-				blipCreator = e.getBlip().getCreator();
-				
 				wavesMap.get(id).add(e.getBlip().getBlipId());
-				if (!waversBlipsMap.containsKey(blipCreator)) {
-					waversBlipsMap.put(blipCreator, new HashSet<String>());
-				} else {
-					waversBlipsMap.get(blipCreator).add(e.getBlip().getBlipId());
-				}
 				
-				numBlips = getNumberOfBlipsInWavelet(id);
+				numBlips = getNumberOfBlipsInWave(id);
 				
 				if (numBlips % 50 == 0) {
 					log.log(Level.INFO, "Wave '" + wavelet.getTitle() + "' has reached " + numBlips + " blips.");
@@ -150,14 +142,10 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		
 		HashMap<String, Object> dataMap = new HashMap<String, Object>();
 		
-		if(!activeWavers.contains(blipAuthor) && !blipAuthor.contains("@appspot.com")) {
-			activeWavers.add(blipAuthor);
-		}
-		
 		dataMap.put("commandText", blip.getDocument().getText());
 		dataMap.put("privelegedWavers", privelegedWavers);
 		dataMap.put("numberOfActiveWavers", getNumberOfActiveWavers());
-		dataMap.put("waversBlipsMap", waversBlipsMap);
+		dataMap.put("numberOfBlips", getNumberOfBlipsInWave(id));
 		dataMap.put("waveletID", wavelet.getWaveletId());
 		dataMap.put("waveID", wavelet.getWaveId());
 		dataMap.put("autobotID",uniqueID);
@@ -176,7 +164,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		return activeWavers.size();
 	}
 	
-	private int getNumberOfBlipsInWavelet(String id) {
+	private int getNumberOfBlipsInWave(String id) {
 		return wavesMap.get(id).size();
 	}
 	
