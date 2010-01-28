@@ -138,7 +138,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 
 	private void processBlip(Blip blip, Wavelet wavelet) {
 		String blipAuthor = blip.getCreator();
-		String id = wavelet.getWaveId() + wavelet.getWaveletId();
+		String id = wavelet.getWaveId();
 		
 		HashMap<String, Object> dataMap = new HashMap<String, Object>();
 		
