@@ -22,7 +22,7 @@ public class WaveUtils {
 	}
 	
 	public static String getNewTitle(Wavelet wavelet) {
-		final String CONT_IDENT = "// Part ";
+		final String CONT_IDENT = " // Part ";
 		
 		int index;
 		String title, waveBaseTitle = wavelet.getTitle();;
