@@ -40,6 +40,7 @@ import blipProcessors.VoteToBanBlipProcessor;
 import com.google.wave.api.*;
 
 public class Auto_BotServlet extends AbstractRobotServlet {
+	private static final long serialVersionUID = -8761201906629081656L;
 	public static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName());
 	private final long uniqueID = System.nanoTime();
 	
@@ -77,7 +78,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		
 		/* Say hello */
 		if (bundle.wasSelfAdded()) {
-			log.log(Level.INFO, "Attempting to greet the wave.");
+			log.log(Level.INFO, "AUTO-BOT: Attempting to greet the wave.");
 			
 			Image optimusTransform = new Image("http://imgur.com/m66zH.gif", 160, 120, "");
 			Blip blip = wavelet.appendBlip();
@@ -88,9 +89,9 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			for (String s : wavelet.getRootBlip().getChildBlipIds()) {
 				wavesMap.get(id).add(s);
 			}
-			log.log(Level.INFO, "Wave had " + blipSet.size() + " blips when I entered.");
+			log.log(Level.INFO, "AUTO-BOT: Wave had " + blipSet.size() + " blips when I entered.");
 			
-			log.log(Level.INFO, "Successfully greeted the wave.");
+			log.log(Level.INFO, "AUTO-BOT: Successfully greeted the wave.");
 		}
 
 		for (Event e : bundle.getEvents()) {
@@ -113,13 +114,13 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				numBlips = getNumberOfBlipsInWave(id);
 				
 				if (numBlips % 50 == 0) {
-					log.log(Level.INFO, "Wave '" + wavelet.getTitle() + "' has reached " + numBlips + " blips.");
+					log.log(Level.INFO, "AUTO-BOT: Wave '" + wavelet.getTitle() + "' has reached " + numBlips + " blips.");
 				}
 				
 				processBlip(e.getBlip(), wavelet);
 				
 				if (numBlips == MAX_BLIPS + NUM_OF_VOTES) {
-					log.log(Level.INFO, "Blip count is " + numBlips + ", spawning a new wave.");
+					log.log(Level.INFO, "AUTO-BOT: Blip count is " + numBlips + ", spawning a new wave.");
 					
 					wavelet.createWavelet(wavelet.getParticipants(), "ID").setTitle(WaveUtils.getNewTitle(wavelet));
 				} else if (numBlips == MAX_BLIPS + NUM_OF_VOTES - 5) {
