@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import com.google.wave.api.Blip;
 import com.google.wave.api.Wavelet;
 
-public class AutoInviteBlipProcessor implements BlipProcessor {
+public class AutoInviteBlipProcessor implements IBlipProcessor {
 	public final static String AUTO_INVITE = "auto-invite";
 	public final static String AUTO_INVITE_ADD = "auto-invite-add:";
 	public final static String AUTO_INVITE_REMOVE = "auto-invite-remove:";

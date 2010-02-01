@@ -13,14 +13,14 @@ import com.google.wave.api.Wavelet;
  * @author n.lefler
  *
  */
-public class MasterBlipProcessor implements BlipProcessor {
-	private static final Logger log = Logger.getLogger(MasterBlipProcessor.class.getName());
+public class BlipProcessorMediator implements IBlipProcessor {
+	private static final Logger log = Logger.getLogger(BlipProcessorMediator.class.getName());
 	
 	private Map<String, String> startsWithMap;
-	public final Map<String, BlipProcessor> processorsMap;
+	public final Map<String, IBlipProcessor> processorsMap;
 	
-	public MasterBlipProcessor() {
-		processorsMap = new HashMap<String, BlipProcessor>();
+	public BlipProcessorMediator() {
+		processorsMap = new HashMap<String, IBlipProcessor>();
 		processorsMap.put("voteNewWave", new VoteNewWaveBlipProcessor());
 		processorsMap.put("voteToBan", new VoteToBanBlipProcessor());
 		processorsMap.put("voteToUnBan", new VoteToBanBlipProcessor());
@@ -34,6 +34,7 @@ public class MasterBlipProcessor implements BlipProcessor {
 		startsWithMap.put("voteToUnBan", CMD_OPEN_IDENT + VoteToBanBlipProcessor.VOTE_TO_UNBAN);
 		startsWithMap.put("autoInvite", CMD_OPEN_IDENT + AutoInviteBlipProcessor.AUTO_INVITE + CMD_CLOSE_IDENT);
 		startsWithMap.put("waveStats", CMD_OPEN_IDENT + WaveStatsBlipProcessor.WAVE_STATS + CMD_CLOSE_IDENT);
+		startsWithMap.put("runTests", CMD_OPEN_IDENT + RunTestsBlipProcessor.RUN_TESTS + CMD_CLOSE_IDENT);
 	}
 	
 	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
@@ -48,7 +49,7 @@ public class MasterBlipProcessor implements BlipProcessor {
 		return wavelet;
 	}
 	
-	private BlipProcessor getProcessor(String commandText) throws InvalidBlipProcessorException {
+	private IBlipProcessor getProcessor(String commandText) throws InvalidBlipProcessorException {
 		if (commandText.startsWith(startsWithMap.get("forceNewWave"))) {
 			return new ForceNewWaveBlipProcessor(); 
 		} else if (commandText.startsWith(startsWithMap.get("voteNewWave"))) {
@@ -63,6 +64,8 @@ public class MasterBlipProcessor implements BlipProcessor {
 			return new AutoInviteBlipProcessor();
 		} else if (commandText.startsWith(startsWithMap.get("waveStats"))) {
 			return new WaveStatsBlipProcessor();
+		} else if (commandText.startsWith(startsWithMap.get("runTests"))) {
+			return new RunTestsBlipProcessor();
 		} else {
 			return processorsMap.get("nonCommand");
 		}

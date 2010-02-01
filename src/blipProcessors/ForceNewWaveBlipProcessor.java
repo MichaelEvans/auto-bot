@@ -10,7 +10,7 @@ import autobot.WaveUtils;
 import com.google.wave.api.Blip;
 import com.google.wave.api.Wavelet;
 
-public class ForceNewWaveBlipProcessor implements BlipProcessor {
+public class ForceNewWaveBlipProcessor implements IBlipProcessor {
 	public final static String FORCE_NEW_WAVE = "force-new-wave";
 	
 	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
