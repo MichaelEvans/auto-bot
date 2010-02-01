@@ -68,6 +68,11 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 
 	final String WELCOME_SELF = "Autobots roll out.";
 	
+	
+	public Auto_BotServlet() {
+		log.log(Level.INFO, "I'm started.");
+	}
+	
 	public void processEvents(RobotMessageBundle bundle) {
 		Wavelet wavelet = bundle.getWavelet();
 		String id = wavelet.getWaveId();
