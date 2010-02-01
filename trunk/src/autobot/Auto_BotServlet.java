@@ -87,6 +87,9 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			blip.getDocument().appendElement(optimusTransform);
 			
 			wavesMap.put(id, new Integer(wavelet.getRootBlip().getChildBlipIds().size()));
+			if (wavesMap.get(id) == null) {
+				wavesMap.put(id, new Integer(0));
+			}
 				
 			log.log(Level.INFO, "AUTO-BOT: Wave had " + blipSet.size() + " blips when I entered.");
 			
