@@ -12,7 +12,7 @@ import com.google.wave.api.Blip;
 import com.google.wave.api.TextView;
 import com.google.wave.api.Wavelet;
 
-public class VoteToBanBlipProcessor implements BlipProcessor {
+public class VoteToBanBlipProcessor implements IBlipProcessor {
 	final static Logger log = Logger.getLogger(VoteNewWaveBlipProcessor.class.getName());
 
 	public final static String VOTE_TO_BAN = "vote-to-ban:";

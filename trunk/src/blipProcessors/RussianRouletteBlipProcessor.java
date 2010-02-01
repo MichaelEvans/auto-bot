@@ -7,7 +7,7 @@ import com.google.wave.api.Blip;
 import com.google.wave.api.TextView;
 import com.google.wave.api.Wavelet;
 
-public class RussianRouletteBlipProcessor implements BlipProcessor {
+public class RussianRouletteBlipProcessor implements IBlipProcessor {
 	public final static String RUSSIAN_ROULETTE = "russian-roulette";
 	
 	public Wavelet processBlip(Blip blip, Wavelet wavelet,

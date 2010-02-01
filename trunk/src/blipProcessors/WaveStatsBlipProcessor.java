@@ -17,7 +17,7 @@ import com.google.wave.api.Wavelet;
  * @author n.lefler
  *
  */
-public class WaveStatsBlipProcessor implements BlipProcessor {
+public class WaveStatsBlipProcessor implements IBlipProcessor {
 	public final static String WAVE_STATS = "get-wave-stats";
 	
 	final static Pattern getWaveStatsPattern = Pattern.compile(CMD_OPEN_IDENT + WAVE_STATS + CMD_CLOSE_IDENT);
