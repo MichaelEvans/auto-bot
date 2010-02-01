@@ -76,6 +76,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		Wavelet wavelet = bundle.getWavelet();
 		String id = wavelet.getWaveId();
 		
+		wavesMap.put(id, new Integer(0));
+		
 		/* Say hello */
 		if (bundle.wasSelfAdded()) {
 			log.log(Level.INFO, "AUTO-BOT: Attempting to greet the wave.");
@@ -87,9 +89,6 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			blip.getDocument().appendElement(optimusTransform);
 			
 			wavesMap.put(id, new Integer(wavelet.getRootBlip().getChildBlipIds().size()));
-			if (wavesMap.get(id) == null) {
-				wavesMap.put(id, new Integer(0));
-			}
 				
 			log.log(Level.INFO, "AUTO-BOT: Wave had " + blipSet.size() + " blips when I entered.");
 			
@@ -112,8 +111,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				int numBlips = wavesMap.get(id) + 1;
 				
 				wavesMap.put(id, numBlips);
-				
-				numBlips = getNumberOfBlipsInWave(id);
+				log.log(Level.INFO, "Auto-Bot unique id: " + uniqueID);
+				log.log(Level.INFO, "Wave " + wavelet.getWaveId() + " (" + wavelet.getTitle() + ") has " + numBlips + " blips.");
 				
 				if (numBlips % 50 == 0) {
 					log.log(Level.INFO, "AUTO-BOT: Wave '" + wavelet.getTitle() + "' has reached " + numBlips + " blips.");
