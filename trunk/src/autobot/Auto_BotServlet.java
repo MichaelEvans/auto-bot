@@ -60,7 +60,6 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		add("rob.kiefer@googlewave.com");
 		add("patrick.dattilio@googlewave.com");
 	}};
-	private Set<String> blipSet = new HashSet<String>();
 	
 	public static final int MAX_BLIPS = 150;
 	private int NUM_OF_VOTES = 0;
@@ -92,7 +91,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			
 			wavesMap.put(id, new Integer(wavelet.getRootBlip().getChildBlipIds().size()));
 				
-			log.log(Level.INFO, "AUTO-BOT: Wave had " + blipSet.size() + " blips when I entered.");
+			log.log(Level.INFO, "AUTO-BOT: Wave had " + wavesMap.get(id) + " blips when I entered.");
 			
 			log.log(Level.INFO, "AUTO-BOT: Successfully greeted the wave.");
 		}
@@ -113,8 +112,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				int numBlips = wavesMap.get(id) + 1;
 				
 				wavesMap.put(id, numBlips);
-				log.log(Level.INFO, "Auto-Bot unique id: " + uniqueID);
-				log.log(Level.INFO, "Wave " + wavelet.getWaveId() + " (" + wavelet.getTitle() + ") has " + numBlips + " blips.");
+				//log.log(Level.INFO, "Auto-Bot unique id: " + uniqueID);
+				//log.log(Level.INFO, "Wave " + wavelet.getWaveId() + " (" + wavelet.getTitle() + ") has " + numBlips + " blips.");
 				
 				if (numBlips % 50 == 0) {
 					log.log(Level.INFO, "AUTO-BOT: Wave '" + wavelet.getTitle() + "' has reached " + numBlips + " blips.");
