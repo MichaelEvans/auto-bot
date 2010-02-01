@@ -109,9 +109,9 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			}*/
 
 			if (e.getType() == EventType.BLIP_SUBMITTED) {				
-				int numBlips;
+				int numBlips = wavesMap.get(id) + 1;
 				
-				wavesMap.put(id, wavesMap.get(id) + 1);
+				wavesMap.put(id, numBlips);
 				
 				numBlips = getNumberOfBlipsInWave(id);
 				
@@ -134,7 +134,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				}
 			}
 			if (e.getType() == EventType.BLIP_DELETED) {
-				wavesMap.put(id, wavesMap.get(id) - 1);
+				int numBlips = wavesMap.get(id) - 1;
+				wavesMap.put(id, numBlips);
 			}
 		}
 	}
