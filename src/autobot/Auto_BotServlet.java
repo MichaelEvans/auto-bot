@@ -44,7 +44,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	public static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName());
 	private final long uniqueID = System.nanoTime();
 	
-	private static Map<String, Integer> wavesMap = new HashMap<String, Integer>();
+	private static Map<String, Set<String>> wavesMap = new HashMap<String, Set<String>>();
 	
 	private final IBlipProcessor blipProcessor = new BlipProcessorMediator();
 	
@@ -76,7 +76,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		String id = wavelet.getWaveId();
 		
 		if (!wavesMap.containsKey(id)) {
-			wavesMap.put(id, new Integer(0));
+			wavesMap.put(id, new HashSet<String>());
 		}
 		
 		/* Say hello */
@@ -89,7 +89,9 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			textView.append(WELCOME_SELF);
 			blip.getDocument().appendElement(optimusTransform);
 			
-			wavesMap.put(id, new Integer(wavelet.getRootBlip().getChildBlipIds().size()));
+			for (String s : wavelet.getRootBlip().getChildBlipIds()) {
+				wavesMap.get(id).add(s);
+			}
 				
 			log.log(Level.INFO, "AUTO-BOT: Wave had " + wavesMap.get(id) + " blips when I entered.");
 			
@@ -109,9 +111,10 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			}*/
 
 			if (e.getType() == EventType.BLIP_SUBMITTED) {				
-				int numBlips = wavesMap.get(id) + 1;
+				int numBlips;
 				
-				wavesMap.put(id, numBlips);
+				wavesMap.get(id).add(e.getBlip().getBlipId());
+				numBlips = wavesMap.get(id).size();
 				//log.log(Level.INFO, "Auto-Bot unique id: " + uniqueID);
 				//log.log(Level.INFO, "Wave " + wavelet.getWaveId() + " (" + wavelet.getTitle() + ") has " + numBlips + " blips.");
 				
@@ -134,8 +137,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				}
 			}
 			if (e.getType() == EventType.BLIP_DELETED) {
-				int numBlips = wavesMap.get(id) - 1;
-				wavesMap.put(id, numBlips);
+				wavesMap.get(id).remove(e.getBlip().getBlipId());
 			}
 		}
 	}
@@ -169,7 +171,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	}
 	
 	private int getNumberOfBlipsInWave(String id) {
-		return wavesMap.get(id);
+		return wavesMap.get(id).size();
 	}
 	
 }
