@@ -64,7 +64,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	public static final int MAX_BLIPS = 150;
 	private int NUM_OF_VOTES = 0;
 
-	final String WELCOME_SELF = "Autobots roll out.";
+	final static String WELCOME_SELF = "Autobots roll out.";
 	
 	
 	public Auto_BotServlet() {
