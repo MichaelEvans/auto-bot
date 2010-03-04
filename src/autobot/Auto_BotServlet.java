@@ -49,7 +49,10 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	private final IBlipProcessor blipProcessor = new BlipProcessorMediator();
 	
 	private ArrayList<String> activeWavers = new ArrayList<String>();
-	private Set<String> privelegedWavers = new HashSet<String> () {{
+	private Set<String> privelegedWavers = new HashSet<String> () {
+		private static final long serialVersionUID = -2860494720744602410L;
+
+	{
 		add("n.lefler@googlewave.com");
 		add("bmwracer0@googlewave.com");
 		add("dforsythe@googlewave.com");
@@ -68,7 +71,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	
 	
 	public Auto_BotServlet() {
-		log.log(Level.INFO, "I'm started.");
+		log.log(Level.INFO, "I've started.");
 	}
 	
 	public void processEvents(RobotMessageBundle bundle) {
@@ -143,7 +146,6 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	}
 
 	private void processBlip(Blip blip, Wavelet wavelet) {
-		String blipAuthor = blip.getCreator();
 		String id = wavelet.getWaveId();
 		
 		HashMap<String, Object> dataMap = new HashMap<String, Object>();
