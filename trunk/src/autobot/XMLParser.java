@@ -13,10 +13,23 @@ import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 public class XMLParser{
+	public static Document getDocument(String uri) throws ParserConfigurationException, SAXException, IOException {
+		DocumentBuilderFactory dBF;
+		DocumentBuilder builder;
+		Document doc;
+		
+		dBF = DocumentBuilderFactory.newInstance();
+		builder = dBF.newDocumentBuilder();
+		doc = builder.parse(uri);
+		
+		return doc;
+	}
 	
 	public static String getImage(int Zip) throws IOException{
 		URL url = new URL("http://weather.yahooapis.com/forecastrss?p=" + Zip);
@@ -51,6 +64,7 @@ public class XMLParser{
 		in.close();
 		return image;
 	}
+	
 	public static String getTemp(int Zip) throws IOException{
 		URL url = new URL("http://weather.yahooapis.com/forecastrss?p=" + Zip);
 		InputStream input = url.openStream();
@@ -84,6 +98,7 @@ public class XMLParser{
 		in.close();
 		return current;
 	}
+	
 	public static String getForecast(int Zip) throws IOException{
 		URL url = new URL("http://weather.yahooapis.com/forecastrss?p=" + Zip);
 		InputStream input = url.openStream();
@@ -117,6 +132,7 @@ public class XMLParser{
 		in.close();
 		return forecast;
 	}
+	
 	public static String getLocation(int Zip) throws IOException{
 		URL url = new URL("http://weather.yahooapis.com/forecastrss?p=" + Zip);
 		InputStream input = url.openStream();
@@ -127,12 +143,4 @@ public class XMLParser{
 		in.close();
 		return info.substring(info.indexOf(">")+1, info.lastIndexOf("<"));
 	}
-	/*public static void main(String[] args){
-		try {
-			System.out.println(XMLParser.getLocation(20740));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}*/
 }

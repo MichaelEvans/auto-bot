@@ -28,8 +28,11 @@ public class VoteToBanBlipProcessor implements IBlipProcessor {
 
 	public Wavelet processBlip(Blip blip, Wavelet wavelet,
 			Map<String, Object> dataMap) {
+		TextView rootBlipDoc;
+		
 		String blipAuthor = blip.getCreator();
-
+		rootBlipDoc = wavelet.getRootBlip().getDocument();
+		
 		if (((String)dataMap.get("banType")).contains("ban")) {
 			if (cantBan.containsKey(blipAuthor)) {
 				// Allow if user has been baned for longer than 10 minues
@@ -43,7 +46,6 @@ public class VoteToBanBlipProcessor implements IBlipProcessor {
 			}
 
 			Matcher mtchr = voteToBanPattern.matcher(blip.getDocument().getText());
-			TextView rootBlipDoc = wavelet.getRootBlip().getDocument();
 			String usr;
 
 			mtchr.lookingAt();
@@ -102,7 +104,6 @@ public class VoteToBanBlipProcessor implements IBlipProcessor {
 			}
 
 			Matcher mtchr = voteToUnbanPattern.matcher(blip.getDocument().getText());
-			TextView rootBlipDoc = wavelet.getRootBlip().getDocument();
 			String usr;
 
 			mtchr.lookingAt();
@@ -125,7 +126,7 @@ public class VoteToBanBlipProcessor implements IBlipProcessor {
 				if (banMap.containsKey(usr)) {
 					banMap.get(usr).add(blipAuthor);
 				} else {
-					banMap.put(usr, new HashSet());
+					banMap.put(usr, new HashSet<String>());
 					banMap.get(usr).add(blipAuthor);
 				}
 
