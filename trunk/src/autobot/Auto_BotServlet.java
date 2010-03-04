@@ -113,6 +113,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				}
 			}*/
 
+			log.log(Level.INFO, "AUTO-BOT: Processing event: " + e.toString());
 			if (e.getType() == EventType.BLIP_SUBMITTED) {				
 				int numBlips;
 				

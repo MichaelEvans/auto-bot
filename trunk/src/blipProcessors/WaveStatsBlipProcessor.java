@@ -6,8 +6,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+
+import autobot.Auto_BotServlet;
 
 import com.google.wave.api.Blip;
 import com.google.wave.api.Wavelet;
@@ -19,12 +23,14 @@ import com.google.wave.api.Wavelet;
  */
 public class WaveStatsBlipProcessor implements IBlipProcessor {
 	public final static String WAVE_STATS = "get-wave-stats";
+	public static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName());
 	
 	final static Pattern getWaveStatsPattern = Pattern.compile(CMD_OPEN_IDENT + WAVE_STATS + CMD_CLOSE_IDENT);
 	
 	final static SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
 
-	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {		
+	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
+		log.log(Level.INFO, "AUTO-BOT: Processing 'get-wave-stats'");
 		StringBuffer responseBuffer = new StringBuffer();
 		
 		responseBuffer.append("\n\n");
