@@ -67,7 +67,8 @@ public class WaveStatsBlipProcessor implements IBlipProcessor {
 		responseBuffer.append(blip.getBlipId());
 		responseBuffer.append("\n\n");
 		
-		blip.getDocument().append(responseBuffer.toString());
+		//blip.getDocument().append(responseBuffer.toString());
+		blip.getDocument().replace(responseBuffer.toString());
 		
 		return wavelet;
 	}
