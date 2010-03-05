@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jdo.PersistenceManager;
-import autobot.WaveStats;
+import stats.WaveStats;
 import java.util.Collections;
 
 import blipProcessors.IBlipProcessor;
