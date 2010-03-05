@@ -1,4 +1,4 @@
-package stats;
+package autobot;
 
 import com.google.appengine.api.datastore.Key;
 import javax.jdo.annotations.IdGeneratorStrategy;
@@ -11,7 +11,7 @@ import javax.jdo.annotations.PrimaryKey;
 public class WaveStats implements Comparable {
 	@PrimaryKey
     @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
-    private Key key;
+    private Key key; 
 	
     @Persistent
     private String waveID;
