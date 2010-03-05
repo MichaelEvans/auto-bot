@@ -34,12 +34,14 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jdo.PersistenceManager;
-import stats.*;
+import autobot.WaveStats;
 import java.util.Collections;
 
 import blipProcessors.IBlipProcessor;
 import blipProcessors.BlipProcessorMediator;
 import blipProcessors.VoteToBanBlipProcessor;
+
+import autobot.PMF;
 
 
 import com.google.wave.api.*;
@@ -51,6 +53,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	
 	private static Map<String, Set<String>> wavesMap = new HashMap<String, Set<String>>();
 	private static Map<String, Integer> blipsMap = new TreeMap<String, Integer>();
+	List<WaveStats> ideas;
 	
 	private final IBlipProcessor blipProcessor = new BlipProcessorMediator();
 	
@@ -79,34 +82,39 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	
 	public Auto_BotServlet() {
 		log.log(Level.INFO, "I've started.");
-		try {
-			pm = PMF.get().getPersistenceManager();
-		}
-		catch (Exception e) {
-			log.log(Level.INFO, "Fuck: " + e);
-		}
+		ideas = new ArrayList<WaveStats>();
 	}
 	
 	private void makeBlipsMap() {
 		String query = "select from " + stats.WaveStats.class.getName() + "";
-	    List<WaveStats> ideas = (List<WaveStats>) pm.newQuery(query).execute();
-	    for (WaveStats i : ideas) {
-	    	blipsMap.put(i.getWaveID(), i.getBlips());
-	    }
+		if (pm == null)
+			log.log(Level.INFO,"pm is null");
+		else if (query == null)
+			log.log(Level.INFO, "query is null");
+		else
+			ideas = (List<WaveStats>) pm.newQuery(query).execute();
+	    log.log(Level.INFO, "AUTO-BOT: Creating blips map.");
 	}
 	
 	public void processEvents(RobotMessageBundle bundle) {
 		Wavelet wavelet = bundle.getWavelet();
 		String id = wavelet.getWaveId();
-		makeBlipsMap();
+		try {
+			pm = PMF.get().getPersistenceManager();
+		}
+		catch (NoClassDefFoundError e) {
+			log.log(Level.INFO, "Help: " + e);
+		}
+		catch (Exception e) {
+			log.log(Level.INFO, "Fuck me: " + e);
+			e.printStackTrace();
+		}
+		//makeBlipsMap();
 		
 		if (!wavesMap.containsKey(id)) {
 			wavesMap.put(id, new HashSet<String>());
 		}
-		
-		if (!blipsMap.containsKey(id)) {
-			blipsMap.put(id, 0);
-		}
+			
 		
 		/* Say hello */
 		if (bundle.wasSelfAdded()) {
@@ -139,12 +147,30 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				}
 			}*/
 
-			if (e.getType() == EventType.BLIP_SUBMITTED) {				
+			if (e.getType() == EventType.BLIP_SUBMITTED) {
+				WaveStats wah = null;
+				for (WaveStats ws : ideas) {
+					if (ws.getWaveID().equals(id)) {
+						wah = ws;
+						break;
+					}
+				}
+				if (wah == null) {
+					try {
+						wah = new WaveStats(id, 0);
+						pm.makePersistent(wah);
+					}
+					catch (Exception ex) {
+						log.log(Level.INFO, "Fuck couldn't persist");
+					}
+					makeBlipsMap();
+				}
 				int numBlips, numBlips1;
 				
 				wavesMap.get(id).add(e.getBlip().getBlipId());
 				numBlips = wavesMap.get(id).size();
-				numBlips1 = blipsMap.put(id, blipsMap.get(id) + 1) + 1;
+				numBlips1 = wah.getBlips() + 1;
+				wah.setBlips(numBlips1);
 				
 				//log.log(Level.INFO, "Auto-Bot unique id: " + uniqueID);
 				//log.log(Level.INFO, "Wave " + wavelet.getWaveId() + " (" + wavelet.getTitle() + ") has " + numBlips + " blips.");
@@ -173,6 +199,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				blipsMap.put(id, blipsMap.get(id) - 1);
 			}
 		}
+		pm.close();
 	}
 
 	private void processBlip(Blip blip, Wavelet wavelet) {
