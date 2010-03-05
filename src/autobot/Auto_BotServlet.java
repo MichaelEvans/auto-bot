@@ -24,13 +24,18 @@
  */
 package autobot;
 
+import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.jdo.PersistenceManager;
+import stats.*;
+import java.util.Collections;
 
 import blipProcessors.IBlipProcessor;
 import blipProcessors.BlipProcessorMediator;
@@ -45,6 +50,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	private final long uniqueID = System.nanoTime();
 	
 	private static Map<String, Set<String>> wavesMap = new HashMap<String, Set<String>>();
+	private static Map<String, Integer> blipsMap = new TreeMap<String, Integer>();
 	
 	private final IBlipProcessor blipProcessor = new BlipProcessorMediator();
 	
@@ -66,20 +72,40 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	
 	public static final int MAX_BLIPS = 150;
 	private int NUM_OF_VOTES = 0;
+	private PersistenceManager pm;
 
 	final static String WELCOME_SELF = "Autobots roll out.";
 	
 	
 	public Auto_BotServlet() {
 		log.log(Level.INFO, "I've started.");
+		try {
+			pm = PMF.get().getPersistenceManager();
+		}
+		catch (Exception e) {
+			log.log(Level.INFO, "Fuck: " + e);
+		}
+	}
+	
+	private void makeBlipsMap() {
+		String query = "select from " + stats.WaveStats.class.getName() + "";
+	    List<WaveStats> ideas = (List<WaveStats>) pm.newQuery(query).execute();
+	    for (WaveStats i : ideas) {
+	    	blipsMap.put(i.getWaveID(), i.getBlips());
+	    }
 	}
 	
 	public void processEvents(RobotMessageBundle bundle) {
 		Wavelet wavelet = bundle.getWavelet();
 		String id = wavelet.getWaveId();
+		makeBlipsMap();
 		
 		if (!wavesMap.containsKey(id)) {
 			wavesMap.put(id, new HashSet<String>());
+		}
+		
+		if (!blipsMap.containsKey(id)) {
+			blipsMap.put(id, 0);
 		}
 		
 		/* Say hello */
@@ -113,14 +139,16 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				}
 			}*/
 
-			log.log(Level.INFO, "AUTO-BOT: Processing event: " + e.toString());
 			if (e.getType() == EventType.BLIP_SUBMITTED) {				
-				int numBlips;
+				int numBlips, numBlips1;
 				
 				wavesMap.get(id).add(e.getBlip().getBlipId());
 				numBlips = wavesMap.get(id).size();
+				numBlips1 = blipsMap.put(id, blipsMap.get(id) + 1) + 1;
+				
 				//log.log(Level.INFO, "Auto-Bot unique id: " + uniqueID);
 				//log.log(Level.INFO, "Wave " + wavelet.getWaveId() + " (" + wavelet.getTitle() + ") has " + numBlips + " blips.");
+				log.log(Level.INFO, "There are " + numBlips1 + " blips in this wave!");
 				
 				if (numBlips % 50 == 0) {
 					log.log(Level.INFO, "AUTO-BOT: Wave '" + wavelet.getTitle() + "' has reached " + numBlips + " blips.");
@@ -142,6 +170,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			}
 			if (e.getType() == EventType.BLIP_DELETED) {
 				wavesMap.get(id).remove(e.getBlip().getBlipId());
+				blipsMap.put(id, blipsMap.get(id) - 1);
 			}
 		}
 	}

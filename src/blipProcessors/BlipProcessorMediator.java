@@ -39,7 +39,7 @@ public class BlipProcessorMediator implements IBlipProcessor {
 	
 	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
 		String commandText = (String)dataMap.get("commandText");
-		
+		log.log(Level.INFO, "AUTO-BOT: Received '" + commandText + "'");
 		try {
 			return getProcessor(commandText).processBlip(blip, wavelet, dataMap);
 		} catch (InvalidBlipProcessorException e) {
@@ -62,8 +62,8 @@ public class BlipProcessorMediator implements IBlipProcessor {
 			return processorsMap.get("voteToUnBan");
 		} else if (commandText.startsWith(startsWithMap.get("autoInvite"))) {
 			return new AutoInviteBlipProcessor();
-		//} else if (commandText.startsWith(startsWithMap.get("waveStats"))) {
-			//return new WaveStatsBlipProcessor();
+		} else if (commandText.startsWith(startsWithMap.get("waveStats"))) {
+			return new WaveStatsBlipProcessor();
 		} else if (commandText.startsWith(startsWithMap.get("runTests"))) {
 			return new RunTestsBlipProcessor();
 		} else {
