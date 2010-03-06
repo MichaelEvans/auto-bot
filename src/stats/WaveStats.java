@@ -8,7 +8,7 @@ import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
 @PersistenceCapable(identityType = IdentityType.APPLICATION)
-public class WaveStats implements Comparable {
+public class WaveStats implements Comparable<WaveStats> {
 	@PrimaryKey
     @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
     private Key key;
@@ -44,8 +44,9 @@ public class WaveStats implements Comparable {
 		this.blips = blips;
 	}
 
-	public int compareTo(Object o) {
+	public int compareTo(WaveStats w) {
 		return 1; //TODO Make this better
+		// why is this class comparable?
 	}
     
 }
