@@ -109,7 +109,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			log.log(Level.INFO, "Fuck me: " + e);
 			e.printStackTrace();
 		}
-		//makeBlipsMap();
+		makeBlipsMap();
 		
 		if (!wavesMap.containsKey(id)) {
 			wavesMap.put(id, new HashSet<String>());
