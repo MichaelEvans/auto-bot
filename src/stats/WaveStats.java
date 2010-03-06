@@ -44,7 +44,6 @@ public class WaveStats implements Comparable {
 		this.blips = blips;
 	}
 
-	@Override
 	public int compareTo(Object o) {
 		return 1; //TODO Make this better
 	}
