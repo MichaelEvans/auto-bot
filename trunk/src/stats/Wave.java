@@ -1,5 +1,4 @@
-package Stats;
-
+package stats;
 import java.util.*;
 
 public class Wave {
