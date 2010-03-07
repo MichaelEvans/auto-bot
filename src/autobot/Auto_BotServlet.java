@@ -97,9 +97,10 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		}
 		else if (query == null) {
 			log.log(Level.INFO, "query is null");
+
 		}
 		else {
-			log.log(Level.INFO, "AUTO-BOT: Creating blips map.");
+		//	log.log(Level.INFO, "AUTO-BOT: Creating blips map.");
 			
 			tempList = (List<WaveStats>) pm.newQuery(query).execute();
 			for (WaveStats ws : tempList) {
