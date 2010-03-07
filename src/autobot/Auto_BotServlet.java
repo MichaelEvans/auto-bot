@@ -132,6 +132,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			wave= new Wave(wavelet.getTitle());
 			
 			for(String name: wavelet.getParticipants()){
+				log.log(Level.INFO,"Adding "+name+" to the wave.Users");
 				wave.addUser(new User(name));
 			}
 			
