@@ -94,4 +94,35 @@ public class Wave {
 		return Users.get(Users.indexOf(name));
 	}
 	
+	public void updateBlipTotalsFromUsers(){
+		int updatedBlipCount=0;
+		for(User u: Users){
+			updatedBlipCount+=u.getBlipCount();			
+		}
+		BlipCount=updatedBlipCount;
+	}
+	
+	public void updateDeleteTotalsFromUsers(){
+		int updatedDeleteCount=0;
+		for(User u: Users){
+			updatedDeleteCount+=u.getDeleteCount();			
+		}
+		DeleteCount=updatedDeleteCount;
+	}
+	
+	public void updateEditTotalsFromUsers(){
+		int updatedEditCount=0;
+		for(User u: Users){
+			updatedEditCount+=u.getEditCount();			
+		}
+		EditCount=updatedEditCount;
+	}
+	
+	public void updateStatTotalsFromUsers(){
+		updateBlipTotalsFromUsers();
+		updateDeleteTotalsFromUsers();
+		updateEditTotalsFromUsers();
+
+	}
+	
 }
