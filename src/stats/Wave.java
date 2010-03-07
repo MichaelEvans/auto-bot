@@ -8,7 +8,7 @@ public class Wave {
 	private int EditCount = 0;
 	private int DeleteCount = 0;
 	
-	private ArrayList<User> Users;
+	private TreeMap<String,User> Users;
 	
 	public Wave(Wave wave){
 		this.Title = wave.Title;
@@ -17,19 +17,19 @@ public class Wave {
 		this.DeleteCount = wave.DeleteCount;
 	}
 	
-	public Wave(String Title,ArrayList<User> Users){
+	public Wave(String Title,TreeMap<String,User> Users){
 		this.Title = Title;
-		this.Users.addAll(Users);
+		this.Users.putAll(Users);
 	}
 	
 	public Wave(String Title){
 		this.Title = Title;
-		this.Users = new ArrayList<User>();
+		this.Users = new TreeMap<String,User>();
 	}
 	
 	public Wave(){
 		this.Title = "DefaultTitle";
-		this.Users = new ArrayList<User>();
+		this.Users = new TreeMap<String,User>();
 	}
 	
 	public String getTitle(){
@@ -86,17 +86,17 @@ public class Wave {
 		return Users.size();
 	}
 	
-	public void addUser(User user){
-		Users.add(user);
+	public User getUser(String name){
+		return Users.get(name);
 	}
 	
-	public User getUser(String name){
-		return Users.get(Users.indexOf(name));
+	public void addUser(User user){
+		Users.put(user.getName(),user);
 	}
 	
 	public void updateBlipTotalsFromUsers(){
 		int updatedBlipCount=0;
-		for(User u: Users){
+		for(User u: Users.values()){
 			updatedBlipCount+=u.getBlipCount();			
 		}
 		BlipCount=updatedBlipCount;
@@ -104,7 +104,7 @@ public class Wave {
 	
 	public void updateDeleteTotalsFromUsers(){
 		int updatedDeleteCount=0;
-		for(User u: Users){
+		for(User u: Users.values()){
 			updatedDeleteCount+=u.getDeleteCount();			
 		}
 		DeleteCount=updatedDeleteCount;
@@ -112,7 +112,7 @@ public class Wave {
 	
 	public void updateEditTotalsFromUsers(){
 		int updatedEditCount=0;
-		for(User u: Users){
+		for(User u: Users.values()){
 			updatedEditCount+=u.getEditCount();			
 		}
 		EditCount=updatedEditCount;
