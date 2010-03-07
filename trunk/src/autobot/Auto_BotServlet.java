@@ -34,8 +34,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.jdo.PersistenceManager;
-import stats.WaveStats;
+import stats.*;
 import java.util.Collections;
+
 
 import blipProcessors.IBlipProcessor;
 import blipProcessors.BlipProcessorMediator;
@@ -54,6 +55,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	private static Map<String, Set<String>> wavesMap = new HashMap<String, Set<String>>();
 	private static Map<String, Integer> blipsMap = new TreeMap<String, Integer>();
 	Map<String, WaveStats> waveStatsMap;
+	//private static ArrayList<Wave> waveList= new ArrayList<Wave>();
+	public static Wave wave;
 	
 	private final IBlipProcessor blipProcessor = new BlipProcessorMediator();
 	
@@ -126,6 +129,12 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		if (bundle.wasSelfAdded()) {
 			WaveStats waveStats;
 			
+			wave= new Wave(wavelet.getTitle());
+			
+			for(String name: wavelet.getParticipants()){
+				wave.addUser(new User(name));
+			}
+			
 			log.log(Level.INFO, "AUTO-BOT: Attempting to greet the wave.");
 			
 			Image optimusTransform = new Image("http://imgur.com/m66zH.gif", 160, 120, "");
@@ -185,6 +194,10 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				numBlips = waveStats.getBlips() + 1;
 				waveStats.setBlips(numBlips);
 				
+				//Statistics
+				wave.getUser(e.getBlip().getCreator()).incrementBlipCount();
+				
+				
 				//log.log(Level.INFO, "Auto-Bot unique id: " + uniqueID);
 				//log.log(Level.INFO, "Wave " + wavelet.getWaveId() + " (" + wavelet.getTitle() + ") has " + numBlips + " blips.");
 				log.log(Level.INFO, "There are " + numBlips + " blips in this wave!");
@@ -209,7 +222,12 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			}
 			if (e.getType() == EventType.BLIP_DELETED) {
 				waveStatsMap.get(id).setBlips(waveStatsMap.get(id).getBlips() - 1);
+				wave.getUser(e.getBlip().getCreator()).incrementDeleteCount();
 			}
+			if (e.getType() == EventType.BLIP_TIMESTAMP_CHANGED ){
+				wave.getUser(e.getBlip().getCreator()).incrementEditCount();
+			}
+				
 		}
 		pm.close();
 	}

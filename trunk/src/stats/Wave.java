@@ -85,4 +85,13 @@ public class Wave {
 	public int getNumberOfUsers(){
 		return Users.size();
 	}
+	
+	public void addUser(User user){
+		Users.add(user);
+	}
+	
+	public User getUser(String name){
+		return Users.get(Users.indexOf(name));
+	}
+	
 }
