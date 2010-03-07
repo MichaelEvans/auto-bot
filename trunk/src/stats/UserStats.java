@@ -1,6 +1,6 @@
 package stats;
 
-public class User {
+public class UserStats {
 	
 	private String Name;
 	private int BlipCount = 0;
@@ -9,11 +9,11 @@ public class User {
 	private WordCount WordCounts;
 	
 	
-	public User(){
+	public UserStats(){
 		this.Name="DefaultUser";
 	}
 	
-	public User(String Name){
+	public UserStats(String Name){
 		this.Name=Name;
 	}
 	
