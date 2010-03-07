@@ -195,6 +195,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				waveStats.setBlips(numBlips);
 				
 				//Statistics
+				log.log(Level.INFO,"Attempting to increment blip for "+ e.getBlip().getCreator());
 				wave.getUser(e.getBlip().getCreator()).incrementBlipCount();
 				
 				
