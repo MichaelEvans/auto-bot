@@ -1,4 +1,4 @@
-package Stats;
+package stats;
 
 public class Word {
 	public String string = "DefaultWord";
