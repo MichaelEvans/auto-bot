@@ -94,6 +94,10 @@ public class Wave {
 		Users.put(user.getName(),user);
 	}
 	
+	public void addUser(String name){
+		Users.put(name,new User(name));
+	}
+	
 	public void updateBlipTotalsFromUsers(){
 		int updatedBlipCount=0;
 		for(User u: Users.values()){
