@@ -134,7 +134,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			
 			for(String name: wavelet.getParticipants()){
 				log.log(Level.INFO,"Adding "+name+" to the wave.Users");
-				wave.addUser(new User(name));
+				wave.addUser(new UserStats(name));
 			}
 			
 			log.log(Level.INFO, "AUTO-BOT: Attempting to greet the wave.");
@@ -198,6 +198,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				
 				//Statistics
 				log.log(Level.INFO,"Attempting to increment blip for "+ e.getBlip().getCreator());
+				if(wave == null)
+					wave = new Wave(wavelet.getTitle());
 				if(wave.getUser(e.getBlip().getCreator())== null)
 					wave.addUser(e.getBlip().getCreator());
 				wave.getUser(e.getBlip().getCreator()).incrementBlipCount();
