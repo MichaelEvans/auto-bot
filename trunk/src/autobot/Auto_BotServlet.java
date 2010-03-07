@@ -263,7 +263,21 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	}
 	
 	private int getNumberOfBlipsInWave(String id) {
-		return wavesMap.get(id).size();
+		WaveStats waveStats;
+		
+		waveStats = waveStatsMap.get(id);
+		if (waveStats == null) {
+			try {
+				waveStats = new WaveStats(id, 0);
+				pm.makePersistent(waveStats);
+			}
+			catch (Exception ex) {
+				log.log(Level.INFO, "Fuck couldn't persist");
+			}
+			makeBlipsMap();
+		}
+		
+		return waveStats.getBlips();
 	}
 	
 }
