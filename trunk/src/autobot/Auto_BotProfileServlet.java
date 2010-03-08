@@ -15,7 +15,7 @@ public class Auto_BotProfileServlet extends AbstractRobot {
  
   @Override
   public String getRobotAvatarUrl() {
-    return "http://i.imgur.com/CQoTo.png";
+	  return "http://auto-bot.appspot.com/_wave/autobot.png";
   }
  
   @Override
