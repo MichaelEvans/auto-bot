@@ -134,6 +134,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			
 			for(String name: wavelet.getParticipants()){
 				log.log(Level.INFO,"Adding "+name+" to the wave.Users");
+
 				wave.addUser(new UserStats(name));
 			}
 			
@@ -149,7 +150,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			waveStats = waveStatsMap.get(id);
 			if (waveStats == null) {
 				try {
-					waveStats = new WaveStats(id, 0);
+					waveStats = new WaveStats(id);
 					pm.makePersistent(waveStats);
 				}
 				catch (Exception ex) {
@@ -197,12 +198,15 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				waveStats.setBlips(numBlips);
 				
 				//Statistics
+				String BLIP_AUTHOR = e.getBlip().getCreator();
 				log.log(Level.INFO,"Attempting to increment blip for "+ e.getBlip().getCreator());
-				if(wave == null)
-					wave = new Wave(wavelet.getTitle());
-				if(wave.getUser(e.getBlip().getCreator())== null)
-					wave.addUser(e.getBlip().getCreator());
-				wave.getUser(e.getBlip().getCreator()).incrementBlipCount();
+				
+				if (waveStats.getUser(BLIP_AUTHOR) == null) {
+					UserStats user = new UserStats(BLIP_AUTHOR);
+					pm.makePersistent(user);
+					waveStats.addUser(user);
+				}
+				waveStats.getUser(BLIP_AUTHOR).incrementBlipCount();
 				
 				
 				//log.log(Level.INFO, "Auto-Bot unique id: " + uniqueID);
