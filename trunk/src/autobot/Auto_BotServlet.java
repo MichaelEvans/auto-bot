@@ -197,7 +197,11 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				//Statistics
 				String BLIP_AUTHOR = e.getBlip().getCreator();
 				log.log(Level.INFO,"Attempting to increment blip for "+ e.getBlip().getCreator());
-				
+				if (waveStats.getUser(BLIP_AUTHOR) == null) {
+					UserStats user = new UserStats(BLIP_AUTHOR);
+					pm.makePersistent(user);
+					waveStats.addUser(user);
+				}
 				
 				waveStats.getUser(BLIP_AUTHOR).incrementBlipCount();
 				
