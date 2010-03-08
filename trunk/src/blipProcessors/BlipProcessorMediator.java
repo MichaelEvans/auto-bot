@@ -38,7 +38,7 @@ public class BlipProcessorMediator implements IBlipProcessor {
 	}
 	
 	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
-		String commandText = (String)dataMap.get("commandText");
+		String commandText = ((String)dataMap.get("commandText")).trim();
 		log.log(Level.INFO, "AUTO-BOT: Received '" + commandText + "'");
 		try {
 			return getProcessor(commandText).processBlip(blip, wavelet, dataMap);

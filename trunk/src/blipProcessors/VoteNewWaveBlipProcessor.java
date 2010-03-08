@@ -22,7 +22,7 @@ public class VoteNewWaveBlipProcessor implements IBlipProcessor {
 		votes = new HashMap<String, Integer>();
 		numVotes  = votes.size();
 		voteCreator = blip.getCreator();
-		
+/*		TODO
 		blip.getDocument().append("\n" + NW_VOTE_QUOTE);
 		votes.put(voteCreator, 1);
 
@@ -41,9 +41,9 @@ public class VoteNewWaveBlipProcessor implements IBlipProcessor {
 		
 		if (numVotes > ((1/3) * (Integer)dataMap.get("numberOfActiveWavers"))) {
 			return WaveUtils.makeNewWavelet(wavelet);
-		}
+		}*/
 		
-		return wavelet;
+		return null;// wavelet;
 	}
 
 }

@@ -14,6 +14,7 @@ import stats.WaveStats;
 
 
 import autobot.Auto_BotServlet;
+import autobot.WaveUtils;
 
 import com.google.wave.api.Blip;
 import com.google.wave.api.Wavelet;
@@ -55,13 +56,13 @@ public class WaveStatsBlipProcessor implements IBlipProcessor {
 		responseBuffer.append(dataMap.get("waveletID"));
 		responseBuffer.append("\n\n");
 		
-		responseBuffer.append("Number of Human Wavers: ");
+/*		responseBuffer.append("Number of Human Wavers: ");
 		responseBuffer.append(getHumanWavers(wavelet.getParticipants()).size());
 		responseBuffer.append("\n\n");
 		
 		responseBuffer.append("Number of Bots: ");
 		responseBuffer.append(getBots(wavelet.getParticipants()).size());
-		responseBuffer.append("\n\n");
+		responseBuffer.append("\n\n");*/
 		
 		responseBuffer.append("Number of Blips (According to Auto-Bot): ");
 		responseBuffer.append(dataMap.get("numberOfBlips"));
@@ -76,7 +77,9 @@ public class WaveStatsBlipProcessor implements IBlipProcessor {
 		responseBuffer.append("DeleteCount:"+waveStats.getUser(blip.getCreator()).getDeleteCount()+"\n");
 		responseBuffer.append("EditCount:"+waveStats.getUser(blip.getCreator()).getEditCount()+"\n");
 		//blip.getDocument().append(responseBuffer.toString());
-		blip.getDocument().replace(responseBuffer.toString());
+		//blip.getDocument().replace(responseBuffer.toString());
+		WaveUtils.replaceBlip(blip, responseBuffer.toString());
+		log.log(Level.INFO, "Blip is now: " + blip.getContent());
 		
 		return wavelet;
 	}

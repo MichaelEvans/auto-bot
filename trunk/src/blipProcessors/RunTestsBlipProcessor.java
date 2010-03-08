@@ -13,12 +13,12 @@ public class RunTestsBlipProcessor implements IBlipProcessor {
 		
 	public Wavelet processBlip(Blip blip, Wavelet wavelet,
 			Map<String, Object> dataMap) {
-		Blip acknowledge = wavelet.appendBlip();
-		acknowledge.getDocument().append(ACKNOWLEDGE_TEXT);
+		wavelet.reply(ACKNOWLEDGE_TEXT);
+		//acknowledge.getDocument().append(ACKNOWLEDGE_TEXT);
 		
 		for (int i = 0; i < 3; ++i) {
 			for (int j = 0; j < 50; ++j) {
-				wavelet.appendBlip().getDocument().append(String.valueOf(j));
+				wavelet.reply(String.valueOf(j));
 			}
 		}
 		

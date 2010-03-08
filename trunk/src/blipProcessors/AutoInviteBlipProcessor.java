@@ -21,7 +21,7 @@ public class AutoInviteBlipProcessor implements IBlipProcessor {
 		Set<String> privelegedWavers = (HashSet<String>)dataMap.get("privelegedWavers");
 		
 		for (String usr : privelegedWavers) {
-			wavelet.addParticipant(usr);
+			wavelet.serialize().addParticipant(usr);
 		}
 		
 		return wavelet;

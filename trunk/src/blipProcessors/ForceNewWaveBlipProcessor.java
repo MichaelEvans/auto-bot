@@ -3,7 +3,7 @@ package blipProcessors;
 import java.util.Map;
 import java.util.HashSet;
 
-import autobot.Auto_BotProfileServlet;
+//import autobot.Auto_BotProfileServlet;
 import autobot.Auto_BotServlet;
 import autobot.WaveUtils;
 
@@ -17,7 +17,7 @@ public class ForceNewWaveBlipProcessor implements IBlipProcessor {
 		if (((HashSet<String>)dataMap.get("privelegedWavers")).contains(blip.getCreator())) {
 			Auto_BotServlet.log.info(blip.getCreator() + " is forcing a new wave.");
 			
-			return WaveUtils.makeNewWavelet(wavelet);
+			((Auto_BotServlet)dataMap.get("robot")).createNewWave(wavelet);
 		}
 		
 		return wavelet;

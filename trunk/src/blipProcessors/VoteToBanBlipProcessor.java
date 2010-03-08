@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.wave.api.Blip;
-import com.google.wave.api.TextView;
+//import com.google.wave.api.TextView;
 import com.google.wave.api.Wavelet;
 
 public class VoteToBanBlipProcessor implements IBlipProcessor {
@@ -28,7 +28,7 @@ public class VoteToBanBlipProcessor implements IBlipProcessor {
 
 	public Wavelet processBlip(Blip blip, Wavelet wavelet,
 			Map<String, Object> dataMap) {
-		TextView rootBlipDoc;
+	/*	TextView rootBlipDoc;
 		
 		String blipAuthor = blip.getCreator();
 		rootBlipDoc = wavelet.getRootBlip().getDocument();
@@ -93,9 +93,9 @@ public class VoteToBanBlipProcessor implements IBlipProcessor {
 				String message = "Incorrect command form. Correct form is !@vote-to-ban:<user>@googlewave.com@!";
 				wavelet.getRootBlip().getDocument().append("\n" + message);
 			}
-		} else {
+		} else {*/
 			/* The following if block can be removed once removeParticipant() works */
-			if (cantBan.containsKey(blipAuthor)) {
+/*			if (cantBan.containsKey(blipAuthor)) {
 				if (cantBan.get(blipAuthor) + 10*60*1000 < System.currentTimeMillis()) {
 					return wavelet;
 				} else {
@@ -149,7 +149,8 @@ public class VoteToBanBlipProcessor implements IBlipProcessor {
 			}
 		}
 
-		return wavelet;
+		return wavelet;*/
+		return null;
 	}
 
 }
