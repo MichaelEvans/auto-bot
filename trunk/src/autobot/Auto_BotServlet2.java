@@ -1,11 +1,16 @@
 package autobot;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import blipProcessors.*;
 
 import javax.jdo.PersistenceManager;
 
@@ -29,20 +34,36 @@ public class Auto_BotServlet2 extends AbstractRobot {
 	private int NUM_OF_VOTES = 0;
 	private PersistenceManager pm;
 	Map<String, WaveStats> waveStatsMap;
+	
+	private final IBlipProcessor blipProcessor = new BlipProcessorMediator();
+	
+	private ArrayList<String> activeWavers = new ArrayList<String>();
+	private Set<String> privelegedWavers = new HashSet<String> () {
+		private static final long serialVersionUID = -2860494720744602410L;
+
+	{
+		add("n.lefler@googlewave.com");
+		add("bmwracer0@googlewave.com");
+		add("dforsythe@googlewave.com");
+		add("themagnum@googlewave.com");
+		add("twyphoon@googlewave.com");
+		add("claudio.sayan@googlewave.com");
+		add("rgalginaitis@googlewave.com");
+		add("rob.kiefer@googlewave.com");
+		add("patrick.dattilio@googlewave.com");
+	}};
 
 	final static String WELCOME_SELF = "Autobots roll out.";
+	final String NEW_WAVE_INDICATOR = "We're rolling out!";
 
-	@Override
 	protected String getRobotName() {
 		return "Auto-Bot";
 	}
 
-	@Override
 	public String getRobotAvatarUrl() {
 		return "http://i.imgur.com/CQoTo.png";
 	}
 
-	@Override
 	public String getRobotProfilePageUrl() {
 		return "auto-bot.appspot.com";
 	}
@@ -69,23 +90,32 @@ public class Auto_BotServlet2 extends AbstractRobot {
 		}
 	}
 	
+	private void openPM() {
+		try {
+			pm = PMF.get().getPersistenceManager();
+		}
+		catch (Exception e) {
+			log.log(Level.INFO, "Error opening PersistenceManager");
+		}
+		makeBlipsMap();
+	}
+	
+	private void closePM() {
+		try {
+			pm.close();
+		}
+		catch (Exception e) {
+			log.log(Level.INFO, "Error closing PersistenceManager");
+		}
+	}
+	
 	
 	public void onWaveletSelfAdded(WaveletSelfAddedEvent event) {
 		Wavelet wavelet = event.getWavelet();
 		String id = wavelet.serialize().getWaveId();
-		WaveStats waveStats= null;
+		WaveStats waveStats = null;
 
-		try {
-			pm = PMF.get().getPersistenceManager();
-		}
-		catch (NoClassDefFoundError e) {
-			log.log(Level.INFO, "Help: " + e);
-		}
-		catch (Exception e) {
-			log.log(Level.INFO, "Fuck me: " + e);
-			e.printStackTrace();
-		}
-		makeBlipsMap();
+		openPM();
 
 		waveStats = waveStatsMap.get(id);
 		if (waveStats == null) {
@@ -100,10 +130,10 @@ public class Auto_BotServlet2 extends AbstractRobot {
 		}
 
 		for(String name: wavelet.getParticipants()){
-			log.log(Level.INFO,"Adding "+name+" to the wave.Users");
+			log.log(Level.INFO, "Adding " + name + " to the wave.Users");
 			if (waveStats.getUser(name) == null) {
 				UserStats user = new UserStats(name);
-				pm.makePersistent(user);
+				//pm.makePersistent(user);
 				waveStats.addUser(user);
 			}
 		}
@@ -117,7 +147,9 @@ public class Auto_BotServlet2 extends AbstractRobot {
 			
 		log.log(Level.INFO, "AUTO-BOT: Wave had " + waveStats.getBlips() + " blips when I entered.");
 		
-		log.log(Level.INFO, "AUTO-BOT: Successfully greeted the wave.");		
+		log.log(Level.INFO, "AUTO-BOT: Successfully greeted the wave.");
+		
+		closePM();
 	}
 	
 	public void onBlipSubmitted(BlipSubmittedEvent event){
@@ -126,17 +158,7 @@ public class Auto_BotServlet2 extends AbstractRobot {
 		String id = wavelet.serialize().getWaveId();
 		WaveStats waveStats= null;
 
-		try {
-			pm = PMF.get().getPersistenceManager();
-		}
-		catch (NoClassDefFoundError e) {
-			log.log(Level.INFO, "Help: " + e);
-		}
-		catch (Exception e) {
-			log.log(Level.INFO, "Fuck me: " + e);
-			e.printStackTrace();
-		}
-		makeBlipsMap();
+		openPM();
 
 		waveStats = waveStatsMap.get(id);
 		if (waveStats == null) {
@@ -176,15 +198,20 @@ public class Auto_BotServlet2 extends AbstractRobot {
 		
 		if (numBlips == MAX_BLIPS + NUM_OF_VOTES) {
 			log.log(Level.INFO, "AUTO-BOT: Blip count is " + numBlips + ", spawning a new wave.");
+			wavelet.reply(NEW_WAVE_INDICATOR);
+			Wavelet newWavelet = this.newWave(wavelet.getDomain(), wavelet.getParticipants());
+			newWavelet.setTitle(WaveUtils.getNewTitle(wavelet));
+			newWavelet.submitWith(wavelet);
 			
-			wavelet.createWavelet(wavelet.getParticipants(), "ID").setTitle(WaveUtils.getNewTitle(wavelet));
-		} else if (numBlips == MAX_BLIPS + NUM_OF_VOTES - 5) {
-			Blip blip = wavelet.appendBlip();
-			
-			blip.getDocument().append("=============================\n");
-			blip.getDocument().append("Rolling out in 5 blips.\n");
-			blip.getDocument().append("===========================\n");
+		} 
+		else if (numBlips == MAX_BLIPS + NUM_OF_VOTES - 5) {
+			Blip blip = wavelet.reply("");
+			WaveUtils.appendToBlip(blip, "=============================\n");
+			WaveUtils.appendToBlip(blip, "Rolling out in 5 blips.\n");
+			WaveUtils.appendToBlip(blip, "===========================\n");
 		}
+		
+		closePM();
 	}
 	
 	private void processBlip(Blip blip, Wavelet wavelet, WaveStats waveStats) {
@@ -192,22 +219,44 @@ public class Auto_BotServlet2 extends AbstractRobot {
 		
 		HashMap<String, Object> dataMap = new HashMap<String, Object>();
 		
-		dataMap.put("commandText", blip.getDocument().getText());
+		dataMap.put("commandText", blip.getContent());
 		dataMap.put("privelegedWavers", privelegedWavers);
 		dataMap.put("numberOfActiveWavers", getNumberOfActiveWavers());
 		dataMap.put("numberOfBlips", getNumberOfBlipsInWave(id));
-		dataMap.put("waveletID", wavelet.getWaveletId());
-		dataMap.put("waveID", wavelet.getWaveId());
+		dataMap.put("waveletID", wavelet.serialize().getWaveletId());
+		dataMap.put("waveID", wavelet.serialize().getWaveId());
 		dataMap.put("autobotID",uniqueID);
 		dataMap.put("WaveStats", waveStats);
-		if (blip.getDocument().getText().contains(VoteToBanBlipProcessor.VOTE_TO_BAN)) {
+		if (blip.getContent().contains(VoteToBanBlipProcessor.VOTE_TO_BAN)) {
 			dataMap.put("banType", "ban");
-		} else if (blip.getDocument().getText().contains(VoteToBanBlipProcessor.VOTE_TO_UNBAN)) {
+		} else if (blip.getContent().contains(VoteToBanBlipProcessor.VOTE_TO_UNBAN)) {
 			dataMap.put("banType", "unban");
 		}
 		
 		blipProcessor.processBlip(blip, wavelet, dataMap);
 		
 		//consolidateBlips(blip);
+	}
+	
+	private int getNumberOfActiveWavers() {
+		return activeWavers.size();
+	}
+	
+	private int getNumberOfBlipsInWave(String id) {
+		WaveStats waveStats;
+		
+		waveStats = waveStatsMap.get(id);
+		if (waveStats == null) {
+			try {
+				waveStats = new WaveStats(id, 0);
+				pm.makePersistent(waveStats);
+			}
+			catch (Exception ex) {
+				log.log(Level.INFO, "Fuck couldn't persist");
+			}
+			makeBlipsMap();
+		}
+		
+		return waveStats.getBlips();
 	}
 }
