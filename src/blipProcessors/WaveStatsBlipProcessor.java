@@ -10,6 +10,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import stats.WaveStats;
+
 
 import autobot.Auto_BotServlet;
 
@@ -32,6 +34,8 @@ public class WaveStatsBlipProcessor implements IBlipProcessor {
 	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
 		log.log(Level.INFO, "AUTO-BOT: Processing 'get-wave-stats'");
 		StringBuffer responseBuffer = new StringBuffer();
+		
+		WaveStats waveStats = (WaveStats) dataMap.get("WaveStats");
 		
 		responseBuffer.append("\n\n");
 		
@@ -68,9 +72,9 @@ public class WaveStatsBlipProcessor implements IBlipProcessor {
 		responseBuffer.append("\n\n");
 		
 		responseBuffer.append(blip.getCreator()+":\n");
-		//responseBuffer.append("BlipCount:"+autobot.Auto_BotServlet.waveStats.getUser(blip.getCreator()).getBlipCount()+"\n");
-		//responseBuffer.append("DeleteCount:"+autobot.Auto_BotServlet.waveStats.getUser(blip.getCreator()).getDeleteCount()+"\n");
-		//responseBuffer.append("EditCount:"+autobot.Auto_BotServlet.waveStats.getUser(blip.getCreator()).getEditCount()+"\n");
+		responseBuffer.append("BlipCount:"+waveStats.getUser(blip.getCreator()).getBlipCount()+"\n");
+		responseBuffer.append("DeleteCount:"+waveStats.getUser(blip.getCreator()).getDeleteCount()+"\n");
+		responseBuffer.append("EditCount:"+waveStats.getUser(blip.getCreator()).getEditCount()+"\n");
 		//blip.getDocument().append(responseBuffer.toString());
 		blip.getDocument().replace(responseBuffer.toString());
 		

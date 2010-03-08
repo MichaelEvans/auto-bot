@@ -216,7 +216,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 					log.log(Level.INFO, "AUTO-BOT: Wave '" + wavelet.getTitle() + "' has reached " + numBlips + " blips.");
 				}
 				
-				processBlip(e.getBlip(), wavelet);
+				processBlip(e.getBlip(), wavelet, waveStats);
 				
 				if (numBlips == MAX_BLIPS + NUM_OF_VOTES) {
 					log.log(Level.INFO, "AUTO-BOT: Blip count is " + numBlips + ", spawning a new wave.");
@@ -242,7 +242,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		pm.close();
 	}
 
-	private void processBlip(Blip blip, Wavelet wavelet) {
+	private void processBlip(Blip blip, Wavelet wavelet, WaveStats waveStats) {
 		String id = wavelet.getWaveId();
 		
 		HashMap<String, Object> dataMap = new HashMap<String, Object>();
@@ -254,6 +254,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		dataMap.put("waveletID", wavelet.getWaveletId());
 		dataMap.put("waveID", wavelet.getWaveId());
 		dataMap.put("autobotID",uniqueID);
+		dataMap.put("WaveStats", waveStats);
 		if (blip.getDocument().getText().contains(VoteToBanBlipProcessor.VOTE_TO_BAN)) {
 			dataMap.put("banType", "ban");
 		} else if (blip.getDocument().getText().contains(VoteToBanBlipProcessor.VOTE_TO_UNBAN)) {
