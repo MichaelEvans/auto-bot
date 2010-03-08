@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <w:robot xmlns:w="http://wave.google.com/extensions/robots/1.0">
+  <w:version>ffffde4b96ce40f6</w:version> 
+  <w:protocolversion>2.0</w:protocolversion> 
   <w:capabilities>
     <w:capability name="WAVELET_PARTICIPANTS_CHANGED" content="true" />
     <w:capability name="WAVELET_BLIP_CREATED" content="true" />
@@ -9,5 +11,4 @@
     <w:capability name="BLIP_SUBMITTED" content="true" />
     <w:capability name="DOCUMENT_CHANGED" content="true" />
   </w:capabilities>
-  <w:version>5</w:version>
 </w:robot>
