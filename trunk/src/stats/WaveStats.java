@@ -97,13 +97,4 @@ public class WaveStats {
 	public void addUser(UserStats name) {
 		users.add(name);
 	}
-
-	public ArrayList<UserStats> getUsers() {
-		return users;
-	}
-
-	public void setUsers(ArrayList<UserStats> users) {
-		this.users = users;
-	}
-	
 }
