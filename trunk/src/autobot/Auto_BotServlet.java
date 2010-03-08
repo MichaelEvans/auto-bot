@@ -56,7 +56,6 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	private static Map<String, Integer> blipsMap = new TreeMap<String, Integer>();
 	Map<String, WaveStats> waveStatsMap;
 	//private static ArrayList<Wave> waveList= new ArrayList<Wave>();
-	public static Wave wave;
 	
 	private final IBlipProcessor blipProcessor = new BlipProcessorMediator();
 	
@@ -112,7 +111,17 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	public void processEvents(RobotMessageBundle bundle) {
 		Wavelet wavelet = bundle.getWavelet();
 		String id = wavelet.getWaveId();
-		
+		WaveStats waveStats = waveStatsMap.get(id);
+		if (waveStats == null) {
+			try {
+				waveStats = new WaveStats(id, 0);
+				pm.makePersistent(waveStats);
+			}
+			catch (Exception ex) {
+				log.log(Level.INFO, "Fuck couldn't persist");
+			}
+			makeBlipsMap();
+		};
 		try {
 			pm = PMF.get().getPersistenceManager();
 		}
@@ -128,14 +137,14 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		
 		/* Say hello */
 		if (bundle.wasSelfAdded()) {
-			WaveStats waveStats;
-			
-			wave= new Wave(wavelet.getTitle());
-			
+						
 			for(String name: wavelet.getParticipants()){
 				log.log(Level.INFO,"Adding "+name+" to the wave.Users");
-
-				wave.addUser(new UserStats(name));
+				if (waveStats.getUser(name) == null) {
+					UserStats user = new UserStats(name);
+					pm.makePersistent(user);
+					waveStats.addUser(user);
+				}
 			}
 			
 			log.log(Level.INFO, "AUTO-BOT: Attempting to greet the wave.");
@@ -180,19 +189,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 
 			if (e.getType() == EventType.BLIP_SUBMITTED) {
 				int numBlips;
-				WaveStats waveStats;
 				
-				waveStats = waveStatsMap.get(id);
-				if (waveStats == null) {
-					try {
-						waveStats = new WaveStats(id, 0);
-						pm.makePersistent(waveStats);
-					}
-					catch (Exception ex) {
-						log.log(Level.INFO, "Fuck couldn't persist");
-					}
-					makeBlipsMap();
-				}
 				
 				numBlips = waveStats.getBlips() + 1;
 				waveStats.setBlips(numBlips);
@@ -201,11 +198,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 				String BLIP_AUTHOR = e.getBlip().getCreator();
 				log.log(Level.INFO,"Attempting to increment blip for "+ e.getBlip().getCreator());
 				
-				if (waveStats.getUser(BLIP_AUTHOR) == null) {
-					UserStats user = new UserStats(BLIP_AUTHOR);
-					pm.makePersistent(user);
-					waveStats.addUser(user);
-				}
+				
 				waveStats.getUser(BLIP_AUTHOR).incrementBlipCount();
 				
 				
@@ -233,10 +226,10 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			}
 			if (e.getType() == EventType.BLIP_DELETED) {
 				waveStatsMap.get(id).setBlips(waveStatsMap.get(id).getBlips() - 1);
-				wave.getUser(e.getBlip().getCreator()).incrementDeleteCount();
+				waveStats.getUser(e.getBlip().getCreator()).incrementDeleteCount();
 			}
 			if (e.getType() == EventType.BLIP_TIMESTAMP_CHANGED ){
-				wave.getUser(e.getBlip().getCreator()).incrementEditCount();
+				waveStats.getUser(e.getBlip().getCreator()).incrementEditCount();
 			}
 				
 		}
