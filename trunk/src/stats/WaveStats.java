@@ -22,7 +22,7 @@ public class WaveStats {
     private int blips;
     
     @Persistent
-    private ArrayList<UserStats> users;
+    private List<UserStats> users;
 
     /** Constructor for a wave with a specified number of blips.
      * 
