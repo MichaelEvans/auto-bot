@@ -1,17 +1,36 @@
 package stats;
 
+import com.google.appengine.api.datastore.Key;
+import javax.jdo.annotations.IdGeneratorStrategy;
+import javax.jdo.annotations.IdentityType;
+import javax.jdo.annotations.PersistenceCapable;
+import javax.jdo.annotations.Persistent;
+import javax.jdo.annotations.PrimaryKey;
+
+@PersistenceCapable(identityType = IdentityType.APPLICATION)
 public class UserStats {
+	@PrimaryKey
+    @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
+    private Key key;
 	
+	@Persistent
 	private String Name;
+	
+	@Persistent
 	private int BlipCount = 0;
+	
+	@Persistent
 	private int EditCount = 0;
+	
+	@Persistent
 	private int DeleteCount = 0;
-	private WordCount WordCounts;
+	
+	//private WordCount WordCounts;
 	
 	
-	public UserStats(){
+	/*public UserStats(){
 		this.Name="DefaultUser";
-	}
+	}*/
 	
 	public UserStats(String Name){
 		this.Name=Name;
@@ -79,12 +98,20 @@ public class UserStats {
 		this.DeleteCount+=numDeletes;
 	}
 	
-	public void updateFrequency(String message){
-		WordCounts.addMessage(message);
+	//public void updateFrequency(String message){
+	//	WordCounts.addMessage(message);
 		
-	}
+	//}
 	public String getNextFreqentWord(){
 		return "getNextFreqentWord Not Implemented";
+	}
+
+	public Key getKey() {
+		return key;
+	}
+
+	public void setKey(Key key) {
+		this.key = key;
 	}
 
 }
