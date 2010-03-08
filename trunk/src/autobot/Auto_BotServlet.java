@@ -111,17 +111,8 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 	public void processEvents(RobotMessageBundle bundle) {
 		Wavelet wavelet = bundle.getWavelet();
 		String id = wavelet.getWaveId();
-		WaveStats waveStats = waveStatsMap.get(id);
-		if (waveStats == null) {
-			try {
-				waveStats = new WaveStats(id, 0);
-				pm.makePersistent(waveStats);
-			}
-			catch (Exception ex) {
-				log.log(Level.INFO, "Fuck couldn't persist");
-			}
-			makeBlipsMap();
-		};
+		WaveStats waveStats = null;
+		
 		try {
 			pm = PMF.get().getPersistenceManager();
 		}
@@ -133,7 +124,18 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			e.printStackTrace();
 		}
 		makeBlipsMap();
-			
+		
+		waveStats = waveStatsMap.get(id);
+		if (waveStats == null) {
+			try {
+				waveStats = new WaveStats(id, 0);
+				pm.makePersistent(waveStats);
+			}
+			catch (Exception ex) {
+				log.log(Level.INFO, "Fuck couldn't persist");
+			}
+			makeBlipsMap();
+		}
 		
 		/* Say hello */
 		if (bundle.wasSelfAdded()) {
