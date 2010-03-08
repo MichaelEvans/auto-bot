@@ -1,61 +1,36 @@
-/* 
-  Copyright (c) 2009 Michael Evans, David Forsythe, Nathan Lefler
-  All rights reserved.
-
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
-  1. Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
-  2. Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
-
-  THIS SOFTWARE IS PROVIDED BY THE AUTHOR(S) ``AS IS'' AND ANY EXPRESS OR
-  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-  IN NO EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY DIRECT, INDIRECT,
-  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
 package autobot;
 
-import java.util.List;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.TreeMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import blipProcessors.*;
+
 import javax.jdo.PersistenceManager;
-import stats.*;
-import java.util.Collections;
 
-
-import blipProcessors.IBlipProcessor;
-import blipProcessors.BlipProcessorMediator;
-import blipProcessors.VoteToBanBlipProcessor;
-
-import autobot.PMF;
-
+import stats.UserStats;
+import stats.WaveStats;
 
 import com.google.wave.api.*;
+import com.google.wave.api.event.BlipSubmittedEvent;
+import com.google.wave.api.event.WaveletSelfAddedEvent;
 
-public class Auto_BotServlet extends AbstractRobotServlet {
+public class Auto_BotServlet extends AbstractRobot {
+
 	private static final long serialVersionUID = -8761201906629081656L;
 	public static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName());
 	private final long uniqueID = System.nanoTime();
-	
-	private static Map<String, Set<String>> wavesMap = new HashMap<String, Set<String>>();
-	private static Map<String, Integer> blipsMap = new TreeMap<String, Integer>();
+
+	public static final int MAX_BLIPS = 150;
+	private int NUM_OF_VOTES = 0;
+	private PersistenceManager pm;
 	Map<String, WaveStats> waveStatsMap;
-	//private static ArrayList<Wave> waveList= new ArrayList<Wave>();
 	
 	private final IBlipProcessor blipProcessor = new BlipProcessorMediator();
 	
@@ -74,18 +49,26 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		add("rob.kiefer@googlewave.com");
 		add("patrick.dattilio@googlewave.com");
 	}};
-	
-	public static final int MAX_BLIPS = 150;
-	private int NUM_OF_VOTES = 0;
-	private PersistenceManager pm;
 
 	final static String WELCOME_SELF = "Autobots roll out.";
-	
+	final String NEW_WAVE_INDICATOR = "We're rolling out!";
+
+	protected String getRobotName() {
+		return "Auto-Bot";
+	}
+
+	public String getRobotAvatarUrl() {
+		return "http://i.imgur.com/CQoTo.png";
+	}
+
+	public String getRobotProfilePageUrl() {
+		return "auto-bot.appspot.com";
+	}
 	
 	public Auto_BotServlet() {
-		log.log(Level.INFO, "I've started.");
-		waveStatsMap = new TreeMap<String, WaveStats>();
+		waveStatsMap = new HashMap<String, WaveStats>();
 	}
+
 	
 	private void makeBlipsMap() {
 		List<WaveStats> tempList;
@@ -108,23 +91,33 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		}
 	}
 	
-	public void processEvents(RobotMessageBundle bundle) {
-		Wavelet wavelet = bundle.getWavelet();
-		String id = wavelet.getWaveId();
-		WaveStats waveStats = null;
-		
+	private void openPM() {
 		try {
 			pm = PMF.get().getPersistenceManager();
 		}
-		catch (NoClassDefFoundError e) {
-			log.log(Level.INFO, "Help: " + e);
-		}
 		catch (Exception e) {
-			log.log(Level.INFO, "Fuck me: " + e);
-			e.printStackTrace();
+			log.log(Level.INFO, "Error opening PersistenceManager");
 		}
 		makeBlipsMap();
-		
+	}
+	
+	private void closePM() {
+		try {
+			pm.close();
+		}
+		catch (Exception e) {
+			log.log(Level.INFO, "Error closing PersistenceManager");
+		}
+	}
+	
+	
+	public void onWaveletSelfAdded(WaveletSelfAddedEvent event) {
+		Wavelet wavelet = event.getWavelet();
+		String id = wavelet.serialize().getWaveId();
+		WaveStats waveStats = null;
+
+		openPM();
+
 		waveStats = waveStatsMap.get(id);
 		if (waveStats == null) {
 			try {
@@ -136,128 +129,106 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 			}
 			makeBlipsMap();
 		}
+
+		for(String name: wavelet.getParticipants()){
+			log.log(Level.INFO, "Adding " + name + " to the wave.Users");
+			if (waveStats.getUser(name) == null) {
+				UserStats user = new UserStats(name);
+				waveStats.addUser(user);
+			}
+		}
+
+		log.log(Level.INFO, "AUTO-BOT: Attempting to greet the wave.");
 		
-		/* Say hello */
-		if (bundle.wasSelfAdded()) {
-						
-			for(String name: wavelet.getParticipants()){
-				log.log(Level.INFO,"Adding "+name+" to the wave.Users");
-				if (waveStats.getUser(name) == null) {
-					UserStats user = new UserStats(name);
-					pm.makePersistent(user);
-					waveStats.addUser(user);
-				}
-			}
+		Element optimusTransform = new Image("http://imgur.com/m66zH.gif", 160, 120, "");
+		Blip greeting = WaveUtils.reply(wavelet, WELCOME_SELF);
+		greeting.append(optimusTransform);
+		
+		waveStats.setBlips( wavelet.getRootBlip().getChildBlipIds().size());
 			
-			log.log(Level.INFO, "AUTO-BOT: Attempting to greet the wave.");
-			
-			Image optimusTransform = new Image("http://imgur.com/m66zH.gif", 160, 120, "");
-			Blip blip = wavelet.appendBlip();
-			blip.getDocument().append(WELCOME_SELF);
-			blip.getDocument().appendElement(optimusTransform);
-			
-			
-			
-			waveStats = waveStatsMap.get(id);
-			if (waveStats == null) {
-				try {
-					waveStats = new WaveStats(id);
-					pm.makePersistent(waveStats);
-				}
-				catch (Exception ex) {
-					log.log(Level.INFO, "Fuck couldn't persist");
-				}
-				makeBlipsMap();
-			}
-			
-			waveStats.setBlips( wavelet.getRootBlip().getChildBlipIds().size());
-				
-			log.log(Level.INFO, "AUTO-BOT: Wave had " + wavesMap.get(id) + " blips when I entered.");
-			
-			log.log(Level.INFO, "AUTO-BOT: Successfully greeted the wave.");
-		}
-
-		for (Event e : bundle.getEvents()) {
-			/*if (e.getType() == EventType.WAVELET_PARTICIPANTS_CHANGED) {
-				for (String usr : e.getRemovedParticipants()) {
-					activeWavers.remove(usr);
-				}
-				for (String usr : e.getAddedParticipants()) {
-					if (areBanned.contains(usr)) {
-						wavelet.removeParticipant(usr);
-					}
-				}
-			}*/
-
-			if (e.getType() == EventType.BLIP_SUBMITTED) {
-				int numBlips;
-				
-				
-				numBlips = waveStats.getBlips() + 1;
-				waveStats.setBlips(numBlips);
-				
-				//Statistics
-				String BLIP_AUTHOR = e.getBlip().getCreator();
-				log.log(Level.INFO,"Attempting to increment blip for "+ e.getBlip().getCreator());
-				if (waveStats.getUser(BLIP_AUTHOR) == null) {
-					UserStats user = new UserStats(BLIP_AUTHOR);
-					pm.makePersistent(user);
-					waveStats.addUser(user);
-				}
-				
-				waveStats.getUser(BLIP_AUTHOR).incrementBlipCount();
-				
-				
-				//log.log(Level.INFO, "Auto-Bot unique id: " + uniqueID);
-				//log.log(Level.INFO, "Wave " + wavelet.getWaveId() + " (" + wavelet.getTitle() + ") has " + numBlips + " blips.");
-				log.log(Level.INFO, "There are " + numBlips + " blips in this wave!");
-				
-				if (numBlips % 50 == 0) {
-					log.log(Level.INFO, "AUTO-BOT: Wave '" + wavelet.getTitle() + "' has reached " + numBlips + " blips.");
-				}
-				
-				processBlip(e.getBlip(), wavelet, waveStats);
-				
-				if (numBlips == MAX_BLIPS + NUM_OF_VOTES) {
-					log.log(Level.INFO, "AUTO-BOT: Blip count is " + numBlips + ", spawning a new wave.");
-					
-					wavelet.createWavelet(wavelet.getParticipants(), "ID").setTitle(WaveUtils.getNewTitle(wavelet));
-				} else if (numBlips == MAX_BLIPS + NUM_OF_VOTES - 5) {
-					Blip blip = wavelet.appendBlip();
-					
-					blip.getDocument().append("=============================\n");
-					blip.getDocument().append("Rolling out in 5 blips.\n");
-					blip.getDocument().append("===========================\n");
-				}
-			}
-			if (e.getType() == EventType.BLIP_DELETED) {
-				waveStatsMap.get(id).setBlips(waveStatsMap.get(id).getBlips() - 1);
-				waveStats.getUser(e.getBlip().getCreator()).incrementDeleteCount();
-			}
-			if (e.getType() == EventType.BLIP_TIMESTAMP_CHANGED ){
-				waveStats.getUser(e.getBlip().getCreator()).incrementEditCount();
-			}
-				
-		}
-		pm.close();
+		log.log(Level.INFO, "AUTO-BOT: Wave had " + waveStats.getBlips() + " blips when I entered.");
+		
+		log.log(Level.INFO, "AUTO-BOT: Successfully greeted the wave.");
+		
+		closePM();
 	}
+	
+	public void onBlipSubmitted(BlipSubmittedEvent event){
+		int numBlips = 0;
+		Wavelet wavelet = event.getWavelet();
+		String id = wavelet.serialize().getWaveId();
+		WaveStats waveStats= null;
+		
+		log.log(Level.INFO, "Testing a new count " + wavelet.getBlips().size());
 
+		openPM();
+
+		waveStats = waveStatsMap.get(id);
+		if (waveStats == null) {
+			try {
+				waveStats = new WaveStats(id, 0);
+				pm.makePersistent(waveStats);
+			}
+			catch (Exception ex) {
+				log.log(Level.INFO, "Fuck couldn't persist");
+			}
+			makeBlipsMap();
+		}
+		numBlips = waveStats.getBlips() + 1;
+		waveStats.setBlips(numBlips);
+		
+		//Statistics
+		String BLIP_AUTHOR = event.getBlip().getCreator();
+		log.log(Level.INFO,"Attempting to increment blip for "+ event.getBlip().getCreator());
+		if (waveStats.getUser(BLIP_AUTHOR) == null) {
+			UserStats user = new UserStats(BLIP_AUTHOR);
+			waveStats.addUser(user);
+		}
+		
+		waveStats.getUser(BLIP_AUTHOR).incrementBlipCount();
+		
+		
+		//log.log(Level.INFO, "Auto-Bot unique id: " + uniqueID);
+		//log.log(Level.INFO, "Wave " + wavelet.getWaveId() + " (" + wavelet.getTitle() + ") has " + numBlips + " blips.");
+		log.log(Level.INFO, "There are " + waveStats.getBlips() + " blips in this wave!");
+		
+		if (numBlips % 50 == 0) {
+			log.log(Level.INFO, "AUTO-BOT: Wave '" + wavelet.getTitle() + "' has reached " + numBlips + " blips.");
+		}
+		
+		processBlip(event.getBlip(), wavelet, waveStats);
+		
+		if (numBlips == MAX_BLIPS + NUM_OF_VOTES) {
+			log.log(Level.INFO, "AUTO-BOT: Blip count is " + numBlips + ", spawning a new wave.");
+			createNewWave(wavelet);			
+		} 
+		else if (numBlips == MAX_BLIPS + NUM_OF_VOTES - 5) {
+			Blip blip = WaveUtils.reply(wavelet, "");
+			WaveUtils.appendToBlip(blip, "=============================\n");
+			WaveUtils.appendToBlip(blip, "Rolling out in 5 blips.\n");
+			WaveUtils.appendToBlip(blip, "===========================\n");
+		}
+		
+		closePM();
+	}
+	
 	private void processBlip(Blip blip, Wavelet wavelet, WaveStats waveStats) {
-		String id = wavelet.getWaveId();
+		String id = wavelet.serialize().getWaveId();
 		
 		HashMap<String, Object> dataMap = new HashMap<String, Object>();
 		
-		dataMap.put("commandText", blip.getDocument().getText());
+		dataMap.put("commandText", blip.getContent());
 		dataMap.put("privelegedWavers", privelegedWavers);
 		dataMap.put("numberOfActiveWavers", getNumberOfActiveWavers());
 		dataMap.put("numberOfBlips", getNumberOfBlipsInWave(id));
-		dataMap.put("waveletID", wavelet.getWaveletId());
-		dataMap.put("waveID", wavelet.getWaveId());
+		dataMap.put("waveletID", wavelet.serialize().getWaveletId());
+		dataMap.put("waveID", wavelet.serialize().getWaveId());
 		dataMap.put("autobotID",uniqueID);
 		dataMap.put("WaveStats", waveStats);
-		if (blip.getDocument().getText().contains(VoteToBanBlipProcessor.VOTE_TO_BAN)) {
+		dataMap.put("robot", this);
+		if (blip.getContent().contains(VoteToBanBlipProcessor.VOTE_TO_BAN)) {
 			dataMap.put("banType", "ban");
-		} else if (blip.getDocument().getText().contains(VoteToBanBlipProcessor.VOTE_TO_UNBAN)) {
+		} else if (blip.getContent().contains(VoteToBanBlipProcessor.VOTE_TO_UNBAN)) {
 			dataMap.put("banType", "unban");
 		}
 		
@@ -265,7 +236,7 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		
 		//consolidateBlips(blip);
 	}
-
+	
 	private int getNumberOfActiveWavers() {
 		return activeWavers.size();
 	}
@@ -288,4 +259,10 @@ public class Auto_BotServlet extends AbstractRobotServlet {
 		return waveStats.getBlips();
 	}
 	
+	public void createNewWave(Wavelet wavelet) {
+		WaveUtils.reply(wavelet, NEW_WAVE_INDICATOR);
+		Wavelet newWavelet = this.newWave(wavelet.getDomain(), wavelet.getParticipants());
+		newWavelet.setTitle(WaveUtils.getNewTitle(wavelet));
+		newWavelet.submitWith(wavelet);
+	}
 }

@@ -1,8 +1,8 @@
 package autobot;
 
-import com.google.wave.api.ProfileServlet;
+import com.google.wave.api.*;
 
-public class Auto_BotProfileServlet extends ProfileServlet {
+public class Auto_BotProfileServlet extends AbstractRobot {
   /**
 	 * 
 	 */

@@ -6,30 +6,19 @@ import com.google.wave.api.Blip;
 import com.google.wave.api.Wavelet;
 
 public class WaveUtils {
-	public static Wavelet makeNewWavelet(Wavelet wavelet) {
-		/*final String NEW_WAVE_INDICATOR = "We're rolling out!";
-		
-		Auto_BotServlet.log.log(Level.INFO, "Creating new wave");
-		
-		wavelet.appendBlip().getDocument().append(NEW_WAVE_INDICATOR);
-		
-		String title = getNewTitle(wavelet);
-		Wavelet newWave = wavelet.createWavelet(wavelet.getParticipants(), "ID");
-		newWave.setTitle(title);
-		
-		Auto_BotServlet.log.log(Level.INFO, "Created new wave: " + title);
-		
-		return newWave;*/
-		return null;
-	}
 	
 	public static void appendToBlip(Blip b, String s) {
-		String newStr = b.getContent() + "\n" + s;
-		replaceBlip(b, newStr);
+		b.append("\n" + s);
 	}
 	
 	public static void replaceBlip(Blip b, String s) {
-		b.serialize().setContent(s);
+		b.all().delete();
+		b.append(s);
+		//Auto_BotServlet.log.log(Level.INFO, "Replacing content to:" + b.getContent());
+	}
+	
+	public static Blip reply(Wavelet w, String s) {
+		return w.reply("\n" + s);
 	}
 	
 	public static String getNewTitle(Wavelet wavelet) {
