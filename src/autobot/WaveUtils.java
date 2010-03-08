@@ -2,11 +2,12 @@ package autobot;
 
 import java.util.logging.Level;
 
+import com.google.wave.api.Blip;
 import com.google.wave.api.Wavelet;
 
 public class WaveUtils {
 	public static Wavelet makeNewWavelet(Wavelet wavelet) {
-		final String NEW_WAVE_INDICATOR = "We're rolling out!";
+		/*final String NEW_WAVE_INDICATOR = "We're rolling out!";
 		
 		Auto_BotServlet.log.log(Level.INFO, "Creating new wave");
 		
@@ -18,7 +19,17 @@ public class WaveUtils {
 		
 		Auto_BotServlet.log.log(Level.INFO, "Created new wave: " + title);
 		
-		return newWave;
+		return newWave;*/
+		return null;
+	}
+	
+	public static void appendToBlip(Blip b, String s) {
+		String newStr = b.getContent() + "\n" + s;
+		replaceBlip(b, newStr);
+	}
+	
+	public static void replaceBlip(Blip b, String s) {
+		b.serialize().setContent(s);
 	}
 	
 	public static String getNewTitle(Wavelet wavelet) {
