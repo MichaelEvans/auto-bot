@@ -67,9 +67,10 @@ public class WaveStatsBlipProcessor implements IBlipProcessor {
 		responseBuffer.append(blip.getBlipId());
 		responseBuffer.append("\n\n");
 		
-//		responseBuffer.append(blip.getCreator()+":\n");
-//		responseBuffer.append("Blips:"+autobot.Auto_BotServlet.wave.getUser(blip.getCreator()).getBlipCount());
-		
+		responseBuffer.append(blip.getCreator()+":\n");
+		responseBuffer.append("BlipCount:"+autobot.Auto_BotServlet.waveStats.getUser(blip.getCreator()).getBlipCount()+"\n");
+		responseBuffer.append("DeleteCount:"+autobot.Auto_BotServlet.waveStats.getUser(blip.getCreator()).getDeleteCount()+"\n");
+		responseBuffer.append("EditCount:"+autobot.Auto_BotServlet.waveStats.getUser(blip.getCreator()).getEditCount()+"\n");
 		//blip.getDocument().append(responseBuffer.toString());
 		blip.getDocument().replace(responseBuffer.toString());
 		
