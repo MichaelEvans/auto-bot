@@ -58,7 +58,7 @@ public class Auto_BotServlet extends AbstractRobot {
 	}
 
 	public String getRobotAvatarUrl() {
-		return "http://i.imgur.com/CQoTo.png";
+		return "http://auto-bot.appspot.com/_wave/autobot.png";
 	}
 
 	public String getRobotProfilePageUrl() {
