@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<datastore-indexes autoGenerate="true">
+
+    <!-- Used 3 times in query history -->
+    <datastore-index kind="UserStats" ancestor="true" source="auto">
+        <property name="users_INTEGER_IDX" direction="asc"/>
+    </datastore-index>
+
+</datastore-indexes>
