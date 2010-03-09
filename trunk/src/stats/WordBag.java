@@ -54,4 +54,26 @@ public class WordBag {
 			counts.remove(idx+1);
 		}
 	}
+	
+	public int count() {
+		int sum = 0;
+		for (Integer i : counts) {
+			sum += i;
+		}
+		return sum;
+	}
+	
+	public String getWord(int count) {
+		int j = 0;
+		int minmax = counts.get(0);
+		while(true) {
+			if (count > minmax) {
+				j++;
+				minmax += counts.get(j);
+			}
+			else
+				break;
+		}
+		return words.get(j);
+	}
 }
