@@ -8,6 +8,7 @@ import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -113,8 +114,8 @@ public class WaveStats {
 		int i = 0;
 		
 		for (i = 0; i < allWords.length-1; i++) {
-			String keyword = allWords[i];
-			String nextWord = allWords[i+1];
+			String keyword = allWords[i].trim();
+			String nextWord = allWords[i+1].trim();
 			int keywordIdx = keywords.indexOf(keyword);
 			if (keywordIdx != -1) {
 				wordBags.get(keywordIdx).add(nextWord);
@@ -126,5 +127,25 @@ public class WaveStats {
 				wordBags.add(temp);
 			}
 		}
+	}
+	
+	public String doMarkov(int times) {
+		int idx = -1;
+		Random r = new Random();
+		idx = (idx != -1) ? idx : (r.nextInt(((int)(keywords.size() * 2.2))) % keywords.size());
+		String ret = "";
+		int j = 0;
+		while(true) {
+			WordBag temp = wordBags.get(idx);
+			int count = temp.count();
+			String next = temp.getWord(r.nextInt(((int)(count * 2.2))) % count);
+			ret += next + " ";
+			idx = keywords.indexOf(next);
+			idx = (idx != -1) ? idx : (r.nextInt(((int)(count * 2.2))) % keywords.size());
+			j++;
+			if ((next.contains(".") && j > times) || (j > (2 * times)))
+				break;
+		}
+		return ret;
 	}
 }

@@ -27,7 +27,7 @@ public class Auto_BotServlet extends AbstractRobot {
 	public static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName());
 	private final long uniqueID = System.nanoTime();
 
-	public static final int MAX_BLIPS = 150;
+	public static final int MAX_BLIPS = 200;
 	private int NUM_OF_VOTES = 0;
 	private PersistenceManager pm;
 	Map<String, WaveStats> waveStatsMap;
@@ -200,14 +200,21 @@ public class Auto_BotServlet extends AbstractRobot {
 		
 		if (numBlips == MAX_BLIPS + NUM_OF_VOTES) {
 			log.log(Level.INFO, "AUTO-BOT: Blip count is " + numBlips + ", spawning a new wave.");
-			createNewWave(wavelet);			
+			createNewWave(wavelet, waveStats);			
 		} 
 		else if (numBlips == MAX_BLIPS + NUM_OF_VOTES - 5) {
 			Blip blip = WaveUtils.reply(wavelet, "");
-			WaveUtils.appendToBlip(blip, "=============================\n");
-			WaveUtils.appendToBlip(blip, "Rolling out in 5 blips.\n");
-			WaveUtils.appendToBlip(blip, "===========================\n");
+			WaveUtils.appendToBlip(blip, "=============================");
+			WaveUtils.appendToBlip(blip, "Rolling out in 5 blips.");
+			WaveUtils.appendToBlip(blip, "===========================");
 		}
+		
+		/*try {
+			log.log(Level.INFO, "Testing Markov: " + WaveUtils.markovTitle(wavelet, waveStats));
+		}
+		catch (Exception e) {
+			log.log(Level.INFO, "Broken during markov " + e.getStackTrace().toString());
+		}*/
 		
 		closePM();
 	}
@@ -263,6 +270,13 @@ public class Auto_BotServlet extends AbstractRobot {
 		WaveUtils.reply(wavelet, NEW_WAVE_INDICATOR);
 		Wavelet newWavelet = this.newWave(wavelet.getDomain(), wavelet.getParticipants());
 		newWavelet.setTitle(WaveUtils.getNewTitle(wavelet));
+		newWavelet.submitWith(wavelet);
+	}
+	
+	public void createNewWave(Wavelet wavelet, WaveStats ws) {
+		WaveUtils.reply(wavelet, NEW_WAVE_INDICATOR);
+		Wavelet newWavelet = this.newWave(wavelet.getDomain(), wavelet.getParticipants());
+		newWavelet.setTitle(WaveUtils.markovTitle(ws));
 		newWavelet.submitWith(wavelet);
 	}
 }
