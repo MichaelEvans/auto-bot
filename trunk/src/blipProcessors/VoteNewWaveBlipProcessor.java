@@ -3,8 +3,9 @@ package blipProcessors;
 import java.util.HashMap;
 import java.util.Map;
 
+import waveutils.Utils;
+
 import autobot.Auto_BotServlet;
-import autobot.WaveUtils;
 
 import com.google.wave.api.Blip;
 import com.google.wave.api.Wavelet;

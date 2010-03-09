@@ -1,20 +1,19 @@
-package autobot;
+package waveutils;
 
 import stats.*;
 
 import com.google.wave.api.Blip;
-import com.google.wave.api.BlipContentRefs;
 import com.google.wave.api.Wavelet;
 
 /**
- * Utilities for performing common Wave actions. Generally, WaveUtils provides a way for modifying Blips 
- * and Wavelets in one place.
+ * Utilities for performing common Wave actions. Generally, Utils provides a way for modifying Blips 
+ * and Wavelets in one place and is a wrapper for other package classes like BlipUtils and WaveletUtils.
  * 
- * @author Auto-Bot team
+ * @author Rob Kiefer
  * @version 0.1.0
  *
  */
-public class WaveUtils {
+public class Utils {
 	
 	/**
 	 * Appends the string <i>s</i> on a new line to Blip <i>b</i>
@@ -22,8 +21,8 @@ public class WaveUtils {
 	 * @param b Blip to append 
 	 * @param s String to append to Blip
 	 */
-	public static void appendToBlip(Blip b, String s) {
-		b.append("\n" + s);
+	public static void appendLineToBlip(Blip b, String s) {
+		BlipUtils.appendLine(b, s);
 	}
 	
 	/**
@@ -32,8 +31,8 @@ public class WaveUtils {
 	 * @param b Blip to append
 	 * @param s String to append to Blip
 	 */
-	public static void appendToBlipNoLine(Blip b, String s) {
-		b.append(s);
+	public static void appendToBlip(Blip b, String s) {
+		BlipUtils.append(b, s);
 	}
 	
 	/**
@@ -43,8 +42,7 @@ public class WaveUtils {
 	 * @param s String to set Blip content to
 	 */
 	public static void replaceBlip(Blip b, String s) {
-		b.all().delete();
-		b.append(s);
+		BlipUtils.replace(b, s);
 	}
 	
 	/**
@@ -55,8 +53,7 @@ public class WaveUtils {
 	 * @param replace Replacement string
 	 */
 	public static void replaceBlipContent(Blip b, String needle, String replace) {
-		BlipContentRefs refs = b.all(needle);
-		refs.replace(replace);
+		BlipUtils.replaceContent(b, needle, replace);
 	}
 	
 	/**
@@ -67,16 +64,10 @@ public class WaveUtils {
 	 * @return Reply blip
 	 */
 	public static Blip reply(Wavelet w, String s) {
-		return w.reply("\n" + s);
+		return WaveletUtils.reply(w, s);
 	}
 	
-	/**
-	 * Generates a non-markov title by taking the previous title and incrementing the part
-	 * number.
-	 * 
-	 * @param wavelet Wavelet to draw original title from
-	 * @return New title with correct part number
-	 */
+	// TODO : Move this
 	public static String getNewTitle(Wavelet wavelet) {
 		final String CONT_IDENT = " // Part ";
 		
@@ -98,11 +89,7 @@ public class WaveUtils {
 		return title;
 	}
 	
-	/**
-	 * Generates a markov title by performing markov actions on a given WaveStats WordBags.
-	 * @param ws WaveStats to use as training set for markov
-	 * @return New markov title
-	 */
+	// TODO: Move this
 	public static String markovTitle(WaveStats ws) {
 		String start = "Wave of " + ws.doMarkov(10);
 		return start;

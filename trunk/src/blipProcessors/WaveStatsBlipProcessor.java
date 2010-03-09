@@ -11,10 +11,10 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import stats.WaveStats;
+import waveutils.Utils;
 
 
 import autobot.Auto_BotServlet;
-import autobot.WaveUtils;
 
 import com.google.wave.api.Blip;
 import com.google.wave.api.Wavelet;
@@ -78,7 +78,7 @@ public class WaveStatsBlipProcessor implements IBlipProcessor {
 		responseBuffer.append("EditCount:"+waveStats.getUser(blip.getCreator()).getEditCount()+"\n");
 		//blip.getDocument().append(responseBuffer.toString());
 		//blip.getDocument().replace(responseBuffer.toString());
-		WaveUtils.replaceBlip(blip, responseBuffer.toString());
+		Utils.replaceBlip(blip, responseBuffer.toString());
 		log.log(Level.INFO, "Blip is now: " + blip.getContent());
 		
 		return wavelet;

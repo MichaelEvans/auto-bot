@@ -2,7 +2,6 @@ package blipProcessors;
 
 import java.util.Map;
 
-import autobot.WaveUtils;
 import waveutils.*;
 
 import com.google.wave.api.Blip;
