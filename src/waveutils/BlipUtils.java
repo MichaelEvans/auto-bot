@@ -38,19 +38,21 @@ public class BlipUtils {
 	 * @param s String to set Blip content to
 	 */
 	public static void replace(Blip b, String s) {
-		b.all().delete();
-		BlipUtils.append(b, s);
-	}
+		BlipUtils.replace(b.all(), s);
+	}	
 	
 	/**
-	 * Replaces all instances of the <i>needle</i> string inside a Blip <i>b</i>
+	 * Replaces all instances of the <tt>needle</tt> string with <tt>replace</tt> inside a Blip <tt>b</tt>
 	 * 
 	 * @param b Blip to replace in
 	 * @param needle String to match against
 	 * @param replace Replacement string
 	 */
-	public static void replaceBlipContent(Blip b, String needle, String replace) {
-		BlipContentRefs refs = b.all(needle);
-		refs.replace(replace);
+	public static void replaceContent(Blip b, String needle, String replace) {
+		BlipUtils.replace(b.all(needle), replace);
+	}
+	
+	private static void replace(BlipContentRefs refs, String s) {
+		refs.replace(s);
 	}
 }

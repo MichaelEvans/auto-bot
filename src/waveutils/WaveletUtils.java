@@ -22,4 +22,8 @@ public class WaveletUtils {
 	public static Blip reply(Wavelet w, String s) {
 		return w.reply("\n" + s);
 	}
+	
+	public static void deleteBlip(Wavelet w, Blip b) {
+		w.delete(b);
+	}
 }

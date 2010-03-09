@@ -16,6 +16,7 @@ import javax.jdo.PersistenceManager;
 
 import stats.UserStats;
 import stats.WaveStats;
+import waveutils.*;
 
 import com.google.wave.api.*;
 import com.google.wave.api.event.*;
@@ -140,7 +141,7 @@ public class Auto_BotServlet extends AbstractRobot {
 		log.log(Level.INFO, "AUTO-BOT: Attempting to greet the wave.");
 		
 		Element optimusTransform = new Image("http://imgur.com/m66zH.gif", 160, 120, "");
-		Blip greeting = WaveUtils.reply(wavelet, WELCOME_SELF);
+		Blip greeting = Utils.reply(wavelet, WELCOME_SELF);
 		greeting.append(optimusTransform);
 		
 		waveStats.setBlips( wavelet.getRootBlip().getChildBlipIds().size());
@@ -218,14 +219,7 @@ public class Auto_BotServlet extends AbstractRobot {
 		waveStats.getUser(BLIP_AUTHOR).incrementBlipCount();
 		waveStats.fillWordBags(event.getBlip().getContent());
 		
-		
-		//log.log(Level.INFO, "Auto-Bot unique id: " + uniqueID);
-		//log.log(Level.INFO, "Wave " + wavelet.getWaveId() + " (" + wavelet.getTitle() + ") has " + numBlips + " blips.");
 		log.log(Level.INFO, "There are " + waveStats.getBlips() + " blips in this wave!");
-		
-		if (numBlips % 50 == 0) {
-			log.log(Level.INFO, "AUTO-BOT: Wave '" + wavelet.getTitle() + "' has reached " + numBlips + " blips.");
-		}
 		
 		processBlip(event.getBlip(), wavelet, waveStats);
 		
@@ -234,22 +228,16 @@ public class Auto_BotServlet extends AbstractRobot {
 			createNewWave(wavelet, waveStats);			
 		} 
 		else if (numBlips == MAX_BLIPS + NUM_OF_VOTES - 5) {
-			Blip blip = WaveUtils.reply(wavelet, "");
-			WaveUtils.appendToBlip(blip, "=============================");
-			WaveUtils.appendToBlip(blip, "Rolling out in 5 blips.");
-			WaveUtils.appendToBlip(blip, "===========================");
+			Blip blip = Utils.reply(wavelet, "");
+			Utils.appendLineToBlip(blip, "=============================");
+			Utils.appendLineToBlip(blip, "Rolling out in 5 blips.");
+			Utils.appendLineToBlip(blip, "===========================");
 		}
 		
 		if (numBlips > MAX_BLIPS + NUM_OF_VOTES) {
 			wavelet.delete(event.getBlip());
 		}
 		
-		/*try {
-			log.log(Level.INFO, "Testing Markov: " + WaveUtils.markovTitle(wavelet, waveStats));
-		}
-		catch (Exception e) {
-			log.log(Level.INFO, "Broken during markov " + e.getStackTrace().toString());
-		}*/
 		
 		closePM();
 	}
@@ -302,16 +290,16 @@ public class Auto_BotServlet extends AbstractRobot {
 	}
 	
 	public void createNewWave(Wavelet wavelet) {
-		WaveUtils.reply(wavelet, NEW_WAVE_INDICATOR);
+		Utils.reply(wavelet, NEW_WAVE_INDICATOR);
 		Wavelet newWavelet = this.newWave(wavelet.getDomain(), wavelet.getParticipants());
-		newWavelet.setTitle(WaveUtils.getNewTitle(wavelet));
+		newWavelet.setTitle(Utils.getNewTitle(wavelet));
 		newWavelet.submitWith(wavelet);
 	}
 	
 	public void createNewWave(Wavelet wavelet, WaveStats ws) {
-		WaveUtils.reply(wavelet, NEW_WAVE_INDICATOR);
+		Utils.reply(wavelet, NEW_WAVE_INDICATOR);
 		Wavelet newWavelet = this.newWave(wavelet.getDomain(), wavelet.getParticipants());
-		newWavelet.setTitle(WaveUtils.markovTitle(ws));
+		newWavelet.setTitle(Utils.markovTitle(ws));
 		newWavelet.submitWith(wavelet);
 	}
 }

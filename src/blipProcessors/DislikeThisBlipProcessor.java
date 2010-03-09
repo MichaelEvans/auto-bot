@@ -3,9 +3,10 @@ package blipProcessors;
 import java.util.Map;
 import java.util.HashSet;
 
+import waveutils.Utils;
+
 //import autobot.Auto_BotProfileServlet;
 import autobot.Auto_BotServlet;
-import autobot.WaveUtils;
 
 import com.google.wave.api.Blip;
 import com.google.wave.api.Element;
@@ -21,7 +22,7 @@ public class DislikeThisBlipProcessor implements IBlipProcessor {
 		blip.append("\n");
 		Element like = new Image("http://imgur.com/VnwPf.png", 15, 15, "");
 		blip.append(like);
-		WaveUtils.appendToBlipNoLine(blip, likeStr);
+		Utils.appendToBlip(blip, likeStr);
 		
 		return wavelet;
 	}
