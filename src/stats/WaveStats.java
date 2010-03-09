@@ -8,6 +8,8 @@ import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.TreeSet;
 
 @PersistenceCapable(identityType = IdentityType.APPLICATION)
 public class WaveStats {
@@ -23,6 +25,12 @@ public class WaveStats {
     
     @Persistent
     private List<UserStats> users;
+    
+    @Persistent
+    private List<String> keywords;
+    
+    @Persistent
+    private List<WordBag> wordBags;
 
     /** Constructor for a wave with a specified number of blips.
      * 
@@ -33,6 +41,8 @@ public class WaveStats {
         this.waveID = waveID;
         this.blips = blips;
         this.users = new ArrayList<UserStats>();
+        this.keywords = new ArrayList<String>();
+        this.wordBags = new ArrayList<WordBag>();
     }
     
     /** Constructor for new wave with no blips yet
@@ -96,5 +106,25 @@ public class WaveStats {
 	
 	public void addUser(UserStats name) {
 		users.add(name);
+	}
+	
+	public void fillWordBags(String s) {
+		String[] allWords = s.split(" ");
+		int i = 0;
+		
+		for (i = 0; i < allWords.length-1; i++) {
+			String keyword = allWords[i];
+			String nextWord = allWords[i+1];
+			int keywordIdx = keywords.indexOf(keyword);
+			if (keywordIdx != -1) {
+				wordBags.get(keywordIdx).add(nextWord);
+			}
+			else {
+				WordBag temp = new WordBag();
+				temp.add(nextWord);
+				keywords.add(keyword);
+				wordBags.add(temp);
+			}
+		}
 	}
 }
