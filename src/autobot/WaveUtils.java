@@ -1,13 +1,14 @@
 package autobot;
 
-import java.util.logging.Level;
 import stats.*;
+
 import com.google.wave.api.Blip;
+import com.google.wave.api.BlipContentRefs;
 import com.google.wave.api.Wavelet;
 
 /**
- * Utilities for performing common Wave actions for Auto-Bot. Generally, WaveUtils provides a way for modifying Blips and
- * Wavelets in one place.
+ * Utilities for performing common Wave actions. Generally, WaveUtils provides a way for modifying Blips 
+ * and Wavelets in one place.
  * 
  * @author Auto-Bot team
  * @version 0.1.0
@@ -44,6 +45,18 @@ public class WaveUtils {
 	public static void replaceBlip(Blip b, String s) {
 		b.all().delete();
 		b.append(s);
+	}
+	
+	/**
+	 * Replaces all instances of the <i>needle</i> string inside a Blip
+	 * 
+	 * @param b Blip to replace in
+	 * @param needle String to match against
+	 * @param replace Replacement string
+	 */
+	public static void replaceBlipContent(Blip b, String needle, String replace) {
+		BlipContentRefs refs = b.all(needle);
+		refs.replace(replace);
 	}
 	
 	/**

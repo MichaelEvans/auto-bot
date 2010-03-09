@@ -14,8 +14,8 @@ public class RussianRouletteBlipProcessor implements IBlipProcessor {
 		Random generator = new Random();
 		int drop = generator.nextInt(wavelet.getParticipants().size());
 		
-		/* TODO FIX THIS 
-		TextView textView = blip.getDocument();
+		// TODO FIX THIS 
+		/*TextView textView = blip.getDocument();
 		textView.append("\nThanks for transforming " + wavelet.getParticipants().get(drop) + ".");
 		wavelet.removeParticipant(wavelet.getParticipants().get(drop));*/
 		
