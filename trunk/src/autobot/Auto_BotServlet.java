@@ -18,8 +18,7 @@ import stats.UserStats;
 import stats.WaveStats;
 
 import com.google.wave.api.*;
-import com.google.wave.api.event.BlipSubmittedEvent;
-import com.google.wave.api.event.WaveletSelfAddedEvent;
+import com.google.wave.api.event.*;
 
 public class Auto_BotServlet extends AbstractRobot {
 
@@ -153,13 +152,45 @@ public class Auto_BotServlet extends AbstractRobot {
 		closePM();
 	}
 	
+	public void onWaveletBlipRemoved(WaveletBlipRemovedEvent event) {
+		int numBlips = 0;
+		Wavelet wavelet = event.getWavelet();
+		String id = wavelet.serialize().getWaveId();
+		WaveStats waveStats = null;
+	
+		openPM();
+		waveStats = waveStatsMap.get(id);
+		if (waveStats == null) {
+			try {
+				waveStats = new WaveStats(id, 0);
+				pm.makePersistent(waveStats);
+			}
+			catch (Exception ex) {
+				log.log(Level.INFO, "Fuck couldn't persist");
+			}
+			makeBlipsMap();
+		}
+		numBlips = waveStats.getBlips() - 1;
+		waveStats.setBlips(numBlips);
+		
+		//Statistics
+		String BLIP_AUTHOR = event.getBlip().getCreator();
+		log.log(Level.INFO, "Attempting to decrement blip for "+ event.getBlip().getCreator());
+		if (waveStats.getUser(BLIP_AUTHOR) == null) {
+			UserStats user = new UserStats(BLIP_AUTHOR);
+			waveStats.addUser(user);
+		}
+		waveStats.getUser(BLIP_AUTHOR).incrementDeleteCount();
+		
+		closePM();
+	}
+	
 	public void onBlipSubmitted(BlipSubmittedEvent event){
 		int numBlips = 0;
 		Wavelet wavelet = event.getWavelet();
 		String id = wavelet.serialize().getWaveId();
 		WaveStats waveStats= null;
 		
-		log.log(Level.INFO, "Testing a new count " + wavelet.getBlips().size());
 
 		openPM();
 
@@ -207,6 +238,10 @@ public class Auto_BotServlet extends AbstractRobot {
 			WaveUtils.appendToBlip(blip, "=============================");
 			WaveUtils.appendToBlip(blip, "Rolling out in 5 blips.");
 			WaveUtils.appendToBlip(blip, "===========================");
+		}
+		
+		if (numBlips > MAX_BLIPS + NUM_OF_VOTES) {
+			wavelet.delete(event.getBlip());
 		}
 		
 		/*try {

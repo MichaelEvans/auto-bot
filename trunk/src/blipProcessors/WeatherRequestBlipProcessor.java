@@ -18,18 +18,23 @@ import com.google.wave.api.Wavelet;
 public class WeatherRequestBlipProcessor implements IBlipProcessor {
 	public final static String WEATHER = "weather";
 	
-	final static Pattern weatherPattern = Pattern.compile(CMD_OPEN_IDENT + WEATHER + ":(\\d{5})" + CMD_CLOSE_IDENT);
+	final static Pattern weatherPattern = Pattern.compile(WEATHER + ":");//(\\d{5})" + CMD_CLOSE_IDENT);
 	final static Logger log = Logger.getLogger(WeatherRequestBlipProcessor.class.getName());
 	
 	public Wavelet processBlip(Blip blip, Wavelet wavelet,
 			Map<String, Object> dataMap) {
 		Matcher mtchr = weatherPattern.matcher(blip.getContent());
-		mtchr.lookingAt();
+		log.log(Level.INFO, "Test: " + blip.getContent());
+		if (mtchr.lookingAt())
+			log.log(Level.INFO, "Found a match");
+		else
+			log.log(Level.INFO, "No match");
 		
 		try {
 			String current = "";
 			String image = "";
 			try {
+				log.log(Level.INFO, "Getting weather for" + mtchr.group(1));
 				current = XMLParser.getLocation(Integer.parseInt(mtchr.group(1)));
 				current += "\nNow - " + XMLParser.getTemp(Integer.parseInt(mtchr.group(1)));
 				current += "\n" + XMLParser.getForecast(Integer.parseInt(mtchr.group(1)));
@@ -50,7 +55,7 @@ public class WeatherRequestBlipProcessor implements IBlipProcessor {
 			
 			//blip.getDocument().replace(current);
 			WaveUtils.replaceBlip(blip, current);
-			//TODO: blip.appendElement(new Image(image, 52,52,""));
+			blip.append(new Image(image, 52,52,""));
 		} catch (IllegalStateException e) {
 			log.warning("Caught IllegalStateException when requesting weather, message was: " + e.getLocalizedMessage());
 			e.printStackTrace();
