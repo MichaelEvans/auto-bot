@@ -184,8 +184,8 @@ public class Auto_BotServlet extends AbstractRobot {
 			UserStats user = new UserStats(BLIP_AUTHOR);
 			waveStats.addUser(user);
 		}
-		
 		waveStats.getUser(BLIP_AUTHOR).incrementBlipCount();
+		waveStats.fillWordBags(event.getBlip().getContent());
 		
 		
 		//log.log(Level.INFO, "Auto-Bot unique id: " + uniqueID);

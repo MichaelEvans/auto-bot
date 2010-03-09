@@ -11,6 +11,10 @@ public class WaveUtils {
 		b.append("\n" + s);
 	}
 	
+	public static void appendToBlipNoLine(Blip b, String s) {
+		b.append(s);
+	}
+	
 	public static void replaceBlip(Blip b, String s) {
 		b.all().delete();
 		b.append(s);

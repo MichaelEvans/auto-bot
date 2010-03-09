@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <datastore-indexes autoGenerate="true">
 
-    <!-- Used 3 times in query history -->
     <datastore-index kind="UserStats" ancestor="true" source="auto">
         <property name="users_INTEGER_IDX" direction="asc"/>
+    </datastore-index>
+    <datastore-index kind="String" ancestor="true" source="auto">
+        <property name="keywords_INTEGER_IDX" direction="asc"/>
+    </datastore-index>
+    <datastore-index kind="WordBag" ancestor="true" source="auto">
+        <property name="wordBags_INTEGER_IDX" direction="asc"/>
+    </datastore-index>
+    <datastore-index kind="String" ancestor="true" source="auto">
+        <property name="words_INTEGER_IDX" direction="asc"/>
+    </datastore-index>
+    <datastore-index kind="String" ancestor="true" source="auto">
+        <property name="counts_INTEGER_IDX" direction="asc"/>
     </datastore-index>
 
 </datastore-indexes>

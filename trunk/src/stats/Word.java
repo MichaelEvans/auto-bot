@@ -1,8 +1,8 @@
 package stats;
 
 public class Word {
-	public String string = "DefaultWord";
-	public int count = 0;
+	public String string;
+	public int count;
 
 	public Word(String string, int count){
 		this.string = string;
