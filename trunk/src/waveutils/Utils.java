@@ -13,7 +13,7 @@ import com.google.wave.api.Wavelet;
  * and Wavelets in one place and is a wrapper for other package classes like BlipUtils and WaveletUtils.
  * 
  * @author Rob Kiefer
- * @version 0.1.0
+ * @version 0.1.2
  *
  */
 public class Utils {
@@ -71,6 +71,16 @@ public class Utils {
 	}
 	
 	/**
+	 * Removes Blip from Wavelet
+	 * 
+	 * @param w Wavelet that contains Blip
+	 * @param b Blip to be deleted
+	 */
+	public static void deleteBlip(Wavelet w, Blip b) {
+		w.delete(b);
+	}
+	
+	/**
 	 * Creates a new Wave via AbstractRobot <tt>Maker</tt> through the submission of Wavelet <tt>withWave</tt> 
 	 * with title <i>title</i> in domain <tt>domain</tt> with participants in the set <tt>participants</tt>.
 	 *  
@@ -82,33 +92,5 @@ public class Utils {
 	 */
 	public static void createWave(AbstractRobot maker, Wavelet withWave, String title, String domain, Set<String> participants) {
 		WaveletUtils.create(maker, withWave, title, domain, participants);
-	}
-	
-	// TODO : Move this
-	public static String getNewTitle(Wavelet wavelet) {
-		final String CONT_IDENT = " // Part ";
-		
-		int index;
-		String title, waveBaseTitle = wavelet.getTitle();
-		
-		if (waveBaseTitle == null) {
-			waveBaseTitle = "";
-		}
-		
-		index = waveBaseTitle.indexOf(CONT_IDENT);
-		if (index == -1) {
-			title = waveBaseTitle + CONT_IDENT + "2";
-		} else {
-			int count = Integer.parseInt(waveBaseTitle.substring(index + CONT_IDENT.length()).trim());
-			title = waveBaseTitle.substring(0,index) + CONT_IDENT + (count + 1);
-		}
-		
-		return title;
-	}
-	
-	// TODO: Move this
-	public static String markovTitle(WaveStats ws) {
-		String start = "Wave of " + ws.doMarkov(10);
-		return start;
 	}
 }

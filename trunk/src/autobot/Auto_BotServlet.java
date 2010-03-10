@@ -52,7 +52,7 @@ public class Auto_BotServlet extends AbstractRobot {
 	}};
 
 	final static String WELCOME_SELF = "Autobots roll out.";
-	final String NEW_WAVE_INDICATOR = "We're rolling out!";
+	public final static String NEW_WAVE_INDICATOR = "We're rolling out!";
 
 	protected String getRobotName() {
 		return "Auto-Bot";
@@ -257,10 +257,10 @@ public class Auto_BotServlet extends AbstractRobot {
 		if (numBlips == MAX_BLIPS + NUM_OF_VOTES) { /* Blip has reached its max, spawn a new one */
 			log.log(Level.INFO, "AUTO-BOT: Blip count is " + numBlips + ", spawning a new wave.");
 			Utils.reply(wavelet, NEW_WAVE_INDICATOR);
-			Utils.createWave(this, wavelet, Utils.markovTitle(waveStats), wavelet.getDomain(), wavelet.getParticipants());			
+			Utils.createWave(this, wavelet, Tools.newTitle(waveStats), wavelet.getDomain(), wavelet.getParticipants());			
 		} 
 		else if (numBlips == MAX_BLIPS + NUM_OF_VOTES - 5) { /* Warning blip */
-			String reply = "\n=============================";
+			String reply = "\n\n=============================";
 			reply += "\nRolling out in 5 blips.";
 			reply += "\n===========================";
 			Utils.reply(wavelet, reply);
@@ -347,7 +347,7 @@ public class Auto_BotServlet extends AbstractRobot {
 	public void createNewWave(Wavelet wavelet) {
 		Utils.reply(wavelet, NEW_WAVE_INDICATOR + "\n\n!{fuck_this_thread_im_outta_here}!");
 		Wavelet newWavelet = this.newWave(wavelet.getDomain(), wavelet.getParticipants());
-		newWavelet.setTitle(Utils.getNewTitle(wavelet));
+		newWavelet.setTitle(Tools.newTitle(wavelet));
 		newWavelet.submitWith(wavelet);
 	}
 }

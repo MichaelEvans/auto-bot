@@ -10,7 +10,7 @@ import com.google.wave.api.Wavelet;
 * A utility class for modifying Wavelets in Google Wave.
 * 
 * @author Rob
-* @version 0.1.0
+* @version 0.1.1
 *
 */
 public class WaveletUtils {
