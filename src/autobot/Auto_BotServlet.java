@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import blipProcessors.*;
 
 import javax.jdo.PersistenceManager;
+import javax.jdo.Transaction;
 
 import stats.UserStats;
 import stats.WaveStats;
@@ -67,6 +68,14 @@ public class Auto_BotServlet extends AbstractRobot {
 	
 	public Auto_BotServlet() {
 		waveStatsMap = new HashMap<String, WaveStats>();
+		openPM();
+		log.log(Level.INFO, "Auto-bot is starting.");
+	}
+	
+	
+	public void destroy() {
+		log.log(Level.INFO, "I wonder when this is called");
+		closePM();
 	}
 
 	
@@ -116,8 +125,10 @@ public class Auto_BotServlet extends AbstractRobot {
 		String id = wavelet.serialize().getWaveId();
 		WaveStats waveStats = null;
 
-		openPM();
+//		openPM();
 
+		Transaction tx = pm.currentTransaction();
+		tx.begin();
 		waveStats = waveStatsMap.get(id);
 		if (waveStats == null) {
 			try {
@@ -141,7 +152,7 @@ public class Auto_BotServlet extends AbstractRobot {
 		log.log(Level.INFO, "AUTO-BOT: Attempting to greet the wave.");
 		
 		Element optimusTransform = new Image("http://imgur.com/m66zH.gif", 160, 120, "");
-		Blip greeting = Utils.reply(wavelet, WELCOME_SELF);
+		Blip greeting = Utils.reply(wavelet, "\n" + WELCOME_SELF);
 		greeting.append(optimusTransform);
 		
 		waveStats.setBlips( wavelet.getRootBlip().getChildBlipIds().size());
@@ -150,9 +161,16 @@ public class Auto_BotServlet extends AbstractRobot {
 		
 		log.log(Level.INFO, "AUTO-BOT: Successfully greeted the wave.");
 		
-		closePM();
+		tx.commit();
+		//closePM();
 	}
 	
+	@Override
+	public void onDocumentChanged(DocumentChangedEvent event) {
+		log.log(Level.INFO, "Should not be happening: " + event.getType());
+	}
+	
+	@Override
 	public void onWaveletBlipRemoved(WaveletBlipRemovedEvent event) {
 		int numBlips = 0;
 		Wavelet wavelet = event.getWavelet();
@@ -160,6 +178,8 @@ public class Auto_BotServlet extends AbstractRobot {
 		WaveStats waveStats = null;
 	
 		openPM();
+		//Transaction tx = pm.currentTransaction();
+		//tx.begin();
 		waveStats = waveStatsMap.get(id);
 		if (waveStats == null) {
 			try {
@@ -183,6 +203,7 @@ public class Auto_BotServlet extends AbstractRobot {
 		}
 		waveStats.getUser(BLIP_AUTHOR).incrementDeleteCount();
 		
+		//tx.commit();
 		closePM();
 	}
 	
@@ -195,20 +216,27 @@ public class Auto_BotServlet extends AbstractRobot {
 
 		openPM();
 
+		/*Transaction tx = pm.currentTransaction();
+		if (!tx.isActive()) {
+			tx.setOptimistic(true);
+			tx.begin();
+		}*/
+		
 		waveStats = waveStatsMap.get(id);
 		if (waveStats == null) {
 			try {
 				waveStats = new WaveStats(id, 0);
 				pm.makePersistent(waveStats);
+			//	tx.commit();
 			}
 			catch (Exception ex) {
-				log.log(Level.INFO, "Fuck couldn't persist");
+				log.log(Level.INFO, "Fuck couldn't persist : " + ex);
 			}
 			makeBlipsMap();
 		}
 		numBlips = waveStats.getBlips() + 1;
 		waveStats.setBlips(numBlips);
-		
+		//tx.commit();
 		//Statistics
 		String BLIP_AUTHOR = event.getBlip().getCreator();
 		log.log(Level.INFO,"Attempting to increment blip for "+ event.getBlip().getCreator());
@@ -217,27 +245,47 @@ public class Auto_BotServlet extends AbstractRobot {
 			waveStats.addUser(user);
 		}
 		waveStats.getUser(BLIP_AUTHOR).incrementBlipCount();
+		//tx.commit();
 		waveStats.fillWordBags(event.getBlip().getContent());
+		//tx.commit();
 		
 		log.log(Level.INFO, "There are " + waveStats.getBlips() + " blips in this wave!");
 		
 		processBlip(event.getBlip(), wavelet, waveStats);
 		
-		if (numBlips == MAX_BLIPS + NUM_OF_VOTES) {
+		
+		if (numBlips == MAX_BLIPS + NUM_OF_VOTES) { /* Blip has reached its max, spawn a new one */
 			log.log(Level.INFO, "AUTO-BOT: Blip count is " + numBlips + ", spawning a new wave.");
-			createNewWave(wavelet, waveStats);			
+			Utils.reply(wavelet, NEW_WAVE_INDICATOR);
+			Utils.createWave(this, wavelet, Utils.markovTitle(waveStats), wavelet.getDomain(), wavelet.getParticipants());			
 		} 
-		else if (numBlips == MAX_BLIPS + NUM_OF_VOTES - 5) {
-			Blip blip = Utils.reply(wavelet, "");
-			Utils.appendLineToBlip(blip, "=============================");
-			Utils.appendLineToBlip(blip, "Rolling out in 5 blips.");
-			Utils.appendLineToBlip(blip, "===========================");
+		else if (numBlips == MAX_BLIPS + NUM_OF_VOTES - 5) { /* Warning blip */
+			String reply = "\n=============================";
+			reply += "\nRolling out in 5 blips.";
+			reply += "\n===========================";
+			Utils.reply(wavelet, reply);
 		}
 		
+		/* Stop bumping shit */
 		if (numBlips > MAX_BLIPS + NUM_OF_VOTES) {
 			wavelet.delete(event.getBlip());
 		}
 		
+		if (BLIP_AUTHOR.equals("twyphoon@googlewave.com")) {
+			event.getBlip().append("\n\n");
+			String likeStr = " Tim KO'd this blip in the first round!";
+			Element like = new Image("https://wiki.endoftheinter.net/images/4/44/Like.png", 15, 15, "");
+			event.getBlip().append(like);
+			Utils.appendToBlip(event.getBlip(), likeStr);
+		}
+		
+		if (BLIP_AUTHOR.equals("bmwracer0@googlewave.com")) {
+			event.getBlip().append("\n\n");
+			String likeStr = " Mike just caused an argument with this blip!";
+			Element like = new Image("https://wiki.endoftheinter.net/images/4/44/Like.png", 15, 15, "");
+			event.getBlip().append(like);
+			Utils.appendToBlip(event.getBlip(), likeStr);
+		}
 		
 		closePM();
 	}
@@ -289,17 +337,11 @@ public class Auto_BotServlet extends AbstractRobot {
 		return waveStats.getBlips();
 	}
 	
+	//TODO Add this to waveutils package
 	public void createNewWave(Wavelet wavelet) {
-		Utils.reply(wavelet, NEW_WAVE_INDICATOR);
+		Utils.reply(wavelet, NEW_WAVE_INDICATOR + "\n\n!{fuck_this_thread_im_outta_here}!");
 		Wavelet newWavelet = this.newWave(wavelet.getDomain(), wavelet.getParticipants());
 		newWavelet.setTitle(Utils.getNewTitle(wavelet));
-		newWavelet.submitWith(wavelet);
-	}
-	
-	public void createNewWave(Wavelet wavelet, WaveStats ws) {
-		Utils.reply(wavelet, NEW_WAVE_INDICATOR);
-		Wavelet newWavelet = this.newWave(wavelet.getDomain(), wavelet.getParticipants());
-		newWavelet.setTitle(Utils.markovTitle(ws));
 		newWavelet.submitWith(wavelet);
 	}
 }
