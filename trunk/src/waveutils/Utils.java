@@ -1,7 +1,10 @@
 package waveutils;
 
+import java.util.Set;
+
 import stats.*;
 
+import com.google.wave.api.AbstractRobot;
 import com.google.wave.api.Blip;
 import com.google.wave.api.Wavelet;
 
@@ -65,6 +68,20 @@ public class Utils {
 	 */
 	public static Blip reply(Wavelet w, String s) {
 		return WaveletUtils.reply(w, s);
+	}
+	
+	/**
+	 * Creates a new Wave via AbstractRobot <tt>Maker</tt> through the submission of Wavelet <tt>withWave</tt> 
+	 * with title <i>title</i> in domain <tt>domain</tt> with participants in the set <tt>participants</tt>.
+	 *  
+	 * @param maker AbstractRobot who will make the new wave
+	 * @param withWave Wavelet that on submission will create the new Wavelet 
+	 * @param title Title of new Wave
+	 * @param domain Domain of new Wave
+	 * @param participants Participants in the new Wave
+	 */
+	public static void createWave(AbstractRobot maker, Wavelet withWave, String title, String domain, Set<String> participants) {
+		WaveletUtils.create(maker, withWave, title, domain, participants);
 	}
 	
 	// TODO : Move this

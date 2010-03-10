@@ -1,5 +1,8 @@
 package waveutils;
 
+import java.util.Set;
+
+import com.google.wave.api.AbstractRobot;
 import com.google.wave.api.Blip;
 import com.google.wave.api.Wavelet;
 
@@ -13,7 +16,7 @@ import com.google.wave.api.Wavelet;
 public class WaveletUtils {
 	
 	/**
-	 * Creates a new reply to Wavelet <i>w</i> with string <i>s</i>
+	 * Creates a new reply to Wavelet <tt>w</tt> with string <tt>s</tt>
 	 * 
 	 * @param w Wavelet to reply to
 	 * @param s Reply message
@@ -23,7 +26,29 @@ public class WaveletUtils {
 		return w.reply("\n" + s);
 	}
 	
+	/**
+	 * Removes Blip from Wavelet
+	 * 
+	 * @param w Wavelet that contains Blip
+	 * @param b Blip to be deleted
+	 */
 	public static void deleteBlip(Wavelet w, Blip b) {
 		w.delete(b);
+	}
+
+	/**
+	 * Creates a new Wave via AbstractRobot <tt>Maker</tt> through the submission of Wavelet <tt>withWave</tt> 
+	 * with title <i>title</i> in domain <tt>domain</tt> with participants in the set <tt>participants</tt>.
+	 *  
+	 * @param maker AbstractRobot who will make the new wave
+	 * @param withWave Wavelet that on submission will create the new Wavelet 
+	 * @param title Title of new Wave
+	 * @param domain Domain of new Wave
+	 * @param participants Participants in the new Wave
+	 */
+	public static void create(AbstractRobot maker, Wavelet withWave, String title, String domain, Set<String> participants) {
+		Wavelet newWavelet = maker.newWave(domain, participants);
+		newWavelet.setTitle(title);
+		newWavelet.submitWith(withWave);
 	}
 }
