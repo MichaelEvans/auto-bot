@@ -110,7 +110,7 @@ public class WaveStats {
 	}
 	
 	public void fillWordBags(String s) {
-		String[] allWords = s.split(" ");
+		String[] allWords = s.replace("\n", "").split(" ");
 		int i = 0;
 		
 		for (i = 0; i < allWords.length-1; i++) {
