@@ -271,6 +271,11 @@ public class Auto_BotServlet extends AbstractRobot {
 			wavelet.delete(event.getBlip());
 		}
 		
+		/*
+		
+		XXX: This was getting annoying.  We'll wait for Rob to add some
+		kind of round robin trolling mechanism.
+
 		if (BLIP_AUTHOR.equals("twyphoon@googlewave.com")) {
 			event.getBlip().append("\n\n");
 			String likeStr = " Tim KO'd this blip in the first round!";
@@ -286,6 +291,7 @@ public class Auto_BotServlet extends AbstractRobot {
 			event.getBlip().append(like);
 			Utils.appendToBlip(event.getBlip(), likeStr);
 		}
+		*/
 		
 		closePM();
 	}
