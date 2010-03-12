@@ -9,5 +9,6 @@
     <w:capability name="WAVELET_BLIP_REMOVED" context="PARENT,CHILDREN,ROOT,SELF" />
     <w:capability name="BLIP_CONTRIBUTORS_CHANGED" content="true" />
     <w:capability name="BLIP_SUBMITTED" content="true" />
+    <w:capability name="FORM_BUTTON_CLICKED" context="PARENT,CHILDREN,ROOT,SELF" />
   </w:capabilities>
 </w:robot>
