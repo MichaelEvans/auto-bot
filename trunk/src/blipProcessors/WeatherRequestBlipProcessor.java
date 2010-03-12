@@ -7,10 +7,14 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
 import waveutils.Utils;
 
 import autobot.Auto_BotServlet;
-import autobot.XMLParser;
+import autobot.WeatherParser;
 
 import com.google.wave.api.Blip;
 import com.google.wave.api.Image;
@@ -36,10 +40,10 @@ public class WeatherRequestBlipProcessor implements IBlipProcessor {
 			String image = "";
 			try {
 				log.log(Level.INFO, "Getting weather for" + mtchr.group(1));
-				current = XMLParser.getLocation(Integer.parseInt(mtchr.group(1)));
-				current += "\nNow - " + XMLParser.getTemp(Integer.parseInt(mtchr.group(1)));
-				current += "\n" + XMLParser.getForecast(Integer.parseInt(mtchr.group(1)));
-				image = XMLParser.getImage(Integer.parseInt(mtchr.group(1)));
+				current = WeatherParser.getLocation(mtchr.group(1));
+				current += "\nNow - " + WeatherParser.getTemp(mtchr.group(1));
+				current += "\n" + WeatherParser.getForecast(mtchr.group(1));
+				image = WeatherParser.getImage(mtchr.group(1));
 			} catch (NumberFormatException e) {
 				//blip.getDocument().append("Encountered an error when requesting weather");
 				Utils.appendLineToBlip(blip, "Encountered an error when requesting weather");
@@ -52,6 +56,10 @@ public class WeatherRequestBlipProcessor implements IBlipProcessor {
 				
 				log.warning("Caught IOException when requesting weather, message was: " + e.getLocalizedMessage());
 				e.printStackTrace();
+			} catch (ParserConfigurationException e) {
+				log.warning("Could not construct xml parser");
+			} catch (SAXException e) {
+				log.warning("Unable to parse weather xml");
 			}
 			
 			//blip.getDocument().replace(current);
