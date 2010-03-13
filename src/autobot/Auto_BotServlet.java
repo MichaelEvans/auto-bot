@@ -125,10 +125,10 @@ public class Auto_BotServlet extends AbstractRobot {
 		String id = wavelet.serialize().getWaveId();
 		WaveStats waveStats = null;
 
-//		openPM();
+		openPM();
 
-		Transaction tx = pm.currentTransaction();
-		tx.begin();
+//		Transaction tx = pm.currentTransaction();
+	//	tx.begin();
 		waveStats = waveStatsMap.get(id);
 		if (waveStats == null) {
 			try {
@@ -152,7 +152,7 @@ public class Auto_BotServlet extends AbstractRobot {
 		log.log(Level.INFO, "AUTO-BOT: Attempting to greet the wave.");
 		
 		Element optimusTransform = new Image("http://imgur.com/m66zH.gif", 160, 120, "");
-		Blip greeting = Utils.reply(wavelet, "\n" + WELCOME_SELF);
+		Blip greeting = Utils.reply(wavelet, "\n" + WELCOME_SELF + "\n");
 		greeting.append(optimusTransform);
 		
 		waveStats.setBlips( wavelet.getRootBlip().getChildBlipIds().size());
@@ -161,8 +161,8 @@ public class Auto_BotServlet extends AbstractRobot {
 		
 		log.log(Level.INFO, "AUTO-BOT: Successfully greeted the wave.");
 		
-		tx.commit();
-		//closePM();
+		//tx.commit();
+		closePM();
 	}
 	
 	@Override
@@ -176,6 +176,9 @@ public class Auto_BotServlet extends AbstractRobot {
 		Wavelet wavelet = event.getWavelet();
 		String id = wavelet.serialize().getWaveId();
 		WaveStats waveStats = null;
+		final Blip BLIP = event.getRemovedBlip();
+		if (BLIP == null)
+			return;
 	
 		openPM();
 		//Transaction tx = pm.currentTransaction();
@@ -191,12 +194,16 @@ public class Auto_BotServlet extends AbstractRobot {
 			}
 			makeBlipsMap();
 		}
-		numBlips = waveStats.getBlips() - 1;
-		waveStats.setBlips(numBlips);
 		
 		//Statistics
-		String BLIP_AUTHOR = event.getBlip().getCreator();
-		log.log(Level.INFO, "Attempting to decrement blip for "+ event.getBlip().getCreator());
+		String BLIP_AUTHOR = BLIP.getCreator();
+		log.log(Level.INFO, BLIP.getContent());
+		if (! BLIP_AUTHOR.contains("auto-bot")) {
+			log.log(Level.INFO, "Decrementing overall blip count.");
+			numBlips = waveStats.getBlips() - 1;
+			waveStats.setBlips(numBlips);
+		}
+		log.log(Level.INFO, "Attempting to decrement blip for "+ BLIP.getCreator());
 		if (waveStats.getUser(BLIP_AUTHOR) == null) {
 			UserStats user = new UserStats(BLIP_AUTHOR);
 			waveStats.addUser(user);
