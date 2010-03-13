@@ -22,60 +22,59 @@ import com.google.wave.api.Wavelet;
 
 public class WeatherRequestBlipProcessor implements IBlipProcessor {
 	public final static String WEATHER = "weather";
+	private final String REGEX = "weather:([0-9]{5})";
 	
-	final static Pattern weatherPattern = Pattern.compile(WEATHER + ":");//(\\d{5})" + CMD_CLOSE_IDENT);
 	final static Logger log = Logger.getLogger(WeatherRequestBlipProcessor.class.getName());
 	
 	public Wavelet processBlip(Blip blip, Wavelet wavelet,
 			Map<String, Object> dataMap) {
+		Pattern weatherPattern = Pattern.compile(REGEX);
 		Matcher mtchr = weatherPattern.matcher(blip.getContent());
-		log.log(Level.INFO, "Test: " + blip.getContent());
-		if (mtchr.lookingAt())
-			log.log(Level.INFO, "Found a match");
-		else
-			log.log(Level.INFO, "No match");
 		
-		try {
-			String current = "";
-			String image = "";
+		while(mtchr.find()) {
+			log.log(Level.INFO, "Found something: " + mtchr.group());
+			String zip = mtchr.group(1);
+		
 			try {
-				log.log(Level.INFO, "Getting weather for" + mtchr.group(1));
-				current = WeatherParser.getLocation(mtchr.group(1));
-				current += "\nNow - " + WeatherParser.getTemp(mtchr.group(1));
-				current += "\n" + WeatherParser.getForecast(mtchr.group(1));
-				image = WeatherParser.getImage(mtchr.group(1));
-			} catch (NumberFormatException e) {
-				//blip.getDocument().append("Encountered an error when requesting weather");
-				Utils.appendLineToBlip(blip, "Encountered an error when requesting weather");
+				String current = "";
+				String image = "";
+				try {
+					log.log(Level.INFO, "Getting weather for " + zip);
+					current = WeatherParser.getLocation(zip);
+					current += "\nNow - " + WeatherParser.getTemp(zip);
+					current += "\n" + WeatherParser.getForecast(zip);
+					image = WeatherParser.getImage(zip);
+					log.log(Level.INFO, "This is something? " + current);
+				} catch (NumberFormatException e) {
+					Utils.appendLineToBlip(blip, "Encountered an error when requesting weather");
 				
-				Auto_BotServlet.log.log(Level.WARNING, "Caught NumberFormatException when requesting weather, message was: " + e.getLocalizedMessage());
-				e.printStackTrace();
-			} catch (IOException e) {
-				//blip.getDocument().append("Encountered an error when requesting weather");
-				Utils.appendLineToBlip(blip, "Encountered an error when requesting weather");
+					Auto_BotServlet.log.log(Level.WARNING, "Caught NumberFormatException when requesting weather, message was: " + e.getLocalizedMessage());
+					e.printStackTrace();
+				} catch (IOException e) {
+					Utils.appendLineToBlip(blip, "Encountered an error when requesting weather");
 				
-				log.warning("Caught IOException when requesting weather, message was: " + e.getLocalizedMessage());
+					log.warning("Caught IOException when requesting weather, message was: " + e.getLocalizedMessage());
+					e.printStackTrace();
+				} catch (ParserConfigurationException e) {
+					log.warning("Could not construct xml parser");
+				} catch (SAXException e) {
+					log.warning("Unable to parse weather xml");
+				}
+			
+				log.log(Level.INFO, "Replacing blips");
+				Utils.replaceBlip(blip, "I knew it!");
+				//blip.append(new Image(image, 52,52,""));
+			} catch (IllegalStateException e) {
+				log.warning("Caught IllegalStateException when requesting weather, message was: " + e.getLocalizedMessage());
 				e.printStackTrace();
-			} catch (ParserConfigurationException e) {
-				log.warning("Could not construct xml parser");
-			} catch (SAXException e) {
-				log.warning("Unable to parse weather xml");
+			} catch (IndexOutOfBoundsException e) {
+				Utils.appendLineToBlip(blip, "Incorrect command form. Correct form is " + CMD_OPEN_IDENT + WEATHER + ":<zip code, 5 digits>" + CMD_CLOSE_IDENT);
+			
+				log.warning("Caught IndexOutOfBoundsException when requesting weather, message was: " + e.getLocalizedMessage());
+				e.printStackTrace();
 			}
-			
-			//blip.getDocument().replace(current);
-			Utils.replaceBlip(blip, current);
-			blip.append(new Image(image, 52,52,""));
-		} catch (IllegalStateException e) {
-			log.warning("Caught IllegalStateException when requesting weather, message was: " + e.getLocalizedMessage());
-			e.printStackTrace();
-		} catch (IndexOutOfBoundsException e) {
-			//blip.getDocument().append("Incorrect command form. Correct form is " + CMD_OPEN_IDENT + WEATHER + ":<zip code, 5 digits>" + CMD_CLOSE_IDENT);
-			Utils.appendLineToBlip(blip, "Incorrect command form. Correct form is " + CMD_OPEN_IDENT + WEATHER + ":<zip code, 5 digits>" + CMD_CLOSE_IDENT);
-			
-			log.warning("Caught IndexOutOfBoundsException when requesting weather, message was: " + e.getLocalizedMessage());
-			e.printStackTrace();
 		}
-		
+		Utils.appendLineToBlip(blip, "Son of a bitch");
 		return wavelet;
 	}
 
