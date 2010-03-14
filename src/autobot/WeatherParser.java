@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.w3c.dom.*;
 
@@ -18,12 +20,18 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import com.google.appengine.repackaged.org.apache.commons.logging.LogFactory;
+
 public class WeatherParser{
+	private static Logger log = Logger.getLogger(WeatherParser.class.getName());
+	
 	public static Document getDocument(String uri) throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilderFactory dBF;
 		DocumentBuilder builder;
 		Document doc;
 
+		log.log(Level.INFO, "Building document from uri: " + uri);
+		
 		dBF = DocumentBuilderFactory.newInstance();
 		dBF.setNamespaceAware(true);
 		dBF.setValidating(true);
@@ -73,6 +81,8 @@ public class WeatherParser{
 		Node imageNode;
 		NodeList imageNodeChildren;
 
+		log.log(Level.INFO, "Locating image url");
+		
 		yahooDoc = getDocument(yahooAPILoc + zip);
 		imageNode = yahooDoc.getElementsByTagName("image").item(0);
 		imageNodeChildren = imageNode.getChildNodes();
@@ -83,11 +93,14 @@ public class WeatherParser{
 			child = imageNodeChildren.item(i);
 			if (child.getNodeType() == Node.ELEMENT_NODE) {
 				if (child.getNodeName().equals("url")) {
+					log.log(Level.INFO, "Image url found");
+					
 					return child.getNodeValue();
 				}
 			}
 		}
 
+		log.log(Level.INFO, "Unable to find image url");
 		return "";
 	}
 
@@ -130,6 +143,8 @@ public class WeatherParser{
 		Document yahooDoc;
 		Node conditionsNode;
 
+		log.log(Level.INFO, "Getting temperature");
+		
 		yahooDoc = getDocument(yahooAPILoc + zip);
 		conditionsNode = yahooDoc.getElementsByTagNameNS("*", "condition").item(0);
 
@@ -177,6 +192,8 @@ public class WeatherParser{
 		NodeList forecastNodes;
 		String ret;
 
+		log.log(Level.INFO, "Constructing forecast");
+		
 		ret = "No Forecast Available";
 		yahooDoc = getDocument(yahooAPILoc + zip);
 		forecastNodes = yahooDoc.getElementsByTagNameNS("*", "forcast");
@@ -219,6 +236,8 @@ public class WeatherParser{
 		Document yahooDoc;
 		Node locationNode;
 
+		log.log(Level.INFO, "Determining location");
+		
 		yahooDoc = getDocument(yahooAPILoc + zip);
 		locationNode = yahooDoc.getElementsByTagName("title").item(0);
 
