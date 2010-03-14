@@ -63,8 +63,8 @@ public class WeatherRequestBlipProcessor implements IBlipProcessor {
 			
 				log.log(Level.INFO, "Replacing blips");
 				//Utils.replaceBlip(blip, "I knew it!");
-				Utils.replaceBlip(blip, "<image src='" + image + "' />");
-				Utils.appendToBlip(blip, current);
+				//Utils.replaceBlip(blip, "<image src='" + image + "' />");
+				Utils.replaceBlip(blip, current);
 				
 				//blip.append(new Image(image, 52,52,""));
 			} catch (IllegalStateException e) {
