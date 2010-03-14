@@ -93,7 +93,7 @@ public class WeatherParser{
 			child = imageNodeChildren.item(i);
 			if (child.getNodeType() == Node.ELEMENT_NODE) {
 				if (child.getNodeName().equals("url")) {
-					log.log(Level.INFO, "Image url found");
+					log.log(Level.INFO, "Image url found: " + child.getNodeValue());
 					
 					return child.getNodeValue();
 				}
@@ -148,6 +148,7 @@ public class WeatherParser{
 		yahooDoc = getDocument(yahooAPILoc + zip);
 		conditionsNode = yahooDoc.getElementsByTagNameNS("*", "condition").item(0);
 
+		log.log(Level.INFO, "Got temp: " + ((Element)conditionsNode).getAttribute("temp"));
 		return ((Element)conditionsNode).getAttribute("temp");
 	}
 
@@ -214,6 +215,8 @@ public class WeatherParser{
 				}
 			}
 		}
+		
+		log.log(Level.INFO, "Got forcast: " + ret);
 
 		return ret;
 	}
@@ -244,6 +247,7 @@ public class WeatherParser{
 
 		if (locationNode.getNodeType() == Node.ELEMENT_NODE) {
 			if (locationNode.getNodeName().equals("title")) {
+				log.log(Level.INFO, "Found location: " + locationNode.getNodeValue());
 				return locationNode.getNodeValue();
 			}
 		}
