@@ -62,7 +62,10 @@ public class WeatherRequestBlipProcessor implements IBlipProcessor {
 				}
 			
 				log.log(Level.INFO, "Replacing blips");
-				Utils.replaceBlip(blip, "I knew it!");
+				//Utils.replaceBlip(blip, "I knew it!");
+				Utils.replaceBlip(blip, "<image src='" + image + "' />");
+				Utils.appendToBlip(blip, current);
+				
 				//blip.append(new Image(image, 52,52,""));
 			} catch (IllegalStateException e) {
 				log.warning("Caught IllegalStateException when requesting weather, message was: " + e.getLocalizedMessage());
@@ -74,7 +77,7 @@ public class WeatherRequestBlipProcessor implements IBlipProcessor {
 				e.printStackTrace();
 			}
 		}
-		Utils.appendLineToBlip(blip, "Son of a bitch");
+		//Utils.appendLineToBlip(blip, "Son of a bitch");
 		return wavelet;
 	}
 
