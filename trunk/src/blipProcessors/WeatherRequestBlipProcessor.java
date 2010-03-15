@@ -37,13 +37,15 @@ public class WeatherRequestBlipProcessor implements IBlipProcessor {
 		
 			try {
 				String current = "";
-				String image = "";
+				String imageURL = "";
 				try {
 					log.log(Level.INFO, "Getting weather for " + zip);
+					
 					current = WeatherParser.getLocation(zip);
 					current += "\nNow - " + WeatherParser.getTemp(zip);
 					current += "\n" + WeatherParser.getForecast(zip);
-					image = WeatherParser.getImage(zip);
+					imageURL = WeatherParser.getImage(zip);
+					
 					log.log(Level.INFO, "This is something? " + current);
 				} catch (NumberFormatException e) {
 					Utils.appendLineToBlip(blip, "Encountered an error when requesting weather");
@@ -61,12 +63,9 @@ public class WeatherRequestBlipProcessor implements IBlipProcessor {
 					log.warning("Unable to parse weather xml");
 				}
 			
-				log.log(Level.INFO, "Replacing blips");
-				//Utils.replaceBlip(blip, "I knew it!");
-				//Utils.replaceBlip(blip, "<image src='" + image + "' />");
+				log.log(Level.INFO, "Replacing blip with: " + current);
+
 				Utils.replaceBlip(blip, current);
-				
-				//blip.append(new Image(image, 52,52,""));
 			} catch (IllegalStateException e) {
 				log.warning("Caught IllegalStateException when requesting weather, message was: " + e.getLocalizedMessage());
 				e.printStackTrace();
@@ -77,7 +76,7 @@ public class WeatherRequestBlipProcessor implements IBlipProcessor {
 				e.printStackTrace();
 			}
 		}
-		//Utils.appendLineToBlip(blip, "Son of a bitch");
+
 		return wavelet;
 	}
 

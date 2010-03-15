@@ -1,11 +1,14 @@
 package waveutils;
 
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import stats.*;
 
 import com.google.wave.api.AbstractRobot;
 import com.google.wave.api.Blip;
+import com.google.wave.api.Element;
 import com.google.wave.api.Wavelet;
 
 /**
@@ -17,6 +20,7 @@ import com.google.wave.api.Wavelet;
  *
  */
 public class Utils {
+	private static Logger log = Logger.getLogger(Utils.class.getName());
 	
 	/**
 	 * Appends the string <i>s</i> on a new line to Blip <i>b</i>
@@ -35,6 +39,7 @@ public class Utils {
 	 * @param s String to append to Blip
 	 */
 	public static void appendToBlip(Blip b, String s) {
+		log.log(Level.INFO, "Appending " + s + " to blip " + b);
 		BlipUtils.append(b, s);
 	}
 	
@@ -45,6 +50,7 @@ public class Utils {
 	 * @param s String to set Blip content to
 	 */
 	public static void replaceBlip(Blip b, String s) {
+		log.log(Level.INFO, "Replaceing blip " + b + " with " + s);
 		BlipUtils.replace(b, s);
 	}
 	

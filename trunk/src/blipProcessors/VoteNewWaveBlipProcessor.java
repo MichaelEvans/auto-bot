@@ -20,9 +20,9 @@ public class VoteNewWaveBlipProcessor implements IBlipProcessor {
 		int numVotes;
 		HashMap<String, Integer> votes;
 		
-		votes = new HashMap<String, Integer>();
-		numVotes  = votes.size();
-		voteCreator = blip.getCreator();
+		//votes = new HashMap<String, Integer>();
+		//numVotes  = votes.size();
+		//voteCreator = blip.getCreator();
 /*		TODO
 		blip.getDocument().append("\n" + NW_VOTE_QUOTE);
 		votes.put(voteCreator, 1);
