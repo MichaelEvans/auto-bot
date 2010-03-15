@@ -17,7 +17,7 @@ public class Wave {
 		this.DeleteCount = wave.DeleteCount;
 	}
 	
-	public Wave(String Title,TreeMap<String,UserStats> Users){
+	public Wave(String Title, TreeMap<String, UserStats> Users){
 		this.Title = Title;
 		this.Users.putAll(Users);
 	}

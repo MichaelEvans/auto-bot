@@ -130,22 +130,28 @@ public class WaveStats {
 	}
 	
 	public String doMarkov(int times) {
-		int idx = -1;
-		Random r = new Random();
+		int idx, j, count;
+		Random r;
+		StringBuilder ret;
+		WordBag temp;
+		String next;
+		
+		idx = -1;
+		r = new Random();
 		idx = (idx != -1) ? idx : (r.nextInt(((int)(keywords.size() * 2.2))) % keywords.size());
-		String ret = "";
-		int j = 0;
+		ret = new StringBuilder();
+		j = 0;
 		while(true) {
-			WordBag temp = wordBags.get(idx);
-			int count = temp.count();
-			String next = temp.getWord(r.nextInt(((int)(count * 2.2))) % count);
-			ret += next + " ";
+			temp = wordBags.get(idx);
+			count = temp.count();
+			next = temp.getWord(r.nextInt(((int)(count * 2.2))) % count);
+			ret.append(next).append(" ");
 			idx = keywords.indexOf(next);
 			idx = (idx != -1) ? idx : (r.nextInt(((int)(count * 2.2))) % keywords.size());
 			j++;
 			if ((next.contains(".") && j > times) || (j > (2 * times)))
 				break;
 		}
-		return ret;
+		return ret.toString();
 	}
 }
