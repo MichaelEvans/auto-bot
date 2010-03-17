@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+	<ModulePrefs title="Auto-Bot Graphs">
+		<Require feature="wave" />
+		<Require feature="locked-domain" />
+		<Require feature="dynamic-height" />
+		<Require feature="tabs" />
+	</ModulePrefs>
+	<Content type="html">
+		<![CDATA[
+			<!DOCTYPE html>
+			<html xmlns="http://www.w3.org/1999/xhtml">
+  				<head>
+    				<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    				<script type="text/javascript">
+    					function rot(letter, offset) {
+    						var letters = "abcdefghijklmnopqrstuvwxyz";
+    						var idx = letters.indexOf(letter);
+    						
+    						return letters[(idx + offset) % 25];
+    					}
+    					
+      					function encrypt(elem) {
+      						var text = elem.value;
+      						var newtext = text.substring(0, text.length - 2);
+      						var newletter = text.substring(text.length - 2, text.length - 1);
+      						
+      						newtext += rot(newletter, 13);
+      						
+      						elem.value = newtext;
+      					}
+      					
+      					function decrypt(elem_id) {
+      						var elem = document.getElementByID(elem_id);
+      						var text = elem.value;
+      						var newtext = "";
+      						
+      						for (var i = 0; i < text.length; ++i) {
+      							newtext += rot(text[i], 13);
+      						}
+      						
+      						elem.value = newtext;
+      					}
+    				</script>
+  				</head>
+  				<body>
+  					<form>
+  						<textarea id="spoiler_text" onkeypress="encrypt(this)" rows="4" cols="5" />
+  						<input type="button" value="Decrypt" onclick="decrypt(spoiler_text")" />
+  					</form>
+  				</body>
+			</html>
+		]]>
+	</Content>
+</Module>
