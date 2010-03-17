@@ -24,7 +24,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 		<url-pattern>/_wave/robot/profile</url-pattern>
 	</servlet-mapping>
 	
-	<!-- Web Frontend Servlet -->
+	<!-- Web Frontend Servlet 
 	<servlet>
 		<servlet-name>Auto_BotFrontend</servlet-name>
 		<servlet-class>frontend.IndexServlet.java</servlet-class>
@@ -32,5 +32,5 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 	<servlet-mapping>
 		<servlet-name>Auto_BotFrontend</servlet-name>
 		<url-pattern>/view</url-pattern>
-	</servlet-mapping>
+	</servlet-mapping>-->
 </web-app>
