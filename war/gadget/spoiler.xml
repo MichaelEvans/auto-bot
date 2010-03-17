@@ -17,7 +17,7 @@
     						var letters = "abcdefghijklmnopqrstuvwxyz";
     						var idx = letters.indexOf(letter);
     						
-    						return letters[(idx + offset) % 25];
+    						return letters[(idx + offset) % 26];
     					}
     					
       					function encrypt(elem) {
