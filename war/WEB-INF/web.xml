@@ -4,6 +4,7 @@ xmlns="http://java.sun.com/xml/ns/javaee"
 xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
 http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+	<!-- Wave Robot Servlet -->
 	<servlet>
 		<servlet-name>Auto_Bot</servlet-name>
 		<servlet-class>autobot.Auto_BotServlet</servlet-class>
@@ -13,6 +14,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 		<url-pattern>/_wave/robot/*</url-pattern>
 	</servlet-mapping>
 	
+	<!-- Wave Robot Profile Servlet -->
 	<servlet>
 		<servlet-name>Auto_BotProfileServlet</servlet-name>
 		<servlet-class>autobot.Auto_BotProfileServlet</servlet-class>
@@ -20,5 +22,15 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 	<servlet-mapping>
 		<servlet-name>Auto_BotProfileServlet</servlet-name>
 		<url-pattern>/_wave/robot/profile</url-pattern>
-	</servlet-mapping>  
+	</servlet-mapping>
+	
+	<!-- Web Frontend Servlet -->
+	<servlet>
+		<servlet-name>Auto_BotFrontend</servlet-name>
+		<servlet-class>frontend.IndexServlet.java</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Auto_BotFrontend</servlet-name>
+		<url-pattern>/view</url-pattern>
+	</servlet-mapping>
 </web-app>

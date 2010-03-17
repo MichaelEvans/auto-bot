@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+	<ModulePrefs title="Auto-Bot Graphs">
+		<Require feature="wave" />
+		<Require feature="locked-domain" />
+		<Require feature="dynamic-height" />
+		<Require feature="tabs" />
+	</ModulePrefs>
+	<Content type="html">
+		<![CDATA[
+			<!DOCTYPE html>
+			<html xmlns="http://www.w3.org/1999/xhtml">
+  				<head>
+    				<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    				<script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+    				<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    				<script type="text/javascript">
+    					//google.load('visualization', '1', {packages: ['piechart']});
+    				</script>
+    				<script type="text/javascript">
+      					function drawVisualization() {
+        					// Create and populate the data table.
+        					var data = new google.visualization.DataTable();
+        					data.addColumn('string', 'Month');
+        					data.addColumn('number', 'Sales');
+        					data.addRows([
+         						['January',{v:20, f:'$20M'}],
+          						['February',{v:31, f:'$31M'}],
+          						['March',{v:61, f:'$61M'}],
+          						['April',{v:26, f:'$26M'}]
+        					]);
+      
+        					// Create and draw the visualization.
+        					new google.visualization.PieChart(
+ 								document.getElementById('visualization')).draw(data, {is3D:true});
+      					}
+      					google.setOnLoadCallback(drawVisualization);
+    				</script>
+  				</head>
+  				<body style="font-family: Arial;border: 0 none;">
+  					<button onclick="google.load('visualization', '1', {packages: ['piechart']});">Show Graph</button>
+    				<div id="visualization" style="width: 300px; height: 300px;">
+    				</div>
+  				</body>
+			</html>
+		]]>
+	</Content>
+</Module>
