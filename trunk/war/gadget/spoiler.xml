@@ -17,7 +17,7 @@
     						var letters = "abcdefghijklmnopqrstuvwxyz";
     						var idx = letters.indexOf(letter);
     						
-    						return letters[(idx + offset) % 26];
+    						return idx > 0 ? letters[(idx + offset) % 26] : letter;
     					}
     					
       					function encrypt(elem) {
@@ -46,7 +46,7 @@
   				<body>
   					<form>
   						<textarea id="spoiler_text" onkeyup="encrypt(this)" rows="4" cols="25"></textarea>
-  						<input type="button" value="Decrypt" onclick="decrypt(spoiler_text")" />
+  						<input type="button" value="Decrypt" onclick="decrypt('spoiler_text')" />
   					</form>
   				</body>
 			</html>
