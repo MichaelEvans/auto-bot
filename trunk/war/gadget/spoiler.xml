@@ -44,8 +44,8 @@
     				</script>
   				</head>
   				<body>
-  					<form style="height: 400px">
-  						<textarea id="spoiler_text" onkeypress="encrypt(this)" rows="4" cols="5"></textarea>
+  					<form>
+  						<textarea id="spoiler_text" onkeyup="encrypt(this)" rows="4" cols="25"></textarea>
   						<input type="button" value="Decrypt" onclick="decrypt(spoiler_text")" />
   					</form>
   				</body>
