@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
+	<classpathentry kind="src" path="tests"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/datanucleus-core-1.1.5.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/datanucleus-jpa-1.1.5.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/geronimo-jpa_3.0_spec-1.1.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/geronimo-jta_1.1_spec-1.1.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jdo2-api-2.3-eb.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/json.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jsonrpc.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jsr107cache-1.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/appengine-jsr107cache-1.3.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/wave-robot-api-20100301.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/App Engine (Mac)"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

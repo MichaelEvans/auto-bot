@@ -22,8 +22,8 @@
     					
       					function encrypt(elem) {
       						var text = elem.value;
-      						var newtext = text.substring(0, text.length - 2);
-      						var newletter = text.substring(text.length - 2, text.length - 1);
+      						var newtext = text.substring(0, text.length - 1);
+      						var newletter = text.substring(text.length - 1, text.length);
       						
       						newtext += rot(newletter, 13);
       						
