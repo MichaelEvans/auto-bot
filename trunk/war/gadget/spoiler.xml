@@ -31,7 +31,7 @@
       					}
       					
       					function decrypt(elem_id) {
-      						var elem = document.getElementByID(elem_id);
+      						var elem = document.getElementById(elem_id);
       						var text = elem.value;
       						var newtext = "";
       						
