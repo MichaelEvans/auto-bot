@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-	<ModulePrefs title="Auto-Bot Spoilers" height="100" width="300">
+	<ModulePrefs title="Auto-Bot Spoilers" height="150" width="300">
 		<Require feature="wave" />
 		<Require feature="locked-domain" />
 		<Require feature="dynamic-height" />
