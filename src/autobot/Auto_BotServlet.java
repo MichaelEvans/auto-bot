@@ -120,6 +120,7 @@ public class Auto_BotServlet extends AbstractRobot {
 	}
 	
 	
+	
 	public void onWaveletSelfAdded(WaveletSelfAddedEvent event) {
 		Wavelet wavelet = event.getWavelet();
 		String id = wavelet.serialize().getWaveId();
@@ -168,6 +169,18 @@ public class Auto_BotServlet extends AbstractRobot {
 	@Override
 	public void onDocumentChanged(DocumentChangedEvent event) {
 		log.log(Level.INFO, "Should not be happening: " + event.getType());
+	}
+	
+	@Override
+	public void onFormButtonClicked(FormButtonClickedEvent event) {
+		log.log(Level.INFO, "Handling a form button request: " + event.getButtonName());
+		if (event.getButtonName().equals("spoiler_submit")) {
+			log.log(Level.INFO, "Handling a spoiler request." + event.getBlip().getElements().size());
+			for (Integer i : event.getBlip().getElements().keySet())
+				if (event.getBlip().getElements().get(i).getType() == ElementType.TEXTAREA) {
+					log.log(Level.INFO, "The spoiler was: " + ((FormElement)event.getBlip().getElements().get(i)).getValue());
+				}
+		}
 	}
 	
 	@Override
@@ -246,7 +259,8 @@ public class Auto_BotServlet extends AbstractRobot {
 		//tx.commit();
 		//Statistics
 		String BLIP_AUTHOR = event.getBlip().getCreator();
-		log.log(Level.INFO,"Attempting to increment blip for "+ event.getBlip().getCreator());
+		log.log(Level.INFO, "Blip version number " + event.getBlip().getVersion());
+		log.log(Level.INFO, "Attempting to increment blip for "+ event.getBlip().getCreator());
 		if (waveStats.getUser(BLIP_AUTHOR) == null) {
 			UserStats user = new UserStats(BLIP_AUTHOR);
 			waveStats.addUser(user);
