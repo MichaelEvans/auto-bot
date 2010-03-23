@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-	<ModulePrefs title="Auto-Bot Graphs">
+	<ModulePrefs title="Auto-Bot Graphs" height="600" width=500">
 		<Require feature="wave" />
 		<Require feature="locked-domain" />
 		<Require feature="dynamic-height" />
@@ -15,7 +15,7 @@
     				<script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
     				<script type="text/javascript" src="http://www.google.com/jsapi"></script>
     				<script type="text/javascript">
-    					//google.load('visualization', '1', {packages: ['piechart']});
+    					google.load('visualization', '1', {packages: ['piechart']});
     				</script>
     				<script type="text/javascript">
       					function drawVisualization() {
@@ -38,7 +38,6 @@
     				</script>
   				</head>
   				<body style="font-family: Arial;border: 0 none;">
-  					<button onclick="google.load('visualization', '1', {packages: ['piechart']});">Show Graph</button>
     				<div id="visualization" style="width: 300px; height: 300px;">
     				</div>
   				</body>
