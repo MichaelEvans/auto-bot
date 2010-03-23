@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
-	<ModulePrefs title="Auto-Bot Graphs" height="600" width=500">
+	<ModulePrefs title="Auto-Bot Graphs" height="600" width="500">
 		<Require feature="wave" />
 		<Require feature="locked-domain" />
 		<Require feature="dynamic-height" />
