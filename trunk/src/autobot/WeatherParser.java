@@ -34,45 +34,12 @@ public class WeatherParser{
 
 		dBF = DocumentBuilderFactory.newInstance();
 		dBF.setNamespaceAware(true);
+		dBF.setCoalescing(true);
 		builder = dBF.newDocumentBuilder();
 		doc = builder.parse(uri);
 
 		return doc;
 	}
-
-	/*public static String getImage(int Zip) throws IOException{
-		URL url = new URL("http://weather.yahooapis.com/forecastrss?p=" + Zip);
-		InputStream input = url.openStream();
-		BufferedReader in = new BufferedReader (new InputStreamReader(input));
-		String info = "";
-		int startLine = 31;
-		int endLine = 22;
-		// read prior junk
-		for (int i = 0; i < startLine; i++) { info = in.readLine(); }
-		String image = info;
-
-		info = in.readLine();
-		String weather = in.readLine();
-		info = in.readLine();
-		String forecast = in.readLine();
-
-
-
-		image = image.substring(image.indexOf("\"")+1, image.lastIndexOf("\""));
-		System.out.println(image);
-		String current = weather.substring(0, weather.lastIndexOf("<"));
-		System.out.println(current);
-		forecast = forecast.substring(0, forecast.lastIndexOf("<"));
-		System.out.println(forecast);
-		//System.out.println(info);
-		/*for (int i = startLine; i < endLine + 1; i++) {
-		        info = in.readLine();
-		        System.out.println(info);
-		    }//
-
-		in.close();
-		return image;
-	}*/
 
 	public static String getImage(String zip) throws ParserConfigurationException, SAXException, IOException {
 		String yahooAPILoc = "http://weather.yahooapis.com/forecastrss?p=";
@@ -82,7 +49,7 @@ public class WeatherParser{
 		log.log(Level.INFO, "Locating image url");
 
 		yahooDoc = getDocument(yahooAPILoc + zip);
-		imageNodeList = yahooDoc.getElementsByTagNameNS("*", "image");
+		imageNodeList = yahooDoc.getElementsByTagNameNS("*", "description");
 
 
 		for (int j = 0; j < imageNodeList.getLength(); ++j) {
@@ -95,11 +62,16 @@ public class WeatherParser{
 				Node child;
 
 				child = imageNodeChildren.item(i);
-				if (child.getNodeType() == Node.ELEMENT_NODE) {
-					if (child.getNodeName().equals("url")) {
-						log.log(Level.INFO, "Image url found: " + child.getTextContent());
+				if (child.getNodeType() == Node.TEXT_NODE) {
+					// I don't feel like doing this correctly right now
+					try {
+						String ret =  child.getTextContent();
+						ret = ret.substring(ret.indexOf("<img src=\"") + 10, ret.length());
+						ret = ret.substring(0, ret.indexOf("\"/>"));
 
-						return child.getTextContent();
+						return ret;
+					} catch (Exception e) {
+						continue;
 					}
 				}
 			}
@@ -108,40 +80,6 @@ public class WeatherParser{
 		log.log(Level.INFO, "Unable to find image url");
 		return "";
 	}
-
-	/*public static String getTemp(int Zip) throws IOException{
-		URL url = new URL("http://weather.yahooapis.com/forecastrss?p=" + Zip);
-		InputStream input = url.openStream();
-		BufferedReader in = new BufferedReader (new InputStreamReader(input));
-		String info = "";
-		int startLine = 31;
-		int endLine = 22;
-		// read prior junk
-		for (int i = 0; i < startLine; i++) { info = in.readLine(); }
-		String image = info;
-
-		info = in.readLine();
-		String weather = in.readLine();
-		info = in.readLine();
-		String forecast = in.readLine();
-
-
-
-		image = image.substring(image.indexOf("\"")+1, image.lastIndexOf("\""));
-		System.out.println(image);
-		String current = weather.substring(0, weather.lastIndexOf("<"));
-		System.out.println(current);
-		forecast = forecast.substring(0, forecast.lastIndexOf("<"));
-		System.out.println(forecast);
-		//System.out.println(info);
-		/*for (int i = startLine; i < endLine + 1; i++) {
-		        info = in.readLine();
-		        System.out.println(info);
-		    }//
-
-		in.close();
-		return current;
-	}*/
 
 	public static String getTemp(String zip) throws ParserConfigurationException, SAXException, IOException {
 		String yahooAPILoc = "http://weather.yahooapis.com/forecastrss?p=";
@@ -156,40 +94,6 @@ public class WeatherParser{
 		log.log(Level.INFO, "Got temp: " + ((Element)conditionsNode).getAttribute("temp"));
 		return ((Element)conditionsNode).getAttribute("temp");
 	}
-
-	/*public static String getForecast(int Zip) throws IOException{
-		URL url = new URL("http://weather.yahooapis.com/forecastrss?p=" + Zip);
-		InputStream input = url.openStream();
-		BufferedReader in = new BufferedReader (new InputStreamReader(input));
-		String info = "";
-		int startLine = 31;
-		int endLine = 22;
-		// read prior junk
-		for (int i = 0; i < startLine; i++) { info = in.readLine(); }
-		String image = info;
-
-		info = in.readLine();
-		String weather = in.readLine();
-		info = in.readLine();
-		String forecast = in.readLine();
-
-
-
-		image = image.substring(image.indexOf("\"")+1, image.lastIndexOf("\""));
-		System.out.println(image);
-		String current = weather.substring(0, weather.lastIndexOf("<"));
-		System.out.println(current);
-		forecast = forecast.substring(0, forecast.lastIndexOf("<"));
-		System.out.println(forecast);
-		//System.out.println(info);
-		/*for (int i = startLine; i < endLine + 1; i++) {
-		        info = in.readLine();
-		        System.out.println(info);
-		    }//
-
-		in.close();
-		return forecast;
-	}*/
 
 	public static String getForecast(String zip) throws ParserConfigurationException, SAXException, IOException {
 		String yahooAPILoc = "http://weather.yahooapis.com/forecastrss?p=";
@@ -230,19 +134,6 @@ public class WeatherParser{
 
 		return ret == null ? "No Forecast Available" : ret;
 	}
-
-
-
-	/*public static String getLocation(int Zip) throws IOException{
-		URL url = new URL("http://weather.yahooapis.com/forecastrss?p=" + Zip);
-		InputStream input = url.openStream();
-		BufferedReader in = new BufferedReader (new InputStreamReader(input));
-		String info = "";
-		int startLine = 24;
-		for (int i = 0; i < startLine; i++) { info = in.readLine(); }
-		in.close();
-		return info.substring(info.indexOf(">")+1, info.lastIndexOf("<"));
-	}*/
 
 	public static String getLocation(String zip) throws ParserConfigurationException, SAXException, IOException {
 		String yahooAPILoc = "http://weather.yahooapis.com/forecastrss?p=";
