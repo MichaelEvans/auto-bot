@@ -1,5 +1,10 @@
 package autobot;
 
+import com.google.appengine.api.labs.taskqueue.Queue;
+import com.google.appengine.api.labs.taskqueue.QueueFactory;
+import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
+
+import static com.google.appengine.api.labs.taskqueue.TaskOptions.Builder.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -289,7 +294,10 @@ public class Auto_BotServlet extends AbstractRobot {
 		}
 		waveStats.getUser(BLIP_AUTHOR).incrementBlipCount();
 		//tx.commit();
-		waveStats.fillWordBags(event.getBlip().getContent());
+		Queue queue = QueueFactory.getDefaultQueue();
+		queue.add(url("/markov").param("text", event.getBlip().getContent()).param("waveID", id).method(Method.POST));
+		
+		//waveStats.fillWordBags(event.getBlip().getContent());
 		//tx.commit();
 		
 		log.log(Level.INFO, "There are " + waveStats.getBlips() + " blips in this wave!");
@@ -301,8 +309,8 @@ public class Auto_BotServlet extends AbstractRobot {
 			log.log(Level.INFO, "AUTO-BOT: Blip count is " + numBlips + ", spawning a new wave.");
 			Utils.reply(wavelet, NEW_WAVE_INDICATOR);
 			Wavelet newWavelet = Utils.createWave(this, wavelet, Tools.newTitle(waveStats), wavelet.getDomain(), wavelet.getParticipants());
-			waveStats.setNextWaveID(newWavelet.getWaveId().toString());
-			waveStats.setNextWaveletID(newWavelet.getWaveletId().toString());
+			waveStats.setNextWaveID(newWavelet.serialize().getWaveId());
+			waveStats.setNextWaveletID(newWavelet.serialize().getWaveletId());
 		} 
 		else if (numBlips == MAX_BLIPS + NUM_OF_VOTES - 5) { /* Warning blip */
 			String reply = "\n\n=============================";
