@@ -300,6 +300,17 @@ public class Auto_BotServlet extends AbstractRobot {
 		//waveStats.fillWordBags(event.getBlip().getContent());
 		//tx.commit();
 		
+		/* Fucking getBlips() doesn't do shit. It returns the root blip, the current blip, and the 
+		 * blip before that. Are you fucking kidding me Google?
+		 * 
+		 * TODO
+		
+		for(Blip b : wavelet.getBlips().values()) {
+			log.log(Level.INFO, "Blip: " + b.getContent());
+			for (Blip b2 : b.getChildBlips())
+				log.log(Level.INFO, "WHAT: " + b2.getContent());
+		}*/
+		
 		log.log(Level.INFO, "There are " + waveStats.getBlips() + " blips in this wave!");
 		
 		processBlip(event.getBlip(), wavelet, waveStats);
@@ -311,6 +322,7 @@ public class Auto_BotServlet extends AbstractRobot {
 			Wavelet newWavelet = Utils.createWave(this, wavelet, Tools.newTitle(waveStats), wavelet.getDomain(), wavelet.getParticipants());
 			waveStats.setNextWaveID(newWavelet.serialize().getWaveId());
 			waveStats.setNextWaveletID(newWavelet.serialize().getWaveletId());
+			queue.add(url("/markov").param("text", event.getBlip().getContent()).param("waveID", id).param("action", "clear").method(Method.POST));
 		} 
 		else if (numBlips == MAX_BLIPS + NUM_OF_VOTES - 5) { /* Warning blip */
 			String reply = "\n\n=============================";
@@ -321,6 +333,8 @@ public class Auto_BotServlet extends AbstractRobot {
 		
 		/* Stop bumping shit */
 		if (numBlips > MAX_BLIPS + NUM_OF_VOTES) {
+			queue = QueueFactory.getDefaultQueue();
+			queue.add(url("/markov").param("text", event.getBlip().getContent()).param("waveID", id).param("action", "clear").method(Method.POST));
 			wavelet.delete(event.getBlip());
 		}
 		

@@ -188,5 +188,10 @@ public class WaveStats {
 		this.muted = muted;
 	}
 	
+	public void clearWordBag() {
+		keywords.clear();
+		wordBags.clear();
+	}
+	
 	
 }
