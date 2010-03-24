@@ -22,6 +22,8 @@ public class NonCommandBlipProcessor implements IBlipProcessor {
 			autobot.Auto_BotServlet.log.log(Level.INFO, "Found something: " + mtchr.group());
 			blip.all().delete();
 			Utils.appendToBlip(blip, "This isn't 4chan.");
+			blip.all().annotate("style/fontWeight", "bold");
+			blip.all().annotate("style/color", "red");
 		}
 
 		return wavelet;
