@@ -66,12 +66,14 @@ public class WeatherParser{
 					// I don't feel like doing this correctly right now
 					try {
 						String ret =  child.getTextContent();
+
 						ret = ret.substring(ret.indexOf("<img src=\"") + 10, ret.length());
 						ret = ret.substring(0, ret.indexOf("\"/>"));
 
 						return ret;
-					} catch (Exception e) {
-						continue;
+					}
+					catch (Exception e) {
+						//Exception, just skip over it.
 					}
 				}
 			}
