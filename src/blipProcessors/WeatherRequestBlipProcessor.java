@@ -73,8 +73,10 @@ public class WeatherRequestBlipProcessor implements IBlipProcessor {
 				e.printStackTrace();
 			}
 		}
+		// TODO: Fix waveutils to allow for replace.
 		Utils.appendLineToBlip(blip, "\n" + current);
-		//blip.append(new Image(imageURL,15,15,""));
+		log.log(Level.INFO, "Image URL: " + imageURL);
+		blip.append(new Image(imageURL,52,52,""));
 
 		return wavelet;
 	}
