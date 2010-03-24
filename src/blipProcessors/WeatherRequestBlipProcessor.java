@@ -26,18 +26,16 @@ public class WeatherRequestBlipProcessor implements IBlipProcessor {
 	
 	final static Logger log = Logger.getLogger(WeatherRequestBlipProcessor.class.getName());
 	
-	public Wavelet processBlip(Blip blip, Wavelet wavelet,
-			Map<String, Object> dataMap) {
+	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
 		Pattern weatherPattern = Pattern.compile(REGEX);
 		Matcher mtchr = weatherPattern.matcher(blip.getContent());
-		
+		String current = "";
+		String imageURL = "";
 		while(mtchr.find()) {
 			log.log(Level.INFO, "Found something: " + mtchr.group());
 			String zip = mtchr.group(1);
 		
 			try {
-				String current = "";
-				String imageURL = "";
 				try {
 					log.log(Level.INFO, "Getting weather for " + zip);
 					
@@ -65,7 +63,6 @@ public class WeatherRequestBlipProcessor implements IBlipProcessor {
 			
 				log.log(Level.INFO, "Replacing blip with: " + current);
 
-				Utils.replaceBlip(blip, current);
 			} catch (IllegalStateException e) {
 				log.warning("Caught IllegalStateException when requesting weather, message was: " + e.getLocalizedMessage());
 				e.printStackTrace();
@@ -76,6 +73,8 @@ public class WeatherRequestBlipProcessor implements IBlipProcessor {
 				e.printStackTrace();
 			}
 		}
+		Utils.appendLineToBlip(blip, "\n" + current);
+		//blip.append(new Image(imageURL,15,15,""));
 
 		return wavelet;
 	}

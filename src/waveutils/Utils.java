@@ -6,6 +6,8 @@ import java.util.logging.Logger;
 
 import stats.*;
 
+import autobot.Auto_BotServlet;
+
 import com.google.wave.api.AbstractRobot;
 import com.google.wave.api.Blip;
 import com.google.wave.api.Element;
@@ -20,7 +22,7 @@ import com.google.wave.api.Wavelet;
  *
  */
 public class Utils {
-	private static Logger log = Logger.getLogger(Utils.class.getName());
+	private static Logger log = Auto_BotServlet.log;
 	
 	/**
 	 * Appends the string <i>s</i> on a new line to Blip <i>b</i>
