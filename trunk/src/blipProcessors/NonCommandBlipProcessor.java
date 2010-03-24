@@ -20,7 +20,8 @@ public class NonCommandBlipProcessor implements IBlipProcessor {
 		
 		while(mtchr.find()) {
 			autobot.Auto_BotServlet.log.log(Level.INFO, "Found something: " + mtchr.group());
-			Utils.replaceBlip(blip, "This isn't 4chan.");
+			blip.all().delete();
+			Utils.appendToBlip(blip, "This isn't 4chan.");
 		}
 
 		return wavelet;
