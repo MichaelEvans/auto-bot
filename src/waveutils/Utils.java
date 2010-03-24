@@ -95,8 +95,10 @@ public class Utils {
 	 * @param title Title of new Wave
 	 * @param domain Domain of new Wave
 	 * @param participants Participants in the new Wave
+	 * 
+	 * @return The newly created wavelet.
 	 */
-	public static void createWave(AbstractRobot maker, Wavelet withWave, String title, String domain, Set<String> participants) {
-		WaveletUtils.create(maker, withWave, title, domain, participants);
+	public static Wavelet createWave(AbstractRobot maker, Wavelet withWave, String title, String domain, Set<String> participants) {
+		return WaveletUtils.create(maker, withWave, title, domain, participants);
 	}
 }

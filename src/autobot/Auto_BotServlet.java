@@ -100,6 +100,27 @@ public class Auto_BotServlet extends AbstractRobot {
 		}
 	}
 	
+	private void makeBlipsMap(String id) {
+		List<WaveStats> tempList;
+		String query = "select from " + stats.WaveStats.class.getName() + " WHERE waveID == '" + id + "'";
+		
+		if (pm == null) {
+			log.log(Level.INFO,"pm is null");
+		}
+		else if (query == null) {
+			log.log(Level.INFO, "query is null");
+
+		}
+		else {
+		//	log.log(Level.INFO, "AUTO-BOT: Creating blips map.");
+			
+			tempList = (List<WaveStats>) pm.newQuery(query).execute();
+			for (WaveStats ws : tempList) {
+				waveStatsMap.put(ws.getWaveID(), ws);
+			}
+		}		
+	}
+	
 	private void openPM() {
 		try {
 			pm = PMF.get().getPersistenceManager();
@@ -107,7 +128,7 @@ public class Auto_BotServlet extends AbstractRobot {
 		catch (Exception e) {
 			log.log(Level.INFO, "Error opening PersistenceManager");
 		}
-		makeBlipsMap();
+		//makeBlipsMap();
 	}
 	
 	private void closePM() {
@@ -241,7 +262,7 @@ public class Auto_BotServlet extends AbstractRobot {
 			tx.setOptimistic(true);
 			tx.begin();
 		}*/
-		
+		makeBlipsMap(id);
 		waveStats = waveStatsMap.get(id);
 		if (waveStats == null) {
 			try {
@@ -252,13 +273,14 @@ public class Auto_BotServlet extends AbstractRobot {
 			catch (Exception ex) {
 				log.log(Level.INFO, "Fuck couldn't persist : " + ex);
 			}
-			makeBlipsMap();
+			makeBlipsMap(id);
 		}
 		numBlips = waveStats.getBlips() + 1;
 		waveStats.setBlips(numBlips);
 		//tx.commit();
 		//Statistics
 		String BLIP_AUTHOR = event.getBlip().getCreator();
+		
 		log.log(Level.INFO, "Blip version number " + event.getBlip().getVersion());
 		log.log(Level.INFO, "Attempting to increment blip for "+ event.getBlip().getCreator());
 		if (waveStats.getUser(BLIP_AUTHOR) == null) {
@@ -278,7 +300,9 @@ public class Auto_BotServlet extends AbstractRobot {
 		if (numBlips == MAX_BLIPS + NUM_OF_VOTES) { /* Blip has reached its max, spawn a new one */
 			log.log(Level.INFO, "AUTO-BOT: Blip count is " + numBlips + ", spawning a new wave.");
 			Utils.reply(wavelet, NEW_WAVE_INDICATOR);
-			Utils.createWave(this, wavelet, Tools.newTitle(waveStats), wavelet.getDomain(), wavelet.getParticipants());			
+			Wavelet newWavelet = Utils.createWave(this, wavelet, Tools.newTitle(waveStats), wavelet.getDomain(), wavelet.getParticipants());
+			waveStats.setNextWaveID(newWavelet.getWaveId().toString());
+			waveStats.setNextWaveletID(newWavelet.getWaveletId().toString());
 		} 
 		else if (numBlips == MAX_BLIPS + NUM_OF_VOTES - 5) { /* Warning blip */
 			String reply = "\n\n=============================";
@@ -289,6 +313,12 @@ public class Auto_BotServlet extends AbstractRobot {
 		
 		/* Stop bumping shit */
 		if (numBlips > MAX_BLIPS + NUM_OF_VOTES) {
+			wavelet.delete(event.getBlip());
+		}
+		
+		/* Russian roulette muting */
+		if (BLIP_AUTHOR.equals(waveStats.getMuted())) {
+			log.log(Level.INFO, "Deleting the muted player");
 			wavelet.delete(event.getBlip());
 		}
 		

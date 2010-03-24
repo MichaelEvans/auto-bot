@@ -10,7 +10,7 @@ import com.google.wave.api.Wavelet;
 * A utility class for modifying Wavelets in Google Wave.
 * 
 * @author Rob
-* @version 0.1.1
+* @version 0.1.2
 *
 */
 public class WaveletUtils {
@@ -45,10 +45,14 @@ public class WaveletUtils {
 	 * @param title Title of new Wave
 	 * @param domain Domain of new Wave
 	 * @param participants Participants in the new Wave
+	 * 
+	 * @return The newly created Wavelet
 	 */
-	public static void create(AbstractRobot maker, Wavelet withWave, String title, String domain, Set<String> participants) {
+	public static Wavelet create(AbstractRobot maker, Wavelet withWave, String title, String domain, Set<String> participants) {
 		Wavelet newWavelet = maker.newWave(domain, participants);
 		newWavelet.setTitle(title);
 		newWavelet.submitWith(withWave);
+		
+		return newWavelet;
 	}
 }

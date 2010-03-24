@@ -76,8 +76,7 @@ public class WaveStatsBlipProcessor implements IBlipProcessor {
 		responseBuffer.append("BlipCount:"+waveStats.getUser(blip.getCreator()).getBlipCount()+"\n");
 		responseBuffer.append("DeleteCount:"+waveStats.getUser(blip.getCreator()).getDeleteCount()+"\n");
 		responseBuffer.append("EditCount:"+waveStats.getUser(blip.getCreator()).getEditCount()+"\n");
-		//blip.getDocument().append(responseBuffer.toString());
-		//blip.getDocument().replace(responseBuffer.toString());
+		
 		Utils.replaceBlip(blip, responseBuffer.toString());
 		log.log(Level.INFO, "Blip is now: " + blip.getContent());
 		
