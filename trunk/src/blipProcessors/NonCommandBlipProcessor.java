@@ -13,8 +13,10 @@ public class NonCommandBlipProcessor implements IBlipProcessor {
 			Map<String, Object> dataMap) {
 
 		//Utils.replaceBlipContent(blip, ":D", "D:");
-		
-		
+
+                if (blip.getContent().matches("^>"))
+                        BlipUtils.replace("This isn't 4chan.");
+
 		return wavelet;
 	}
 
