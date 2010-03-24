@@ -14,6 +14,7 @@ public class NonCommandBlipProcessor implements IBlipProcessor {
 
 		//Utils.replaceBlipContent(blip, ":D", "D:");
 		
+		
 		return wavelet;
 	}
 

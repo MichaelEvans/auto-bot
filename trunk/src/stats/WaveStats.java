@@ -25,6 +25,15 @@ public class WaveStats {
     private int blips;
     
     @Persistent
+    private String nextWaveID;
+    
+    @Persistent
+    private String nextWaveletID;
+    
+    @Persistent
+    private String muted;
+    
+    @Persistent
     private List<UserStats> users;
     
     @Persistent
@@ -110,7 +119,7 @@ public class WaveStats {
 	}
 	
 	public void fillWordBags(String s) {
-		String[] allWords = s.replace("\n", "").split(" ");
+		String[] allWords = s.replace("\n", " ").split(" ");
 		int i = 0;
 		
 		for (i = 0; i < allWords.length-1; i++) {
@@ -154,4 +163,30 @@ public class WaveStats {
 		}
 		return ret.toString();
 	}
+
+	public String getNextWaveID() {
+		return nextWaveID;
+	}
+
+	public void setNextWaveID(String nextWaveID) {
+		this.nextWaveID = nextWaveID;
+	}
+
+	public String getNextWaveletID() {
+		return nextWaveletID;
+	}
+
+	public void setNextWaveletID(String nextWaveletID) {
+		this.nextWaveletID = nextWaveletID;
+	}
+
+	public String getMuted() {
+		return muted;
+	}
+
+	public void setMuted(String muted) {
+		this.muted = muted;
+	}
+	
+	
 }

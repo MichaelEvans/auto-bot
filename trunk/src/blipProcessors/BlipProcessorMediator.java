@@ -38,6 +38,7 @@ public class BlipProcessorMediator implements IBlipProcessor {
 		startsWithMap.put("like", CMD_OPEN_IDENT + LikeThisBlipProcessor.NAME + CMD_CLOSE_IDENT);
 		startsWithMap.put("dislike", CMD_OPEN_IDENT + DislikeThisBlipProcessor.NAME + CMD_CLOSE_IDENT);
 		startsWithMap.put("spoiler", CMD_OPEN_IDENT + SpoilerBlipProcessor.NAME + CMD_CLOSE_IDENT);
+		startsWithMap.put("roulette", CMD_OPEN_IDENT + RussianRouletteBlipProcessor.NAME + CMD_CLOSE_IDENT);
 	}
 	
 	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
@@ -73,6 +74,8 @@ public class BlipProcessorMediator implements IBlipProcessor {
 			return new LikeThisBlipProcessor();
 		} else if (commandText.startsWith(startsWithMap.get("dislike"))) {
 			return new DislikeThisBlipProcessor();
+		} else if (commandText.startsWith(startsWithMap.get("roulette"))) {
+			return new RussianRouletteBlipProcessor();
 		}
 		else if (commandText.startsWith(startsWithMap.get("spoiler"))) {
 			return new SpoilerBlipProcessor();
