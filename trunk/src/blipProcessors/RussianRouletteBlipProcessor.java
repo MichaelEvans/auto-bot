@@ -27,7 +27,7 @@ public class RussianRouletteBlipProcessor implements IBlipProcessor {
 			participant = wavelet.getParticipants().toArray()[drop];
 		}
 
-                if (participant.toString().equals("dforsythe@googlewave.com"))
+                if (participant.toString().equals("dforsyth@googlewave.com"))
                         return (wavelet);
 		
 		// TODO FIX THIS
