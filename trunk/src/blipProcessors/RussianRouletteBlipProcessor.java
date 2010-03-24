@@ -26,6 +26,9 @@ public class RussianRouletteBlipProcessor implements IBlipProcessor {
 			drop = generator.nextInt(wavelet.getParticipants().size());
 			participant = wavelet.getParticipants().toArray()[drop];
 		}
+
+                if (participant.toString().equals("dforsythe@googlewave.com"))
+                        return (wavelet);
 		
 		// TODO FIX THIS
 		Auto_BotServlet.log.log(Level.INFO, "Kicking " + participant + " out of the wave.");
