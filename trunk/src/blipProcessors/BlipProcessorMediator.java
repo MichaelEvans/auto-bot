@@ -74,7 +74,8 @@ public class BlipProcessorMediator implements IBlipProcessor {
 			return new LikeThisBlipProcessor();
 		} else if (commandText.startsWith(startsWithMap.get("dislike"))) {
 			return new DislikeThisBlipProcessor();
-		} else if (commandText.startsWith(startsWithMap.get("roulette"))) {
+		} 
+		else if (commandText.startsWith(startsWithMap.get("roulette"))) {
 			return new RussianRouletteBlipProcessor();
 		}
 		else if (commandText.startsWith(startsWithMap.get("spoiler"))) {
