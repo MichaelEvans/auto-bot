@@ -15,8 +15,18 @@ public class NonCommandBlipProcessor implements IBlipProcessor {
 	public Wavelet processBlip(Blip blip, Wavelet wavelet,
 			Map<String, Object> dataMap) {
 
-		Pattern weatherPattern = Pattern.compile("(\\^|\\n|\\A){1}>.*");
-		Matcher mtchr = weatherPattern.matcher(blip.getContent());
+                String cont = blip.getContent().trim().toLowerCase();
+                if (cont.matches("^*this\\.*")) {
+                        autobot.Auto_BotServlet.log.log(Level.INFO, "Post is "
+                        + "useless " + cont);
+                        blip.all().delete();
+                        Utils.appendToBlip(blip, "This post was completely "
+                        + "useless.  Instead, have a picture\n!{::random}!");
+                        return (wavelet);
+                }
+
+		Pattern chanQuote = Pattern.compile("(\\^|\\n|\\A){1}>.*");
+		Matcher mtchr = chanQuote.matcher(blip.getContent());
 		
 		while(mtchr.find()) {
 			autobot.Auto_BotServlet.log.log(Level.INFO, "Found something: " + mtchr.group());
