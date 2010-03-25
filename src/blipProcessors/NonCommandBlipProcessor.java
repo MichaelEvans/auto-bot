@@ -18,7 +18,7 @@ public class NonCommandBlipProcessor implements IBlipProcessor {
 			Map<String, Object> dataMap) {
 
 		String cont = blip.getContent().trim().toLowerCase();
-		if (cont.matches("^*this\\.*")) {
+		if (cont.matches("^\\^*this\\.*$")) {
 			log.log(Level.INFO, "Post is "
 					+ "useless " + cont);
 			blip.all().delete();
