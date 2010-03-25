@@ -100,7 +100,11 @@ public class Utils {
 	 * 
 	 * @return The newly created wavelet.
 	 */
-	public static Wavelet createWave(AbstractRobot maker, Wavelet withWave, String title, String domain, Set<String> participants) {
+	public static Wavelet createWaveWithOther(AbstractRobot maker, Wavelet withWave, String title, String domain, Set<String> participants) {
 		return WaveletUtils.create(maker, withWave, title, domain, participants);
+	}
+	
+	public static Wavelet createWave(AbstractRobot maker, String title, String domain, Set<String> participants, String rpc) {
+		return WaveletUtils.create(maker, title, domain, participants, rpc);
 	}
 }
