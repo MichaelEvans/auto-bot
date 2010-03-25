@@ -55,4 +55,16 @@ public class WaveletUtils {
 		
 		return newWavelet;
 	}
+	
+	public static Wavelet create(AbstractRobot maker, String title, String domain, Set<String> participants, String rpc) {
+		Wavelet newWavelet = maker.newWave(domain, participants);
+		newWavelet.setTitle(title);
+		try {
+			maker.submit(newWavelet, rpc);
+		}
+		catch(Exception e) {
+			
+		}
+		return newWavelet;
+	}
 }

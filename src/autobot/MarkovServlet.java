@@ -68,14 +68,16 @@ public class MarkovServlet extends HttpServlet {
 	
 	@Override
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) {
-		log.log(Level.INFO, "Markov data for: " + req.getParameter("waveID") + "is: " + req.getParameter("text"));
+		log.log(Level.INFO, "Markov data for: " + req.getParameter("waveID") + "is: " + req.getParameter("text") + "action: " + req.getParameter("action"));
 		String id = req.getParameter("waveID");
 		
 		openPM();
 		makeBlipsMap(id);
 		WaveStats waveStats = waveStatsMap.get(id);
-		if (req.getParameter("action") != null && !req.getParameter("action").equals("clear"))
+		if ((req.getParameter("action") != null && !req.getParameter("action").equals("clear")) || req.getParameter("action") == null) {
 			waveStats.fillWordBags(req.getParameter("text"));
+			log.log(Level.INFO, "Filling bag");
+		}
 		else
 			waveStats.clearWordBag();
 		closePM();

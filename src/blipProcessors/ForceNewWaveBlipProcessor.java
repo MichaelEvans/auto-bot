@@ -22,7 +22,7 @@ public class ForceNewWaveBlipProcessor implements IBlipProcessor {
 			
 			//TODO: Deal with NEW_WAVE_INDICATOR better
 			Utils.reply(wavelet, Auto_BotServlet.NEW_WAVE_INDICATOR + "\n\n!{fuck_this_thread_im_outta_here}!");
-			Utils.createWave((Auto_BotServlet)dataMap.get("robot"), wavelet, Tools.newTitle(wavelet), wavelet.getDomain(), wavelet.getParticipants());
+			Utils.createWaveWithOther((Auto_BotServlet)dataMap.get("robot"), wavelet, Tools.newTitle(wavelet), wavelet.getDomain(), wavelet.getParticipants());
 		}
 		
 		return wavelet;
