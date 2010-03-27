@@ -35,6 +35,7 @@ public class Auto_BotServlet extends AbstractRobot {
 
 	public static final int MAX_BLIPS = 200;
 	private int NUM_OF_VOTES = 0;
+	
 	private PersistenceManager pm;
 	Map<String, WaveStats> waveStatsMap;
 	
@@ -319,8 +320,8 @@ public class Auto_BotServlet extends AbstractRobot {
 		if (numBlips == MAX_BLIPS + NUM_OF_VOTES) { /* Blip has reached its max, spawn a new one */
 			log.log(Level.INFO, "AUTO-BOT: Blip count is " + numBlips + ", spawning a new wave.");
 			Utils.reply(wavelet, NEW_WAVE_INDICATOR);
-			Wavelet newWavelet = Utils.createWaveWithOther(this, wavelet, Tools.newTitle(wavelet), wavelet.getDomain(), wavelet.getParticipants());
-			//Wavelet newWavelet = Utils.createWave(this, wavelet, Tools.newTitle(waveStats), wavelet.getDomain(), wavelet.getParticipants());
+			//Wavelet newWavelet = Utils.createWaveWithOther(this, wavelet, Tools.newTitle(wavelet), wavelet.getDomain(), wavelet.getParticipants());
+			Wavelet newWavelet = Utils.createWaveWithOther(this, wavelet, Tools.newTitle(waveStats), wavelet.getDomain(), wavelet.getParticipants());
 			waveStats.setNextWaveID(newWavelet.serialize().getWaveId());
 			waveStats.setNextWaveletID(newWavelet.serialize().getWaveletId());
 			queue.add(url("/markov").param("text", event.getBlip().getContent()).param("waveID", id).param("action", "clear").method(Method.POST));
