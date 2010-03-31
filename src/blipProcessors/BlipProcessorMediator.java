@@ -1,16 +1,28 @@
 package blipProcessors;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 import stats.WaveStats;
 
 import waveutils.Utils;
 
 import autobot.Auto_BotServlet;
+import autobot.Tools;
+import autobot.WeatherParser;
 
 import com.google.wave.api.Blip;
 import com.google.wave.api.Element;
@@ -43,14 +55,13 @@ public class BlipProcessorMediator implements IBlipProcessor {
 		processorsMap.put("nonCommand", new NonCommandBlipProcessor());
 		
 		startsWithMap = new HashMap<String, String>();
-		startsWithMap.put("forceNewWave", CMD_OPEN_IDENT + ForceNewWaveBlipProcessor.FORCE_NEW_WAVE + CMD_CLOSE_IDENT);
+		startsWithMap.put("forceNewWave", CMD_OPEN_IDENT + "force-new-wave" + CMD_CLOSE_IDENT);
 		startsWithMap.put("voteNewWave", CMD_OPEN_IDENT + VoteNewWaveBlipProcessor.VOTE_NEW_WAVE + CMD_CLOSE_IDENT);
-		startsWithMap.put("weather", CMD_OPEN_IDENT + WeatherRequestBlipProcessor.WEATHER);
+		startsWithMap.put("weather", CMD_OPEN_IDENT + "weather");
 		startsWithMap.put("voteToBan", CMD_OPEN_IDENT + VoteToBanBlipProcessor.VOTE_TO_BAN);
 		startsWithMap.put("voteToUnBan", CMD_OPEN_IDENT + VoteToBanBlipProcessor.VOTE_TO_UNBAN);
 		startsWithMap.put("autoInvite", CMD_OPEN_IDENT + AutoInviteBlipProcessor.AUTO_INVITE + CMD_CLOSE_IDENT);
-		startsWithMap.put("waveStats", CMD_OPEN_IDENT + WaveStatsBlipProcessor.WAVE_STATS + CMD_CLOSE_IDENT);
-		startsWithMap.put("runTests", CMD_OPEN_IDENT + RunTestsBlipProcessor.RUN_TESTS + CMD_CLOSE_IDENT);
+		startsWithMap.put("waveStats", CMD_OPEN_IDENT + "get-wave-stats" + CMD_CLOSE_IDENT);
 		startsWithMap.put("like", CMD_OPEN_IDENT + "like" + CMD_CLOSE_IDENT);
 		startsWithMap.put("dislike", CMD_OPEN_IDENT + "dislike" + CMD_CLOSE_IDENT);
 		startsWithMap.put("spoiler", CMD_OPEN_IDENT + "spoiler" + CMD_CLOSE_IDENT);
@@ -62,49 +73,23 @@ public class BlipProcessorMediator implements IBlipProcessor {
 		log.log(Level.INFO, "AUTO-BOT: Received '" + commandText + "'");
 		
 		/* this is where i rewrite the processing thing, no more processor objects */
-		if (commandText.startsWith(startsWithMap.get("dislike"))) {
+		if (commandText.startsWith(startsWithMap.get("dislike")))
 			return processDislikeCommand(blip, wavelet, dataMap);
-		}
-		else if (commandText.startsWith(startsWithMap.get("like"))) {
+		else if (commandText.startsWith(startsWithMap.get("forceNewWave")))
+			return processForceCommand(blip, wavelet, dataMap);
+		else if (commandText.startsWith(startsWithMap.get("like")))
 			return processLikeCommand(blip, wavelet, dataMap);
-		}
-		else if (commandText.startsWith(startsWithMap.get("roulette"))) {
+		else if (commandText.startsWith(startsWithMap.get("roulette")))
 			return processRussianRouletteCommand(blip, wavelet, dataMap);
-		}
-		else if (commandText.startsWith(startsWithMap.get("spoiler"))) {
+		else if (commandText.startsWith(startsWithMap.get("spoiler")))
 			return processSpoilerCommand(blip, wavelet, dataMap);
+		else if (commandText.startsWith(startsWithMap.get("weather")))
+			return processWeatherCommand(blip, wavelet, dataMap);
+		else if (commandText.startsWith(startsWithMap.get("waveStats"))) {
+			return processWaveStatsCommand(blip, wavelet, dataMap);
 		}
-		
-		try {
-			return getProcessor(commandText).processBlip(blip, wavelet, dataMap);
-		} catch (InvalidBlipProcessorException e) {
-			log.log(Level.SEVERE, "Caught InvalidBlipProcessorException for command string '" + commandText + "'!");
-		}
-
-		return wavelet;
-	}
-
-	private IBlipProcessor getProcessor(String commandText) throws InvalidBlipProcessorException {
-		if (commandText.startsWith(startsWithMap.get("forceNewWave"))) {
-			return new ForceNewWaveBlipProcessor(); 
-		} else if (commandText.startsWith(startsWithMap.get("voteNewWave"))) {
-			return processorsMap.get("voteNewWave");
-		} else if (commandText.startsWith(startsWithMap.get("weather"))) {
-			return new WeatherRequestBlipProcessor();
-		} else if (commandText.startsWith(startsWithMap.get("voteToBan"))) {
-			return processorsMap.get("voteToBan");
-		} else if (commandText.startsWith(startsWithMap.get("voteToUnBan"))) {
-			return processorsMap.get("voteToUnBan");
-		} else if (commandText.startsWith(startsWithMap.get("autoInvite"))) {
-			return new AutoInviteBlipProcessor();
-		} else if (commandText.startsWith(startsWithMap.get("waveStats"))) {
-			return new WaveStatsBlipProcessor();
-		} else if (commandText.startsWith(startsWithMap.get("runTests"))) {
-			return new RunTestsBlipProcessor();
-		} 
-		else {
-			return processorsMap.get("nonCommand");
-		}
+		else
+			return wavelet;
 	}
 	
 	/* 'Dislike' this */
@@ -115,6 +100,19 @@ public class BlipProcessorMediator implements IBlipProcessor {
 		Element like = new Image("http://imgur.com/VnwPf.png", 15, 15, "");
 		blip.append(like);
 		Utils.appendToBlip(blip, likeStr);
+		
+		return wavelet;
+	}
+	
+	public Wavelet processForceCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
+		if (((HashSet<String>)dataMap.get("privelegedWavers")).contains(blip.getCreator())) {
+			
+			Auto_BotServlet.log.info(blip.getCreator() + " is forcing a new wave.");
+			
+			//TODO: Deal with NEW_WAVE_INDICATOR better
+			Utils.reply(wavelet, Auto_BotServlet.NEW_WAVE_INDICATOR + "\n\n!{fuck_this_thread_im_outta_here}!");
+			Utils.createWaveWithOther((Auto_BotServlet)dataMap.get("robot"), wavelet, Tools.newTitle(wavelet), wavelet.getDomain(), wavelet.getParticipants());
+		}
 		
 		return wavelet;
 	}
@@ -159,6 +157,7 @@ public class BlipProcessorMediator implements IBlipProcessor {
 		return wavelet;
 	}
 	
+	/* Spoiler command */
 	public Wavelet processSpoilerCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
 		Utils.replaceBlip(blip, "\n\nSpoiler: ");
 		Auto_BotServlet.log.log(Level.INFO, "WaveDomain: " + wavelet.getWaveId().getDomain() + " | WaveID: " + wavelet.getWaveId().getId());
@@ -166,6 +165,109 @@ public class BlipProcessorMediator implements IBlipProcessor {
 		blip.append(new Gadget("http://spoil-bot.appspot.com/spoil.xml?wave=" + blip.serialize().getWaveId() + "&wavelet=" + blip.serialize().getWaveletId() + "&blip=" + blip.getBlipId()));
 		
 		
+		return wavelet;
+	}
+	
+
+	public Wavelet processWaveStatsCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
+		final SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+		log.log(Level.INFO, "AUTO-BOT: Processing 'get-wave-stats'");
+		StringBuffer responseBuffer = new StringBuffer();
+		
+		WaveStats waveStats = (WaveStats) dataMap.get("WaveStats");
+		
+		responseBuffer.append("\n\n");
+		
+		responseBuffer.append("Auto-Bot's Unique ID: ");
+		responseBuffer.append(dataMap.get("autobotID"));
+		responseBuffer.append("\n\n");
+		
+		responseBuffer.append("Wave created: ");
+		responseBuffer.append(sdf.format(new Date(wavelet.getCreationTime())));
+		responseBuffer.append("\n\n");
+		
+		responseBuffer.append("This Wave's ID: ");
+		responseBuffer.append(dataMap.get("waveID"));
+		responseBuffer.append("\n\n");
+		
+		responseBuffer.append("This wavelet's ID: ");
+		responseBuffer.append(dataMap.get("waveletID"));
+		responseBuffer.append("\n\n");
+		
+		
+		responseBuffer.append("Number of Blips (According to Auto-Bot): ");
+		responseBuffer.append(dataMap.get("numberOfBlips"));
+		responseBuffer.append("\n\n");
+		
+		responseBuffer.append("This blip's ID: ");
+		responseBuffer.append(blip.getBlipId());
+		responseBuffer.append("\n\n");
+		
+		responseBuffer.append(blip.getCreator()+":\n");
+		responseBuffer.append("BlipCount:"+waveStats.getUser(blip.getCreator()).getBlipCount()+"\n");
+		responseBuffer.append("DeleteCount:"+waveStats.getUser(blip.getCreator()).getDeleteCount()+"\n");
+		responseBuffer.append("EditCount:"+waveStats.getUser(blip.getCreator()).getEditCount()+"\n");
+		
+		Utils.replaceBlip(blip, responseBuffer.toString());
+		log.log(Level.INFO, "Blip is now: " + blip.getContent());
+		
+		return wavelet;
+	}
+	
+	/* Weather command */
+	public Wavelet processWeatherCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
+		final String REGEX = "weather:([0-9]{5})";
+		Pattern weatherPattern = Pattern.compile(REGEX);
+		Matcher mtchr = weatherPattern.matcher(blip.getContent());
+		String current = "";
+		String imageURL = "";
+		while(mtchr.find()) {
+			log.log(Level.INFO, "Found something: " + mtchr.group());
+			String zip = mtchr.group(1);
+		
+			try {
+				try {
+					log.log(Level.INFO, "Getting weather for " + zip);
+					
+					current = WeatherParser.getLocation(zip);
+					current += "\nNow - " + WeatherParser.getTemp(zip);
+					current += "\n" + WeatherParser.getForecast(zip);
+					imageURL = WeatherParser.getImage(zip);
+					
+					log.log(Level.INFO, "This is something? " + current);
+				} catch (NumberFormatException e) {
+					Utils.appendLineToBlip(blip, "Encountered an error when requesting weather");
+				
+					Auto_BotServlet.log.log(Level.WARNING, "Caught NumberFormatException when requesting weather, message was: " + e.getLocalizedMessage());
+					e.printStackTrace();
+				} catch (IOException e) {
+					Utils.appendLineToBlip(blip, "Encountered an error when requesting weather");
+				
+					log.warning("Caught IOException when requesting weather, message was: " + e.getLocalizedMessage());
+					e.printStackTrace();
+				} catch (ParserConfigurationException e) {
+					log.warning("Could not construct xml parser");
+				} catch (SAXException e) {
+					log.warning("Unable to parse weather xml");
+				}
+			
+				log.log(Level.INFO, "Replacing blip with: " + current);
+
+			} catch (IllegalStateException e) {
+				log.warning("Caught IllegalStateException when requesting weather, message was: " + e.getLocalizedMessage());
+				e.printStackTrace();
+			} catch (IndexOutOfBoundsException e) {
+				Utils.appendLineToBlip(blip, "Incorrect command form. Correct form is " + CMD_OPEN_IDENT + "weather" + ":<zip code, 5 digits>" + CMD_CLOSE_IDENT);
+			
+				log.warning("Caught IndexOutOfBoundsException when requesting weather, message was: " + e.getLocalizedMessage());
+				e.printStackTrace();
+			}
+		}
+		// TODO: Fix waveutils to allow for replace.
+		Utils.appendLineToBlip(blip, "\n" + current);
+		log.log(Level.INFO, "Image URL: " + imageURL);
+		blip.append(new Image(imageURL,52,52,""));
+
 		return wavelet;
 	}
 }
