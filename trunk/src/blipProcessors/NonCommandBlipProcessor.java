@@ -17,7 +17,7 @@ public class NonCommandBlipProcessor implements IBlipProcessor {
 	public Wavelet processBlip(Blip blip, Wavelet wavelet,
 			Map<String, Object> dataMap) {
 
-		String cont = blip.getContent().trim().toLowerCase();
+		/*String cont = blip.getContent().trim().toLowerCase();
 		if (cont.matches("^\\^*this\\.*$")) {
 			log.log(Level.INFO, "Post is "
 					+ "useless " + cont);
@@ -27,7 +27,7 @@ public class NonCommandBlipProcessor implements IBlipProcessor {
 			return (wavelet);
 		}
 
-		Pattern chanQuote = Pattern.compile("(\\^|\\n|\\A){1}>.*");
+		Pattern chanQuote = Pattern.compile("(\\^|\\n|\\A){1}(\\.)?>.*");
 		Matcher mtchr = chanQuote.matcher(blip.getContent());
 
 		while(mtchr.find()) {
@@ -36,7 +36,7 @@ public class NonCommandBlipProcessor implements IBlipProcessor {
 			Utils.appendToBlip(blip, "This isn't 4chan.");
 			blip.all().annotate("style/fontWeight", "bold");
 			blip.all().annotate("style/color", "red");
-		}
+		}*/
 
 		return wavelet;
 	}
