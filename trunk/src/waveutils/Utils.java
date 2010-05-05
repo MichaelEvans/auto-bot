@@ -10,6 +10,8 @@ import autobot.Auto_BotServlet;
 
 import com.google.wave.api.AbstractRobot;
 import com.google.wave.api.Blip;
+import com.google.wave.api.BlipContent;
+import com.google.wave.api.BlipContentRefs;
 import com.google.wave.api.Element;
 import com.google.wave.api.Wavelet;
 
@@ -52,7 +54,6 @@ public class Utils {
 	 * @param s String to set Blip content to
 	 */
 	public static void replaceBlip(Blip b, String s) {
-		log.log(Level.INFO, "Replaceing blip " + b + " with " + s);
 		BlipUtils.replace(b, s);
 	}
 	
@@ -65,6 +66,10 @@ public class Utils {
 	 */
 	public static void replaceBlipContent(Blip b, String needle, String replace) {
 		BlipUtils.replaceContent(b, needle, replace);
+	}
+	
+	public static BlipContentRefs replaceBlipContent(Blip b, String needle, BlipContent replace) {
+		return BlipUtils.replaceContent(b, needle, replace);
 	}
 	
 	/**

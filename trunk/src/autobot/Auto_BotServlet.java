@@ -198,17 +198,6 @@ public class Auto_BotServlet extends AbstractRobot {
 		log.log(Level.INFO, "Should not be happening: " + event.getType());
 	}
 	
-	@Override
-	public void onFormButtonClicked(FormButtonClickedEvent event) {
-		log.log(Level.INFO, "Handling a form button request: " + event.getButtonName());
-		if (event.getButtonName().equals("spoiler_submit")) {
-			log.log(Level.INFO, "Handling a spoiler request." + event.getBlip().getElements().size());
-			for (Integer i : event.getBlip().getElements().keySet())
-				if (event.getBlip().getElements().get(i).getType() == ElementType.TEXTAREA) {
-					log.log(Level.INFO, "The spoiler was: " + ((FormElement)event.getBlip().getElements().get(i)).getValue());
-				}
-		}
-	}
 	
 	@Override
 	public void onWaveletBlipRemoved(WaveletBlipRemovedEvent event) {
