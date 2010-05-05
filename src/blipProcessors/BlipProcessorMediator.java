@@ -18,7 +18,6 @@ import org.xml.sax.SAXException;
 
 import stats.WaveStats;
 
-import waveutils.Utils;
 
 import autobot.Auto_BotServlet;
 import autobot.Tools;
@@ -29,8 +28,10 @@ import com.google.wave.api.BlipContent;
 import com.google.wave.api.Element;
 import com.google.wave.api.Gadget;
 import com.google.wave.api.Image;
+import com.google.wave.api.Participants;
 import com.google.wave.api.Plaintext;
 import com.google.wave.api.Wavelet;
+import com.trollhouse.wave.utils.Utils;
 
 /**
  * 
@@ -150,6 +151,7 @@ public class BlipProcessorMediator implements IBlipProcessor {
 		try {
 			Utils.appendLineToBlip(blip, "\nThanks for transforming " + participant + ".");
 			wavelet.getParticipants().remove(participant);
+			wavelet.getParticipants().setParticipantRole(participant.toString(), Participants.Role.READ_ONLY);
 		}
 		catch (UnsupportedOperationException e) {
 			WaveStats ws = (WaveStats)dataMap.get("WaveStats");
@@ -163,6 +165,7 @@ public class BlipProcessorMediator implements IBlipProcessor {
 	/* Spoiler command */
 	public Wavelet processSpoilerCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
 		Utils.replaceBlipContent(blip, "!@spoiler@!", "\n\nSpoiler:\n");
+		//Utils.replaceBlip(blip, "\n\nSpoiler:\n");
 		Auto_BotServlet.log.log(Level.INFO, "WaveDomain: " + wavelet.getWaveId().getDomain() + " | WaveID: " + wavelet.getWaveId().getId());
 		Auto_BotServlet.log.log(Level.INFO, "WaveletDomain: " + wavelet.getWaveletId().getDomain() + " | WaveletID: " + wavelet.getWaveletId().getId());
 		blip.append(new Gadget("http://spoil-bot.appspot.com/spoil.xml?wave=" + blip.serialize().getWaveId() + "&wavelet=" + blip.serialize().getWaveletId() + "&blip=" + blip.getBlipId()));
@@ -171,7 +174,7 @@ public class BlipProcessorMediator implements IBlipProcessor {
 		return wavelet;
 	}
 	
-
+	/* Wave stats command */
 	public Wavelet processWaveStatsCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
 		final SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
 		log.log(Level.INFO, "AUTO-BOT: Processing 'get-wave-stats'");

@@ -22,10 +22,10 @@ import javax.jdo.Transaction;
 
 import stats.UserStats;
 import stats.WaveStats;
-import waveutils.*;
 
 import com.google.wave.api.*;
 import com.google.wave.api.event.*;
+import com.trollhouse.wave.utils.*;
 
 public class Auto_BotServlet extends AbstractRobot {
 
