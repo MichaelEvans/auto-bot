@@ -25,9 +25,11 @@ import autobot.Tools;
 import autobot.WeatherParser;
 
 import com.google.wave.api.Blip;
+import com.google.wave.api.BlipContent;
 import com.google.wave.api.Element;
 import com.google.wave.api.Gadget;
 import com.google.wave.api.Image;
+import com.google.wave.api.Plaintext;
 import com.google.wave.api.Wavelet;
 
 /**
@@ -95,15 +97,16 @@ public class BlipProcessorMediator implements IBlipProcessor {
 	/* 'Dislike' this */
 	private Wavelet processDislikeCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
 		String likeStr = " " + blip.getCreator() + " dislikes this blip! >:|";
-		blip.all().delete();
-		blip.append("\n");
 		Element like = new Image("http://imgur.com/VnwPf.png", 15, 15, "");
-		blip.append(like);
-		Utils.appendToBlip(blip, likeStr);
+		log.log(Level.INFO, "Processing dislike");
+		Utils.replaceBlipContent(blip, "!@dislike@!", "\n!@thumbdown@!!@dislike@!");
+		Utils.replaceBlipContent(blip, "!@thumbdown@!", like);
+		Utils.replaceBlipContent(blip, "!@dislike@!", likeStr);
 		
 		return wavelet;
 	}
 	
+	/* Force new wave */
 	public Wavelet processForceCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
 		if (((HashSet<String>)dataMap.get("privelegedWavers")).contains(blip.getCreator())) {
 			
@@ -120,11 +123,11 @@ public class BlipProcessorMediator implements IBlipProcessor {
 	/* 'Like' this */
 	private Wavelet processLikeCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
 		String likeStr = " " + blip.getCreator() + " likes this blip!";
-		blip.all().delete();
-		blip.append("\n");
 		Element like = new Image("https://wiki.endoftheinter.net/images/4/44/Like.png", 15, 15, "");
-		blip.append(like);
-		Utils.appendToBlip(blip, likeStr);
+		log.log(Level.INFO, "Processing like");
+		Utils.replaceBlipContent(blip, "!@like@!", "\n!@thumbup@!!@like@!");
+		Utils.replaceBlipContent(blip, "!@thumbup@!", like);
+		Utils.replaceBlipContent(blip, "!@like@!", likeStr);
 		
 		return wavelet;
 	}
@@ -159,7 +162,7 @@ public class BlipProcessorMediator implements IBlipProcessor {
 	
 	/* Spoiler command */
 	public Wavelet processSpoilerCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
-		Utils.replaceBlip(blip, "\n\nSpoiler: ");
+		Utils.replaceBlipContent(blip, "!@spoiler@!", "\n\nSpoiler:\n");
 		Auto_BotServlet.log.log(Level.INFO, "WaveDomain: " + wavelet.getWaveId().getDomain() + " | WaveID: " + wavelet.getWaveId().getId());
 		Auto_BotServlet.log.log(Level.INFO, "WaveletDomain: " + wavelet.getWaveletId().getDomain() + " | WaveletID: " + wavelet.getWaveletId().getId());
 		blip.append(new Gadget("http://spoil-bot.appspot.com/spoil.xml?wave=" + blip.serialize().getWaveId() + "&wavelet=" + blip.serialize().getWaveletId() + "&blip=" + blip.getBlipId()));
@@ -204,12 +207,11 @@ public class BlipProcessorMediator implements IBlipProcessor {
 		responseBuffer.append("\n\n");
 		
 		responseBuffer.append(blip.getCreator()+":\n");
-		responseBuffer.append("BlipCount:"+waveStats.getUser(blip.getCreator()).getBlipCount()+"\n");
-		responseBuffer.append("DeleteCount:"+waveStats.getUser(blip.getCreator()).getDeleteCount()+"\n");
-		responseBuffer.append("EditCount:"+waveStats.getUser(blip.getCreator()).getEditCount()+"\n");
+		responseBuffer.append("BlipCount:" + waveStats.getUser(blip.getCreator()).getBlipCount() + "\n");
+		responseBuffer.append("DeleteCount:" + waveStats.getUser(blip.getCreator()).getDeleteCount() + "\n");
+		responseBuffer.append("EditCount:" + waveStats.getUser(blip.getCreator()).getEditCount() + "\n");
 		
 		Utils.replaceBlip(blip, responseBuffer.toString());
-		log.log(Level.INFO, "Blip is now: " + blip.getContent());
 		
 		return wavelet;
 	}
@@ -263,9 +265,7 @@ public class BlipProcessorMediator implements IBlipProcessor {
 				e.printStackTrace();
 			}
 		}
-		// TODO: Fix waveutils to allow for replace.
-		Utils.appendLineToBlip(blip, "\n" + current);
-		log.log(Level.INFO, "Image URL: " + imageURL);
+		Utils.replaceBlip(blip, "\n\n\n" + current);
 		blip.append(new Image(imageURL,52,52,""));
 
 		return wavelet;

@@ -38,7 +38,7 @@ public class BlipUtils {
 	 * @param s String to set Blip content to
 	 */
 	public static void replace(Blip b, String s) {
-		BlipUtils.replace(b.all(), s);
+		BlipUtils.replaceContent(b, b.getContent(), s);
 	}	
 	
 	/**
@@ -54,5 +54,10 @@ public class BlipUtils {
 	
 	private static void replace(BlipContentRefs refs, String s) {
 		refs.replace(s);
+	}
+	
+	public static BlipContentRefs replaceContent(Blip b, String needle, BlipContent replace) {
+		
+		return b.all(needle).replace(replace);
 	}
 }
