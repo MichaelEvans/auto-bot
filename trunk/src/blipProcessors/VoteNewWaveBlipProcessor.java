@@ -3,12 +3,12 @@ package blipProcessors;
 import java.util.HashMap;
 import java.util.Map;
 
-import waveutils.Utils;
 
 import autobot.Auto_BotServlet;
 
 import com.google.wave.api.Blip;
 import com.google.wave.api.Wavelet;
+import com.trollhouse.wave.utils.Utils;
 
 public class VoteNewWaveBlipProcessor implements IBlipProcessor {
 	public final static String VOTE_NEW_WAVE = "roll-out";

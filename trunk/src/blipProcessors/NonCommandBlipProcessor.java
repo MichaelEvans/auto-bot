@@ -6,10 +6,10 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import waveutils.*;
 
 import com.google.wave.api.Blip;
 import com.google.wave.api.Wavelet;
+import com.trollhouse.wave.utils.*;
 
 public class NonCommandBlipProcessor implements IBlipProcessor {
 	private static Logger log = Logger.getLogger(NonCommandBlipProcessor.class.getName());
