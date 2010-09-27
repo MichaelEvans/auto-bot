@@ -56,8 +56,14 @@ public class BlipUtils {
 		refs.replace(s);
 	}
 	
+	/**
+	 * Replaces all instances of <tt>needle</tt> string with <tt>replace</tt> inside of Blip <tt>b</tt>
+	 * @param b Blip to replace in
+	 * @param needle String to match against
+	 * @param replace Replacement content (string, image, gadget, etc)
+	 * @return The new content references (chaining)
+	 */
 	public static BlipContentRefs replaceContent(Blip b, String needle, BlipContent replace) {
-		
 		return b.all(needle).replace(replace);
 	}
 }
