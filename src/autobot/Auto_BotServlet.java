@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import blipProcessors.*;
 
@@ -33,7 +35,7 @@ public class Auto_BotServlet extends AbstractRobot {
 	public static final Logger log = Logger.getLogger(Auto_BotServlet.class.getName());
 	private final long uniqueID = System.nanoTime();
 
-	public static final int MAX_BLIPS = 200;
+	public static final int MAX_BLIPS = 250;
 	private int NUM_OF_VOTES = 0;
 	
 	private PersistenceManager pm;
@@ -57,7 +59,7 @@ public class Auto_BotServlet extends AbstractRobot {
 		add("patrick.dattilio@googlewave.com");
 	}};
 
-	final static String WELCOME_SELF = "Autobots roll out.";
+	public final static String WELCOME_SELF = "Autobots roll out.";
 	public final static String NEW_WAVE_INDICATOR = "We're rolling out!";
 
 	protected String getRobotName() {
@@ -155,8 +157,6 @@ public class Auto_BotServlet extends AbstractRobot {
 
 		openPM();
 
-//		Transaction tx = pm.currentTransaction();
-	//	tx.begin();
 		waveStats = waveStatsMap.get(id);
 		if (waveStats == null) {
 			try {
@@ -189,29 +189,26 @@ public class Auto_BotServlet extends AbstractRobot {
 		
 		log.log(Level.INFO, "AUTO-BOT: Successfully greeted the wave.");
 		
-		//tx.commit();
 		closePM();
 	}
 	
-	@Override
-	public void onDocumentChanged(DocumentChangedEvent event) {
-		log.log(Level.INFO, "Should not be happening: " + event.getType());
-	}
 	
 	
 	@Override
 	public void onWaveletBlipRemoved(WaveletBlipRemovedEvent event) {
-		int numBlips = 0;
+		log.log(Level.INFO, "[DEL] Start");
 		Wavelet wavelet = event.getWavelet();
 		String id = wavelet.serialize().getWaveId();
 		WaveStats waveStats = null;
-		final Blip BLIP = event.getRemovedBlip();
-		if (BLIP == null)
+		final String BLIP_ID = event.getRemovedBlipId();
+		log.log(Level.INFO, "[DEL] " + event.getRemovedBlipId());
+		if (BLIP_ID == null) {
+			log.log(Level.INFO, "[DEL] Blip was null");
 			return;
+		}
 	
 		openPM();
-		//Transaction tx = pm.currentTransaction();
-		//tx.begin();
+		
 		waveStats = waveStatsMap.get(id);
 		if (waveStats == null) {
 			try {
@@ -225,22 +222,24 @@ public class Auto_BotServlet extends AbstractRobot {
 		}
 		
 		//Statistics
-		String BLIP_AUTHOR = BLIP.getCreator();
-		log.log(Level.INFO, BLIP.getContent());
+		/*String BLIP_AUTHOR = BLIP.getCreator();
 		if (! BLIP_AUTHOR.contains("auto-bot")) {
-			log.log(Level.INFO, "Decrementing overall blip count.");
+			log.log(Level.INFO, "[DEL] Decrementing overall blip count.");
 			numBlips = waveStats.getBlips() - 1;
 			waveStats.setBlips(numBlips);
 		}
-		log.log(Level.INFO, "Attempting to decrement blip for "+ BLIP.getCreator());
+		log.log(Level.INFO, "[DEL] Attempting to decrement blip for " + BLIP.getCreator());
 		if (waveStats.getUser(BLIP_AUTHOR) == null) {
 			UserStats user = new UserStats(BLIP_AUTHOR);
 			waveStats.addUser(user);
 		}
-		waveStats.getUser(BLIP_AUTHOR).incrementDeleteCount();
+		waveStats.getUser(BLIP_AUTHOR).incrementDeleteCount();*/
+		log.log(Level.INFO, "[DEL] Blip count before: " + waveStats.getBlips());
+		waveStats.removeBlip(BLIP_ID);
+		log.log(Level.INFO, "[DEL] Blip count after: " + waveStats.getBlips());
 		
-		//tx.commit();
 		closePM();
+		log.log(Level.INFO, "[DEL] End");
 	}
 	
 	public void onBlipSubmitted(BlipSubmittedEvent event){
@@ -248,22 +247,18 @@ public class Auto_BotServlet extends AbstractRobot {
 		Wavelet wavelet = event.getWavelet();
 		String id = wavelet.serialize().getWaveId();
 		WaveStats waveStats= null;
-		
-
+		/*Participants parts = wavelet.getParticipants();
+		for (String part : parts) {
+			log.log(Level.INFO, part + ": " + parts.getParticipantRole(part));
+		}*/
 		openPM();
 
-		/*Transaction tx = pm.currentTransaction();
-		if (!tx.isActive()) {
-			tx.setOptimistic(true);
-			tx.begin();
-		}*/
 		makeBlipsMap(id);
 		waveStats = waveStatsMap.get(id);
 		if (waveStats == null) {
 			try {
 				waveStats = new WaveStats(id, 0);
 				pm.makePersistent(waveStats);
-			//	tx.commit();
 			}
 			catch (Exception ex) {
 				log.log(Level.INFO, "Fuck couldn't persist : " + ex);
@@ -272,23 +267,31 @@ public class Auto_BotServlet extends AbstractRobot {
 		}
 		numBlips = waveStats.getBlips() + 1;
 		waveStats.setBlips(numBlips);
-		//tx.commit();
+		
 		//Statistics
 		String BLIP_AUTHOR = event.getBlip().getCreator();
-		
-		log.log(Level.INFO, "Blip version number " + event.getBlip().getVersion());
-		log.log(Level.INFO, "Attempting to increment blip for "+ event.getBlip().getCreator());
+		log.log(Level.INFO, "[SUB] Blip ID: " + event.getBlip().getBlipId());
+		waveStats.addBlip(event.getBlip().getBlipId());
+		log.log(Level.INFO, "Attempting to increment blip for " + event.getBlip().getCreator());
 		if (waveStats.getUser(BLIP_AUTHOR) == null) {
 			UserStats user = new UserStats(BLIP_AUTHOR);
 			waveStats.addUser(user);
 		}
 		waveStats.getUser(BLIP_AUTHOR).incrementBlipCount();
-		//tx.commit();
+		
+		String regexLinks = "(http://\\S*)";
+		Pattern p = Pattern.compile(regexLinks);
+		Matcher m = p.matcher(event.getBlip().getContent());
+		while (m.find()) {
+			log.log(Level.INFO, "[SUB] Found a link: " + m.group(0));
+			waveStats.addLink(m.group());
+		}
+		
 		Queue queue = QueueFactory.getDefaultQueue();
-		queue.add(url("/markov").param("text", event.getBlip().getContent()).param("waveID", id).method(Method.POST));
+		//queue.add(url("/markov").param("text", event.getBlip().getContent()).param("waveID", id).method(Method.POST));
 		
 		//waveStats.fillWordBags(event.getBlip().getContent());
-		//tx.commit();
+		
 		
 		/* Fucking getBlips() doesn't do shit. It returns the root blip, the current blip, and the 
 		 * blip before that. Are you fucking kidding me Google?
@@ -306,14 +309,15 @@ public class Auto_BotServlet extends AbstractRobot {
 		processBlip(event.getBlip(), wavelet, waveStats);
 		
 		
+		
 		if (numBlips == MAX_BLIPS + NUM_OF_VOTES) { /* Blip has reached its max, spawn a new one */
 			log.log(Level.INFO, "AUTO-BOT: Blip count is " + numBlips + ", spawning a new wave.");
-			Utils.reply(wavelet, NEW_WAVE_INDICATOR);
+			Utils.reply(wavelet, NEW_WAVE_INDICATOR + "\n\nLink summary:\n" + waveStats.getLinks());
 			//Wavelet newWavelet = Utils.createWaveWithOther(this, wavelet, Tools.newTitle(wavelet), wavelet.getDomain(), wavelet.getParticipants());
-			Wavelet newWavelet = Utils.createWaveWithOther(this, wavelet, Tools.newTitle(waveStats), wavelet.getDomain(), wavelet.getParticipants());
+			Wavelet newWavelet = Utils.createWaveWithOther(this, wavelet, Tools.newTitle(wavelet), wavelet.getDomain(), wavelet.getParticipants());
 			waveStats.setNextWaveID(newWavelet.serialize().getWaveId());
 			waveStats.setNextWaveletID(newWavelet.serialize().getWaveletId());
-			queue.add(url("/markov").param("text", event.getBlip().getContent()).param("waveID", id).param("action", "clear").method(Method.POST));
+			//queue.add(url("/markov").param("text", event.getBlip().getContent()).param("waveID", id).param("action", "clear").method(Method.POST));
 		} 
 		else if (numBlips == MAX_BLIPS + NUM_OF_VOTES - 5) { /* Warning blip */
 			String reply = "\n\n=============================";
@@ -323,11 +327,11 @@ public class Auto_BotServlet extends AbstractRobot {
 		}
 		
 		/* Stop bumping shit */
-		if (numBlips > MAX_BLIPS + NUM_OF_VOTES) {
+		/*if (numBlips > MAX_BLIPS + NUM_OF_VOTES) {
 			queue = QueueFactory.getDefaultQueue();
 			queue.add(url("/markov").param("text", event.getBlip().getContent()).param("waveID", id).param("action", "clear").method(Method.POST));
 			wavelet.delete(event.getBlip());
-		}
+		}*/
 		
 		/* Russian roulette muting */
 		if (BLIP_AUTHOR.equals(waveStats.getMuted())) {
@@ -364,25 +368,12 @@ public class Auto_BotServlet extends AbstractRobot {
 		String id = wavelet.serialize().getWaveId();
 		
 		HashMap<String, Object> dataMap = new HashMap<String, Object>();
-		
-		dataMap.put("commandText", blip.getContent());
 		dataMap.put("privelegedWavers", privelegedWavers);
-		dataMap.put("numberOfActiveWavers", getNumberOfActiveWavers());
-		dataMap.put("numberOfBlips", getNumberOfBlipsInWave(id));
-		dataMap.put("waveletID", wavelet.serialize().getWaveletId());
-		dataMap.put("waveID", wavelet.serialize().getWaveId());
-		dataMap.put("autobotID",uniqueID);
+		dataMap.put("autobotID", uniqueID);
 		dataMap.put("WaveStats", waveStats);
 		dataMap.put("robot", this);
-		if (blip.getContent().contains(VoteToBanBlipProcessor.VOTE_TO_BAN)) {
-			dataMap.put("banType", "ban");
-		} else if (blip.getContent().contains(VoteToBanBlipProcessor.VOTE_TO_UNBAN)) {
-			dataMap.put("banType", "unban");
-		}
 		
 		blipProcessor.processBlip(blip, wavelet, dataMap);
-		
-		//consolidateBlips(blip);
 	}
 	
 	private int getNumberOfActiveWavers() {

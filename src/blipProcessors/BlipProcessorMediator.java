@@ -44,8 +44,18 @@ import com.trollhouse.wave.utils.Utils;
  * just to do one thing.
  */
 public class BlipProcessorMediator implements IBlipProcessor {
+	
 	private static final Logger log = Logger.getLogger(BlipProcessorMediator.class.getName());
 	
+	private static final String CMD_DISLIKE = "//dislike";
+	private static final String CMD_FORCE = "//force";
+	private static final String CMD_HELP = "//help";
+	private static final String CMD_IMG_ADD = "//iadd:";
+	private static final String CMD_LIKE = "//like";
+	private static final String CMD_LINKS = "//links";
+	private static final String CMD_SPOILER = "//spoiler";
+	private static final String CMD_STATS = "//stats";
+	private static final String CMD_WEATHER = "//weather";
 	
 	private Map<String, String> startsWithMap;
 	public final Map<String, IBlipProcessor> processorsMap;
@@ -58,39 +68,41 @@ public class BlipProcessorMediator implements IBlipProcessor {
 		processorsMap.put("nonCommand", new NonCommandBlipProcessor());
 		
 		startsWithMap = new HashMap<String, String>();
-		startsWithMap.put("forceNewWave", CMD_OPEN_IDENT + "force-new-wave" + CMD_CLOSE_IDENT);
 		startsWithMap.put("voteNewWave", CMD_OPEN_IDENT + VoteNewWaveBlipProcessor.VOTE_NEW_WAVE + CMD_CLOSE_IDENT);
-		startsWithMap.put("weather", CMD_OPEN_IDENT + "weather");
 		startsWithMap.put("voteToBan", CMD_OPEN_IDENT + VoteToBanBlipProcessor.VOTE_TO_BAN);
 		startsWithMap.put("voteToUnBan", CMD_OPEN_IDENT + VoteToBanBlipProcessor.VOTE_TO_UNBAN);
 		startsWithMap.put("autoInvite", CMD_OPEN_IDENT + AutoInviteBlipProcessor.AUTO_INVITE + CMD_CLOSE_IDENT);
-		startsWithMap.put("waveStats", CMD_OPEN_IDENT + "get-wave-stats" + CMD_CLOSE_IDENT);
-		startsWithMap.put("like", CMD_OPEN_IDENT + "like" + CMD_CLOSE_IDENT);
-		startsWithMap.put("dislike", CMD_OPEN_IDENT + "dislike" + CMD_CLOSE_IDENT);
-		startsWithMap.put("spoiler", CMD_OPEN_IDENT + "spoiler" + CMD_CLOSE_IDENT);
 		startsWithMap.put("roulette", CMD_OPEN_IDENT + "russian-roulette" + CMD_CLOSE_IDENT);
+		startsWithMap.put("nuke", CMD_OPEN_IDENT + "nuke" + CMD_CLOSE_IDENT);
 	}
 	
 	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
-		String commandText = ((String)dataMap.get("commandText")).trim();
-		log.log(Level.INFO, "AUTO-BOT: Received '" + commandText + "'");
+		String commandText = blip.getContent().trim();
+		log.log(Level.INFO, "[BPM] Received '" + commandText + "'");
 		
 		/* this is where i rewrite the processing thing, no more processor objects */
-		if (commandText.startsWith(startsWithMap.get("dislike")))
+		if (commandText.startsWith(CMD_DISLIKE))
 			return processDislikeCommand(blip, wavelet, dataMap);
-		else if (commandText.startsWith(startsWithMap.get("forceNewWave")))
+		else if (commandText.startsWith(CMD_FORCE))
 			return processForceCommand(blip, wavelet, dataMap);
-		else if (commandText.startsWith(startsWithMap.get("like")))
+		else if (commandText.startsWith(CMD_HELP))
+			return processHelpCommand(blip, wavelet);
+		else if (commandText.startsWith(CMD_IMG_ADD))
+			return processImgAddCommand(blip, wavelet);
+		else if (commandText.startsWith(CMD_LIKE))
 			return processLikeCommand(blip, wavelet, dataMap);
-		else if (commandText.startsWith(startsWithMap.get("roulette")))
-			return processRussianRouletteCommand(blip, wavelet, dataMap);
-		else if (commandText.startsWith(startsWithMap.get("spoiler")))
+		else if (commandText.startsWith(CMD_LINKS))
+			return processLinksCommand(blip, wavelet, dataMap);
+		//else if (commandText.startsWith(startsWithMap.get("nuke")))
+		//	return processNukeCommand(blip, wavelet, dataMap);
+		//else if (commandText.startsWith(startsWithMap.get("roulette")))
+		//	return processRussianRouletteCommand(blip, wavelet, dataMap);
+		else if (commandText.startsWith(CMD_SPOILER))
 			return processSpoilerCommand(blip, wavelet, dataMap);
-		else if (commandText.startsWith(startsWithMap.get("weather")))
+		else if (commandText.startsWith(CMD_WEATHER))
 			return processWeatherCommand(blip, wavelet, dataMap);
-		else if (commandText.startsWith(startsWithMap.get("waveStats"))) {
+		else if (commandText.startsWith(CMD_STATS))
 			return processWaveStatsCommand(blip, wavelet, dataMap);
-		}
 		else
 			return wavelet;
 	}
@@ -100,7 +112,7 @@ public class BlipProcessorMediator implements IBlipProcessor {
 		String likeStr = " " + blip.getCreator() + " dislikes this blip! >:|";
 		Element like = new Image("http://imgur.com/VnwPf.png", 15, 15, "");
 		log.log(Level.INFO, "Processing dislike");
-		Utils.replaceBlipContent(blip, "!@dislike@!", "\n!@thumbdown@!!@dislike@!");
+		Utils.replaceBlipContent(blip, CMD_DISLIKE, "\n!@thumbdown@!!@dislike@!");
 		Utils.replaceBlipContent(blip, "!@thumbdown@!", like);
 		Utils.replaceBlipContent(blip, "!@dislike@!", likeStr);
 		
@@ -121,14 +133,60 @@ public class BlipProcessorMediator implements IBlipProcessor {
 		return wavelet;
 	}
 	
+	/* Show 'Help' blip */
+	public Wavelet processHelpCommand(Blip blip, Wavelet wavelet) {
+		String newBlip = "\n\nAuto-bot Help Guide:\n" +
+						"//dislike - Dislike the previous blip\n" +
+						"//force - Create a new sequel wave before hitting blip cap\n" +
+						"//help - Show this help guide\n" +
+						"//like - Like the previous blip\n" +
+						"//links - Display a list of links posted in this wave\n" +
+						"//stats - Post wave-specific stats\n" +
+						"//spoiler - Post spoilers easily\n" +
+						"//weather:XXXXX - Get the weather for zip code XXXXX\n";
+		
+		Utils.replaceBlipContent(blip, CMD_HELP, newBlip);
+		
+		return wavelet;
+	}
+	
+	/* Add image to db */
+	public Wavelet processImgAddCommand(Blip blip, Wavelet wavelet) {
+		String content = blip.getContent();
+		content = content.replace(CMD_IMG_ADD, "");
+		Matcher m = Pattern.compile("(\\S+)").matcher(content);
+		while (m.find()) {
+			content = m.group();
+			log.log(Level.INFO, "[BPM] " + content);
+		}
+		
+		
+		return wavelet;
+	}
+	
 	/* 'Like' this */
 	private Wavelet processLikeCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
 		String likeStr = " " + blip.getCreator() + " likes this blip!";
 		Element like = new Image("https://wiki.endoftheinter.net/images/4/44/Like.png", 15, 15, "");
 		log.log(Level.INFO, "Processing like");
-		Utils.replaceBlipContent(blip, "!@like@!", "\n!@thumbup@!!@like@!");
+		Utils.replaceBlipContent(blip, CMD_LIKE, "\n!@thumbup@!!@like@!");
 		Utils.replaceBlipContent(blip, "!@thumbup@!", like);
 		Utils.replaceBlipContent(blip, "!@like@!", likeStr);
+		
+		return wavelet;
+	}
+	
+	/* Show all links posted in wave */
+	private Wavelet processLinksCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
+		WaveStats waveStats = (WaveStats) dataMap.get("WaveStats");
+		String replaceBlip = "\n\nLINKS:\n\n" + waveStats.getLinks();
+		Utils.replaceBlipContent(blip, "//links", replaceBlip);
+		return wavelet;
+	}
+	
+	private Wavelet processNukeCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
+		wavelet.reply("\nWe're all fucked! Enemy nuke incoming!");
+		
 		
 		return wavelet;
 	}
@@ -164,7 +222,7 @@ public class BlipProcessorMediator implements IBlipProcessor {
 	
 	/* Spoiler command */
 	public Wavelet processSpoilerCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
-		Utils.replaceBlipContent(blip, "!@spoiler@!", "\n\nSpoiler:\n");
+		Utils.replaceBlipContent(blip, CMD_SPOILER, "\n\nSpoiler:\n");
 		//Utils.replaceBlip(blip, "\n\nSpoiler:\n");
 		Auto_BotServlet.log.log(Level.INFO, "WaveDomain: " + wavelet.getWaveId().getDomain() + " | WaveID: " + wavelet.getWaveId().getId());
 		Auto_BotServlet.log.log(Level.INFO, "WaveletDomain: " + wavelet.getWaveletId().getDomain() + " | WaveletID: " + wavelet.getWaveletId().getId());
@@ -182,34 +240,21 @@ public class BlipProcessorMediator implements IBlipProcessor {
 		
 		WaveStats waveStats = (WaveStats) dataMap.get("WaveStats");
 		
-		responseBuffer.append("\n\n");
-		
-		responseBuffer.append("Auto-Bot's Unique ID: ");
-		responseBuffer.append(dataMap.get("autobotID"));
-		responseBuffer.append("\n\n");
+		responseBuffer.append("\n\n\n");
 		
 		responseBuffer.append("Wave created: ");
 		responseBuffer.append(sdf.format(new Date(wavelet.getCreationTime())));
-		responseBuffer.append("\n\n");
+		responseBuffer.append("\n");
 		
-		responseBuffer.append("This Wave's ID: ");
-		responseBuffer.append(dataMap.get("waveID"));
-		responseBuffer.append("\n\n");
+		responseBuffer.append("Number of Blips: ");
+		responseBuffer.append(waveStats.getBlipCount());
+		responseBuffer.append("\n");
 		
-		responseBuffer.append("This wavelet's ID: ");
-		responseBuffer.append(dataMap.get("waveletID"));
-		responseBuffer.append("\n\n");
+		responseBuffer.append("Number of Links: ");
+		responseBuffer.append(waveStats.getLinkCount());
+		responseBuffer.append("\n");
 		
-		
-		responseBuffer.append("Number of Blips (According to Auto-Bot): ");
-		responseBuffer.append(dataMap.get("numberOfBlips"));
-		responseBuffer.append("\n\n");
-		
-		responseBuffer.append("This blip's ID: ");
-		responseBuffer.append(blip.getBlipId());
-		responseBuffer.append("\n\n");
-		
-		responseBuffer.append(blip.getCreator()+":\n");
+		responseBuffer.append("\n" + blip.getCreator()+":\n");
 		responseBuffer.append("BlipCount:" + waveStats.getUser(blip.getCreator()).getBlipCount() + "\n");
 		responseBuffer.append("DeleteCount:" + waveStats.getUser(blip.getCreator()).getDeleteCount() + "\n");
 		responseBuffer.append("EditCount:" + waveStats.getUser(blip.getCreator()).getEditCount() + "\n");
