@@ -27,8 +27,8 @@ public class Tools {
 		return title;
 	}
 	
-	public static String newTitle(WaveStats ws) {
-		String start = "Wave of " + ws.doMarkov(10);
-		return start;
-	}
+	//public static String newTitle(WaveStats ws) {
+	//	String start = "Wave of " + ws.doMarkov(10);
+		//return start;
+	//}
 }

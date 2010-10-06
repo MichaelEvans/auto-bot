@@ -75,11 +75,11 @@ public class MarkovServlet extends HttpServlet {
 		makeBlipsMap(id);
 		WaveStats waveStats = waveStatsMap.get(id);
 		if ((req.getParameter("action") != null && !req.getParameter("action").equals("clear")) || req.getParameter("action") == null) {
-			waveStats.fillWordBags(req.getParameter("text"));
+	//		waveStats.fillWordBags(req.getParameter("text"));
 			log.log(Level.INFO, "Filling bag");
 		}
-		else
-			waveStats.clearWordBag();
+		//else
+			//waveStats.clearWordBag();
 		closePM();
 	}
 }
