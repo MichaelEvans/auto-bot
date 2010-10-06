@@ -57,6 +57,12 @@ public class WaveStats {
     
     @Persistent
     private List<WordBag> wordBags;
+    
+    @Persistent
+    private Long startTime;
+    
+    @Persistent
+    private Long endTime = null;
 
     /** Constructor for a wave with a specified number of blips.
      * 
@@ -67,10 +73,11 @@ public class WaveStats {
         this.waveID = waveID;
         this.blips = blips;
         this.users = new ArrayList<UserStats>();
-        this.keywords = new ArrayList<String>();
-        this.wordBags = new ArrayList<WordBag>();
+      //  this.keywords = new ArrayList<String>();
+      //  this.wordBags = new ArrayList<WordBag>();
         this.blipIDs = new ArrayList<String>();
         this.links = new ArrayList<String>();
+        this.startTime = System.currentTimeMillis();
     }
     
     /** Constructor for new wave with no blips yet
@@ -136,26 +143,36 @@ public class WaveStats {
 		users.add(name);
 	}
 	
-	public void addBlip(String blipID) {
+	public List<UserStats> getUsers() {
+		return users;
+	}
+	
+	public boolean addBlip(String blipID) {
 		if (blipIDs != null && !blipIDs.contains(blipID)) {
 			log.log(Level.INFO, "[WS] Adding a blip to list.");
 			blipIDs.add(blipID);
 			blips++;
+			return true;
 		}
+		return false;
 	}
 	
-	public void removeBlip(String blipID) {
-		if (blipIDs != null)
+	public boolean removeBlip(String blipID) {
+		if (blipIDs != null) {
 			blipIDs.remove(blipID);
-		
-		blips--;
+			blips--;
+			return true;
+		}
+		return false;
 	}
 	
-	public void addLink(String link) {
+	public boolean addLink(String link) {
 		if (links != null && !links.contains(link)) {
 			log.log(Level.INFO, "[WS] Adding a link.");
 			links.add(link);
+			return true;
 		}
+		return false;
 	}
 	
 	public String getLinks() {
@@ -180,7 +197,7 @@ public class WaveStats {
 		return blipIDs.size();
 	}
 	
-	public void fillWordBags(String s) {
+	/*public void fillWordBags(String s) {
 		String[] allWords = s.replace("\n", " ").split(" ");
 		int i = 0;
 		
@@ -224,7 +241,7 @@ public class WaveStats {
 				break;
 		}
 		return ret.toString();
-	}
+	}*/
 
 	public String getNextWaveID() {
 		return nextWaveID;
@@ -251,8 +268,18 @@ public class WaveStats {
 	}
 	
 	public void clearWordBag() {
-		keywords.clear();
-		wordBags.clear();
+		if (keywords != null)
+			keywords.clear();
+		if (wordBags != null)
+			wordBags.clear();
+	}
+	
+	public void setEndTime() {
+		this.endTime = System.currentTimeMillis();
+	}
+	
+	public long totalLength() {
+		return (endTime != null) ? endTime - startTime : -1;
 	}
 	
 	

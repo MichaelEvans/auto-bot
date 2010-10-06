@@ -1,5 +1,6 @@
 package blipProcessors;
 
+import java.awt.Toolkit;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -51,30 +52,14 @@ public class BlipProcessorMediator implements IBlipProcessor {
 	private static final String CMD_FORCE = "//force";
 	private static final String CMD_HELP = "//help";
 	private static final String CMD_IMG_ADD = "//iadd:";
+	private static final String CMD_IMG_CMD = "//img:";
 	private static final String CMD_LIKE = "//like";
 	private static final String CMD_LINKS = "//links";
 	private static final String CMD_SPOILER = "//spoiler";
 	private static final String CMD_STATS = "//stats";
+	private static final String CMD_USER = "//user";
 	private static final String CMD_WEATHER = "//weather";
 	
-	private Map<String, String> startsWithMap;
-	public final Map<String, IBlipProcessor> processorsMap;
-	
-	public BlipProcessorMediator() {
-		processorsMap = new HashMap<String, IBlipProcessor>();
-		processorsMap.put("voteNewWave", new VoteNewWaveBlipProcessor());
-		processorsMap.put("voteToBan", new VoteToBanBlipProcessor());
-		processorsMap.put("voteToUnBan", new VoteToBanBlipProcessor());
-		processorsMap.put("nonCommand", new NonCommandBlipProcessor());
-		
-		startsWithMap = new HashMap<String, String>();
-		startsWithMap.put("voteNewWave", CMD_OPEN_IDENT + VoteNewWaveBlipProcessor.VOTE_NEW_WAVE + CMD_CLOSE_IDENT);
-		startsWithMap.put("voteToBan", CMD_OPEN_IDENT + VoteToBanBlipProcessor.VOTE_TO_BAN);
-		startsWithMap.put("voteToUnBan", CMD_OPEN_IDENT + VoteToBanBlipProcessor.VOTE_TO_UNBAN);
-		startsWithMap.put("autoInvite", CMD_OPEN_IDENT + AutoInviteBlipProcessor.AUTO_INVITE + CMD_CLOSE_IDENT);
-		startsWithMap.put("roulette", CMD_OPEN_IDENT + "russian-roulette" + CMD_CLOSE_IDENT);
-		startsWithMap.put("nuke", CMD_OPEN_IDENT + "nuke" + CMD_CLOSE_IDENT);
-	}
 	
 	public Wavelet processBlip(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
 		String commandText = blip.getContent().trim();
@@ -88,7 +73,9 @@ public class BlipProcessorMediator implements IBlipProcessor {
 		else if (commandText.startsWith(CMD_HELP))
 			return processHelpCommand(blip, wavelet);
 		else if (commandText.startsWith(CMD_IMG_ADD))
-			return processImgAddCommand(blip, wavelet);
+			return processImgAddCommand(blip, wavelet, dataMap);
+		else if (commandText.startsWith(CMD_IMG_CMD))
+			return processImgCmdCommand(blip, wavelet, dataMap);
 		else if (commandText.startsWith(CMD_LIKE))
 			return processLikeCommand(blip, wavelet, dataMap);
 		else if (commandText.startsWith(CMD_LINKS))
@@ -99,6 +86,8 @@ public class BlipProcessorMediator implements IBlipProcessor {
 		//	return processRussianRouletteCommand(blip, wavelet, dataMap);
 		else if (commandText.startsWith(CMD_SPOILER))
 			return processSpoilerCommand(blip, wavelet, dataMap);
+		else if (commandText.startsWith(CMD_USER))
+			return processUserCommand(blip, wavelet, dataMap);
 		else if (commandText.startsWith(CMD_WEATHER))
 			return processWeatherCommand(blip, wavelet, dataMap);
 		else if (commandText.startsWith(CMD_STATS))
@@ -151,15 +140,56 @@ public class BlipProcessorMediator implements IBlipProcessor {
 	}
 	
 	/* Add image to db */
-	public Wavelet processImgAddCommand(Blip blip, Wavelet wavelet) {
+	public Wavelet processImgAddCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
 		String content = blip.getContent();
 		content = content.replace(CMD_IMG_ADD, "");
-		Matcher m = Pattern.compile("(\\S+)").matcher(content);
-		while (m.find()) {
-			content = m.group();
-			log.log(Level.INFO, "[BPM] " + content);
+		Matcher m = Pattern.compile("([ \\S]+)").matcher(content);
+		try {
+			while (m.find()) {
+				content = m.group();
+				log.log(Level.INFO, "[BPM] " + content);
+				String args[] = content.split(",");
+				for (int i=0; i < args.length; i++) {
+					args[i] = args[i].trim();
+					if (i > 0)
+						args[i] = args[i].toLowerCase();
+				}
+				log.log(Level.INFO, "[BPM] Image URL: " + args[0]);
+			
+				String tags[] = new String[args.length - 1];
+				for (int i=1; i < args.length; i++) {
+					log.log(Level.INFO, "[BPM] Tag '" + args[i] + "'");
+					tags[i-1] = args[i];
+				}
+		
+				((Auto_BotServlet)dataMap.get("robot")).makeImgTag(args[0], tags);
+				break;
+			}
+			Utils.replaceBlipContent(blip, "//iadd:" + content, "Image added!");
+		}
+		catch (Exception e) {
+			Utils.appendLineToBlip(blip, "\nImage add failed!");
 		}
 		
+		return wavelet;
+	}
+	
+	public Wavelet processImgCmdCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
+		String command = blip.getContent().replace(CMD_IMG_CMD, "").trim().toLowerCase();
+		Auto_BotServlet robot = ((Auto_BotServlet)dataMap.get("robot"));
+		if (command.equals("tags")) {
+			log.log(Level.INFO, "Printing tag list");
+			String taglist = robot.getTagList();
+			Utils.replaceBlipContent(blip, CMD_IMG_CMD + "tags", taglist + "\n");
+		}
+		else if (command.equals("random")) {
+			log.log(Level.INFO, "Getting random image");
+			String url = robot.getRandomImg();
+			Image img = new Image();
+			img.setUrl(url);
+			//log.log(Level.INFO, "Img dimensions: " + img.getWidth() + "x" + img.getHeight());
+			Utils.replaceBlipContent(blip, CMD_IMG_CMD + "random", img);
+		}
 		
 		return wavelet;
 	}
@@ -254,12 +284,24 @@ public class BlipProcessorMediator implements IBlipProcessor {
 		responseBuffer.append(waveStats.getLinkCount());
 		responseBuffer.append("\n");
 		
-		responseBuffer.append("\n" + blip.getCreator()+":\n");
-		responseBuffer.append("BlipCount:" + waveStats.getUser(blip.getCreator()).getBlipCount() + "\n");
-		responseBuffer.append("DeleteCount:" + waveStats.getUser(blip.getCreator()).getDeleteCount() + "\n");
-		responseBuffer.append("EditCount:" + waveStats.getUser(blip.getCreator()).getEditCount() + "\n");
-		
 		Utils.replaceBlip(blip, responseBuffer.toString());
+		
+		return wavelet;
+	}
+	
+	public Wavelet processUserCommand(Blip blip, Wavelet wavelet, Map<String, Object> dataMap) {
+		Matcher m = Pattern.compile(CMD_USER + ":?([\\S]+)").matcher(blip.getContent());
+		String user = blip.getCreator();
+		while (m.find()) {
+			log.log(Level.INFO, "Username: " + m.group(1));
+			if (m.group(1).isEmpty() || m.group(1).equals(":"))
+				break;
+			user = m.group(1) + "@googlewave.com";
+		}
+		
+		String s = ((Auto_BotServlet)dataMap.get("robot")).getUserStats(user);
+		
+		Utils.appendLineToBlip(blip, s);
 		
 		return wavelet;
 	}
